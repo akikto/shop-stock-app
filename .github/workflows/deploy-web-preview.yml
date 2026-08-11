@@ -1,0 +1,89 @@
+name: Deploy web preview to GitHub Pages
+
+# Builds a Flutter WEB PREVIEW ONLY — this workflow never touches the
+# Android app, Supabase schema, or RLS policies. It runs entirely on
+# GitHub's servers, so no local Flutter install is required to get a
+# preview URL.
+#
+# One-time setup required before this works (see README.md "GitHub
+# Pages preview" section):
+#   1. In this repo: Settings -> Pages -> Source -> "GitHub Actions".
+#   2. In this repo: Settings -> Secrets and variables -> Actions ->
+#      add repository secrets SUPABASE_URL and SUPABASE_ANON_KEY
+#      (the public anon key only — NEVER the service_role key).
+#   3. If this repo is not named "shop-stock-app", update BASE_HREF
+#      below to match, e.g. /<your-repo-name>/.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+env:
+  BASE_HREF: /shop-stock-app/
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Enable web (creates web/ platform config if missing)
+        run: flutter config --enable-web
+
+      # Public anon key + URL only — see AppConfig's own comment on why
+      # these two values are safe to ship client-side, and why
+      # service_role must never appear here.
+      - name: Write build-time config from repository secrets
+        run: |
+          mkdir -p config
+          cat > config/config.ci.json << EOF
+          {
+            "SUPABASE_URL": "${{ secrets.SUPABASE_URL }}",
+            "SUPABASE_ANON_KEY": "${{ secrets.SUPABASE_ANON_KEY }}"
+          }
+          EOF
+
+      - name: flutter pub get
+        run: flutter pub get
+
+      - name: flutter analyze
+        run: flutter analyze
+        continue-on-error: true # don't block a preview deploy on lint warnings
+
+      - name: flutter test
+        run: flutter test
+        continue-on-error: true # same — a preview build shouldn't be blocked by test flakiness
+
+      - name: flutter build web
+        run: |
+          flutter build web \
+            --release \
+            --base-href "$BASE_HREF" \
+            --dart-define-from-file=config/config.ci.json
+
+      - name: Remove secrets file (never publish it)
+        run: rm -f config/config.ci.json
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

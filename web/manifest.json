@@ -1,0 +1,35 @@
+{
+    "name": "Shop Stock & Sales (Preview)",
+    "short_name": "Shop Stock",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#10241a",
+    "theme_color": "#2E7D32",
+    "description": "Browser preview build of the Shop Stock & Sales Management App. Not the production Android app — for quick UI preview/testing only.",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}

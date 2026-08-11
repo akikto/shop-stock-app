@@ -1,0 +1,21 @@
+# Real config — contains project-specific Supabase keys, never commit
+config/config.json
+config/config.ci.json
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+*.iml
+.idea/
+
+# Platform build outputs
+/android/.gradle
+/android/local.properties
+/ios/Pods/
+/ios/.symlinks/
+
+# OS
+.DS_Store
