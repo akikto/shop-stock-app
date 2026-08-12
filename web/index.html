@@ -2,13 +2,31 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="Shop Stock & Sales Management App — browser preview build. For real shop use, install the Android app; this web build exists for quick preview/testing only.">
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Shop Stock">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <base href="$FLUTTER_BASE_HREF">
+
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#2E7D32">
-  <base href="$FLUTTER_BASE_HREF">
+
   <title>Shop Stock & Sales (Preview)</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
   <style>
-    html, body { height: 100%; margin: 0; padding: 0; background: #10241a; overscroll-behavior: none; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: #10241a;
+      overscroll-behavior: none;
+    }
   </style>
 </head>
 <body>
@@ -17,24 +35,28 @@
       justify-content: center; font-family: sans-serif; color: #ffffff;
       background: #10241a; padding: 24px; box-sizing: border-box;
       text-align: center; white-space: pre-wrap; word-break: break-word;
-      font-size: 14px; line-height: 1.5;">
+      font-size: 14px; line-height: 1.5; pointer-events: none;">
     Loading Shop Stock &amp; Sales…
   </div>
 
   <script>
     (function () {
-      var shown = false;
+      var el = document.getElementById('preload-status');
+      var errorShown = false;
+      var hidden = false;
+
       function showError(title, detail) {
-        if (shown) return;
-        shown = true;
-        var el = document.getElementById('preload-status');
-        if (!el) return;
+        if (errorShown || !el) return;
+        errorShown = true;
+        hidden = false;
+        el.style.display = 'flex';
         el.style.color = '#ffb4a9';
         el.textContent =
           'Preview failed to start.\n\n' + title +
           (detail ? '\n\n' + detail : '') +
           '\n\nThis is a browser-preview-only error — it does not affect the Android app.';
       }
+
       window.addEventListener('error', function (e) {
         showError(e.message || 'Script error', e.filename ? (e.filename + ':' + e.lineno) : '');
       });
@@ -42,8 +64,16 @@
         var reason = e.reason;
         showError('Unhandled error', typeof reason === 'string' ? reason : (reason && reason.message) || String(reason));
       });
+
       setTimeout(function () {
-        if (!shown && document.getElementById('preload-status')) {
+        if (!errorShown && el) {
+          hidden = true;
+          el.style.display = 'none';
+        }
+      }, 4000);
+
+      setTimeout(function () {
+        if (!errorShown && hidden === false) {
           showError(
             'Still loading after 20 seconds.',
             'Possible causes: slow connection still fetching the Flutter engine, ' +
