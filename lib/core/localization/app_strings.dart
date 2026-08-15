@@ -60,4 +60,37 @@ class AppStrings {
   static const somethingWentWrong = 'কিছু ভুল হয়েছে';
   static const retry = 'আবার চেষ্টা করুন';
   static const loadMore = 'আরও দেখুন';
+
+  // Sale
+  static const sale = 'বিক্রি';
+  static const quantity = 'পরিমাণ';
+  static const availableStock = 'উপলব্ধ স্টক';
+  static const total = 'মোট';
+  static const confirmSale = 'বিক্রি নিশ্চিত করুন';
+  static const saleSuccessful = 'বিক্রি সম্পন্ন হয়েছে';
+  static const insufficientStock = 'পর্যাপ্ত স্টক নেই';
+  static const selectProduct = 'পণ্য বাছাই করুন';
+
+  // Stock In / Adjustment
+  static const stockIn = 'স্টক যোগ';
+  static const stockAdjustment = 'স্টক সমন্বয়';
+  static const addStock = 'স্টক যোগ করুন';
+  static const adjustStock = 'স্টক সমন্বয় করুন';
+  static const reason = 'কারণ';
+  static const reasonRequired = 'কারণ আবশ্যক';
+  static const stockAddedSuccessfully = 'স্টক যোগ হয়েছে';
+  static const stockAdjustedSuccessfully = 'স্টক সমন্বয় হয়েছে';
+  static const increaseStock = 'বৃদ্ধি';
+  static const decreaseStock = 'হ্রাস';
+
+  // History
+  static const history = 'ইতিহাস';
+  static const noHistoryFound = 'কোনো ইতিহাস পাওয়া যায়নি';
+  static const actionSale = 'বিক্রি হয়েছে';
+  static const actionStockIn = 'স্টক যোগ হয়েছে';
+  static const actionStockAdjustment = 'স্টক সমন্বয় হয়েছে';
+  static const actionProductCreated = 'পণ্য তৈরি হয়েছে';
+  static const actionProductUpdated = 'পণ্য হালনাগাদ হয়েছে';
+  static const actionPriceUpdated = 'মূল্য হালনাগাদ হয়েছে';
+  static const actionProductDeactivated = 'পণ্য নিষ্ক্রিয় হয়েছে';
 }
