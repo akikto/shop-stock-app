@@ -54,6 +54,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         return AppStrings.actionPriceUpdated;
       case 'product_deactivated':
         return AppStrings.actionProductDeactivated;
+      case 'product_activated':
+        return AppStrings.actionProductActivated;
       default:
         return action;
     }
@@ -74,6 +76,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         return Icons.edit;
       case 'product_deactivated':
         return Icons.block;
+      case 'product_activated':
+        return Icons.check_circle_outline;
       default:
         return Icons.history;
     }

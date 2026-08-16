@@ -33,12 +33,16 @@ class FakeProductRepository implements ProductRepository {
   Future<List<Product>> fetchProducts({
     String search = '',
     bool activeOnly = true,
+    String? category,
     int limit = 20,
     int offset = 0,
   }) async {
     if (offset > 0) return [];
     return products;
   }
+
+  @override
+  Future<List<String>> fetchDistinctCategories() async => [];
 
   @override
   Future<Product?> fetchProductById(String id) async =>
@@ -56,6 +60,8 @@ class FakeProductRepository implements ProductRepository {
     num? purchasePrice,
     required num salePrice,
     num lowStockLimit = 0,
+    DateTime? expiryDate,
+    String? composition,
   }) async =>
       throw UnimplementedError();
 
@@ -72,11 +78,16 @@ class FakeProductRepository implements ProductRepository {
     num? purchasePrice,
     required num salePrice,
     num lowStockLimit = 0,
+    DateTime? expiryDate,
+    String? composition,
   }) async =>
       throw UnimplementedError();
 
   @override
   Future<Product> deactivateProduct(String id) async => throw UnimplementedError();
+
+  @override
+  Future<Product> activateProduct(String id) async => throw UnimplementedError();
 }
 
 class _RecordSaleCall {

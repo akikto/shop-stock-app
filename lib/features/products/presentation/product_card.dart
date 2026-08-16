@@ -23,41 +23,65 @@ class ProductCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              AspectRatio(
-                aspectRatio: 1,
-                child: ProductPhoto(path: product.photoThumbUrl, size: double.infinity, borderRadius: 10),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                product.name,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleSmall,
-              ),
-              if (product.company != null && product.company!.isNotEmpty)
-                Text(
-                  product.company!,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                ),
-              const SizedBox(height: 4),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '৳${product.salePrice}',
-                    style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+        child: Opacity(
+          opacity: product.isActive ? 1.0 : 0.55,
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                AspectRatio(
+                  aspectRatio: 1,
+                  child: Stack(
+                    children: [
+                      ProductPhoto(path: product.photoThumbUrl, size: double.infinity, borderRadius: 10),
+                      if (!product.isActive)
+                        Positioned(
+                          top: 4,
+                          left: 4,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.errorContainer,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              AppStrings.inactive,
+                              style: theme.textTheme.labelSmall
+                                  ?.copyWith(color: theme.colorScheme.onErrorContainer, fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
-                  _StockBadge(product: product),
-                ],
-              ),
-            ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  product.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleSmall,
+                ),
+                if (product.company != null && product.company!.isNotEmpty)
+                  Text(
+                    product.company!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                  ),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '৳${product.salePrice}',
+                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    _StockBadge(product: product),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

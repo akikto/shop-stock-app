@@ -4,9 +4,18 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/app_strings.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../providers/product_providers.dart';
+import '../providers/products_screen_providers.dart';
 import 'product_card.dart';
 
+/// Products tab: search, category filter, active/inactive toggle
+/// (Phase 3 — needed so a Manager/Owner can find and reactivate a
+/// deactivated product), and the photo-grid list itself.
+///
+/// Uses its own [productsScreenControllerProvider] — deliberately NOT
+/// the [productListControllerProvider] that Sale/Stock's product
+/// picker reuses, so toggling "show inactive" here can never make a
+/// deactivated product sellable/stockable. See
+/// lib/features/products/providers/products_screen_providers.dart.
 class ProductsScreen extends ConsumerStatefulWidget {
   const ProductsScreen({super.key});
 
@@ -34,13 +43,13 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 
   void _onScroll() {
     if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 300) {
-      ref.read(productListControllerProvider.notifier).loadMore();
+      ref.read(productsScreenControllerProvider.notifier).loadMore();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(productListControllerProvider);
+    final state = ref.watch(productsScreenControllerProvider);
     final profileAsync = ref.watch(currentProfileProvider);
     final canManageProducts = profileAsync.maybeWhen(
       data: (profile) => profile.role.canManageProducts,
@@ -51,23 +60,64 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
       appBar: AppBar(
         title: const Text(AppStrings.products),
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(64),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: TextField(
-              controller: _searchController,
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                hintText: AppStrings.searchProducts,
-                prefixIcon: const Icon(Icons.search),
-                isDense: true,
-                filled: true,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
+          preferredSize: const Size.fromHeight(112),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: TextField(
+                  controller: _searchController,
+                  textInputAction: TextInputAction.search,
+                  decoration: InputDecoration(
+                    hintText: AppStrings.searchProducts,
+                    prefixIcon: const Icon(Icons.search),
+                    isDense: true,
+                    filled: true,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
+                  ),
+                  onChanged: (value) {
+                    ref.read(productsScreenControllerProvider.notifier).setSearchQuery(value);
+                  },
+                ),
               ),
-              onChanged: (value) {
-                ref.read(productListControllerProvider.notifier).setSearchQuery(value);
-              },
-            ),
+              SizedBox(
+                height: 44,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  children: [
+                    // Only Manager/Owner can usefully act on inactive
+                    // products (activate them), so only they see this
+                    // toggle — staff browsing has no reason to see
+                    // deactivated products.
+                    if (canManageProducts)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: FilterChip(
+                          label: Text(state.activeOnly ? AppStrings.active : AppStrings.inactive),
+                          selected: !state.activeOnly,
+                          onSelected: (showInactive) {
+                            ref.read(productsScreenControllerProvider.notifier).setActiveOnly(!showInactive);
+                          },
+                        ),
+                      ),
+                    for (final category in state.categories)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: ChoiceChip(
+                          label: Text(category),
+                          selected: state.category == category,
+                          onSelected: (selected) {
+                            ref
+                                .read(productsScreenControllerProvider.notifier)
+                                .setCategory(selected ? category : null);
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -79,13 +129,13 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             )
           : null,
       body: RefreshIndicator(
-        onRefresh: () => ref.read(productListControllerProvider.notifier).refresh(),
+        onRefresh: () => ref.read(productsScreenControllerProvider.notifier).refresh(),
         child: _buildBody(state),
       ),
     );
   }
 
-  Widget _buildBody(ProductListState state) {
+  Widget _buildBody(ProductsScreenState state) {
     if (state.isLoading && state.products.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -102,7 +152,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                   Text(state.error!, textAlign: TextAlign.center),
                   const SizedBox(height: 12),
                   FilledButton(
-                    onPressed: () => ref.read(productListControllerProvider.notifier).refresh(),
+                    onPressed: () => ref.read(productsScreenControllerProvider.notifier).refresh(),
                     child: const Text(AppStrings.retry),
                   ),
                 ],
