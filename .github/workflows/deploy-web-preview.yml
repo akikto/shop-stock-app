@@ -1,9 +1,9 @@
-name: Deploy web preview to GitHub Pages
+name: Deploy web preview to GitHub Pages + build Android APK
 
-# Builds a Flutter WEB PREVIEW ONLY — this workflow never touches the
-# Android app, Supabase schema, or RLS policies. It runs entirely on
-# GitHub's servers, so no local Flutter install is required to get a
-# preview URL.
+# Builds a Flutter WEB PREVIEW and a debug-signed Android APK for
+# internal testing/sideloading — this workflow never touches the
+# Supabase schema/RLS policies. It runs entirely on GitHub's servers,
+# so no local Flutter install is required to get either artifact.
 #
 # One-time setup required before this works (see README.md "GitHub
 # Pages preview" section):
@@ -13,6 +13,15 @@ name: Deploy web preview to GitHub Pages
 #      (the public anon key only — NEVER the service_role key).
 #   3. If this repo is not named "shop-stock-app", update BASE_HREF
 #      below to match, e.g. /<your-repo-name>/.
+#
+# NOTE on the APK: this repo has never had an android/ platform folder
+# (only web/ was ever hand-authored). `flutter create --platforms
+# android .` below generates that platform scaffold fresh on every
+# run — it only adds the missing android/ folder, it does not touch
+# lib/, test/, web/, or pubspec.yaml. Because no release keystore is
+# configured, `flutter build apk --release` produces a debug-signed
+# APK: fine for installing on your own device to test, NOT suitable
+# for Play Store submission.
 
 on:
   push:
@@ -26,6 +35,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: write
 
 concurrency:
   group: pages
@@ -78,6 +88,15 @@ jobs:
             --base-href "$BASE_HREF" \
             --dart-define-from-file=config/config.ci.json
 
+      - name: Generate android/ platform scaffold (not committed to the repo)
+        run: flutter create --platforms android .
+
+      - name: flutter build apk
+        run: |
+          flutter build apk \
+            --release \
+            --dart-define-from-file=config/config.ci.json
+
       - name: Remove secrets file (never publish it)
         run: rm -f config/config.ci.json
 
@@ -87,3 +106,10 @@ jobs:
 
       - id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Upload Android APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
