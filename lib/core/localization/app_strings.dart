@@ -93,4 +93,16 @@ class AppStrings {
   static const actionProductUpdated = 'পণ্য হালনাগাদ হয়েছে';
   static const actionPriceUpdated = 'মূল্য হালনাগাদ হয়েছে';
   static const actionProductDeactivated = 'পণ্য নিষ্ক্রিয় হয়েছে';
+
+  // Phase 3: Product filtering, expiry/composition, activation
+  static const composition = 'উপাদান';
+  static const expiryDate = 'মেয়াদ উত্তীর্ণের তারিখ';
+  static const notSet = 'নির্ধারিত নয়';
+  static const activate = 'সক্রিয় করুন';
+  static const activatedSuccessfully = 'পণ্য সক্রিয় হয়েছে';
+  static const deactivatedSuccessfully = 'পণ্য নিষ্ক্রিয় হয়েছে';
+  static const expired = 'মেয়াদ শেষ';
+  static const expiringSoon = 'মেয়াদ শীঘ্রই শেষ';
+  static const actionProductActivated = 'পণ্য সক্রিয় হয়েছে';
+  static const filterByCategory = 'ক্যাটাগরি অনুযায়ী';
 }

@@ -11,6 +11,7 @@ import '../../../repositories/product_repository.dart';
 import '../../../shared/widgets/error_view.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../providers/product_providers.dart';
+import '../providers/products_screen_providers.dart';
 import 'widgets/photo_picker_field.dart';
 
 /// Router-facing wrapper for the /products/:id/edit route: loads the
@@ -76,10 +77,20 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       TextEditingController(text: widget.existingProduct?.salePrice.toString() ?? '');
   late final _lowStockLimitController =
       TextEditingController(text: widget.existingProduct?.lowStockLimit.toString() ?? '');
+  late final _compositionController =
+      TextEditingController(text: widget.existingProduct?.composition ?? '');
+
+  DateTime? _expiryDate;
 
   Uint8List? _newPhotoBytes;
   bool _isSubmitting = false;
   String? _submitError;
+
+  @override
+  void initState() {
+    super.initState();
+    _expiryDate = widget.existingProduct?.expiryDate;
+  }
 
   @override
   void dispose() {
@@ -91,7 +102,19 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     _purchasePriceController.dispose();
     _salePriceController.dispose();
     _lowStockLimitController.dispose();
+    _compositionController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickExpiryDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _expiryDate ?? now,
+      firstDate: DateTime(now.year - 1),
+      lastDate: DateTime(now.year + 15),
+    );
+    if (picked != null) setState(() => _expiryDate = picked);
   }
 
   Future<void> _submit() async {
@@ -122,6 +145,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       final purchasePrice = _parseOrNull(_purchasePriceController.text);
       final salePrice = num.parse(_salePriceController.text.trim());
       final lowStockLimit = _parseOrNull(_lowStockLimitController.text) ?? 0;
+      final composition = _emptyToNull(_compositionController.text);
 
       if (widget.isEditing) {
         await repo.updateProduct(
@@ -136,6 +160,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
           purchasePrice: purchasePrice,
           salePrice: salePrice,
           lowStockLimit: lowStockLimit,
+          expiryDate: _expiryDate,
+          composition: composition,
         );
         ref.invalidate(productDetailProvider(widget.existingProduct!.id));
       } else {
@@ -150,10 +176,15 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
           purchasePrice: purchasePrice,
           salePrice: salePrice,
           lowStockLimit: lowStockLimit,
+          expiryDate: _expiryDate,
+          composition: composition,
         );
       }
 
+      // Refresh both the Sale/Stock picker's shared list and the
+      // Products screen's own (separately-filtered) list.
       await ref.read(productListControllerProvider.notifier).refresh();
+      await ref.read(productsScreenControllerProvider.notifier).refresh();
 
       if (mounted) context.pop();
     } on ProductException catch (e) {
@@ -172,6 +203,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     if (trimmed.isEmpty) return null;
     return num.tryParse(trimmed);
   }
+
+  String _formatDate(DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
   @override
   Widget build(BuildContext context) {
@@ -207,6 +240,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
             ),
             _field(controller: _companyController, label: AppStrings.company, textCapitalization: TextCapitalization.words),
             _field(controller: _categoryController, label: AppStrings.category, textCapitalization: TextCapitalization.words),
+            _field(controller: _compositionController, label: AppStrings.composition),
             _field(controller: _packSizeController, label: AppStrings.packSize),
             _field(
               controller: _mrpController,
@@ -231,6 +265,22 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
               label: AppStrings.lowStockLimit,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               validator: ProductValidator.validateLowStockLimit,
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 14),
+              child: InkWell(
+                onTap: _pickExpiryDate,
+                child: InputDecorator(
+                  decoration: const InputDecoration(labelText: AppStrings.expiryDate, border: OutlineInputBorder()),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(_expiryDate == null ? AppStrings.notSet : _formatDate(_expiryDate!)),
+                      const Icon(Icons.calendar_today_outlined, size: 18),
+                    ],
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 24),
             FilledButton(

@@ -9,6 +9,7 @@ import '../../../shared/widgets/loading_indicator.dart';
 import '../../../shared/widgets/product_photo.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/product_providers.dart';
+import '../providers/products_screen_providers.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
   const ProductDetailScreen({super.key, required this.productId});
@@ -76,12 +77,20 @@ class _DetailBody extends ConsumerWidget {
         const SizedBox(height: 12),
         _row(context, AppStrings.company, product.company),
         _row(context, AppStrings.category, product.category),
+        _row(context, AppStrings.composition, product.composition),
         _row(context, AppStrings.packSize, product.packSize),
         _row(context, AppStrings.mrp, product.mrp?.toString()),
         _row(context, AppStrings.purchasePrice, product.purchasePrice?.toString()),
         _row(context, AppStrings.salePrice, '৳${product.salePrice}'),
         _row(context, AppStrings.currentStock, '${product.currentStock}'),
         _row(context, AppStrings.lowStockLimit, '${product.lowStockLimit}'),
+        if (product.expiryDate != null)
+          _row(
+            context,
+            AppStrings.expiryDate,
+            '${_formatDate(product.expiryDate!)}'
+            '${product.isExpired ? "  (${AppStrings.expired})" : product.isExpiringSoon ? "  (${AppStrings.expiringSoon})" : ""}',
+          ),
         _row(context, AppStrings.active, product.isActive ? AppStrings.active : AppStrings.inactive),
         _row(context, AppStrings.createdAt, _formatDate(product.createdAt)),
         _row(context, AppStrings.updatedAt, _formatDate(product.updatedAt)),
@@ -102,6 +111,12 @@ class _DetailBody extends ConsumerWidget {
                 foregroundColor: Theme.of(context).colorScheme.error,
                 side: BorderSide(color: Theme.of(context).colorScheme.error),
               ),
+            )
+          else
+            FilledButton.icon(
+              onPressed: () => _activate(context, ref),
+              icon: const Icon(Icons.check_circle_outline),
+              label: const Text(AppStrings.activate),
             ),
         ],
         // Deliberately no stock-editing control here — current_stock
@@ -149,7 +164,31 @@ class _DetailBody extends ConsumerWidget {
       await ref.read(productRepositoryProvider).deactivateProduct(product.id);
       ref.invalidate(productDetailProvider(product.id));
       ref.read(productListControllerProvider.notifier).refresh();
-      if (context.mounted) context.pop();
+      ref.read(productsScreenControllerProvider.notifier).refresh();
+      if (context.mounted) {
+        context.pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text(AppStrings.deactivatedSuccessfully)),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    }
+  }
+
+  Future<void> _activate(BuildContext context, WidgetRef ref) async {
+    try {
+      await ref.read(productRepositoryProvider).activateProduct(product.id);
+      ref.invalidate(productDetailProvider(product.id));
+      ref.read(productListControllerProvider.notifier).refresh();
+      ref.read(productsScreenControllerProvider.notifier).refresh();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text(AppStrings.activatedSuccessfully)),
+        );
+      }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
