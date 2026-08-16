@@ -1,7 +1,7 @@
 name: shop_stock_app
 description: Shop Stock & Sales Management App (mobile-first, Flutter + Supabase)
 publish_to: "none"
-version: 0.1.0-phase0
+version: 0.4.0-phase4
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
