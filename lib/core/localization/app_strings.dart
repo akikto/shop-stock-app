@@ -105,4 +105,24 @@ class AppStrings {
   static const expiringSoon = 'মেয়াদ শীঘ্রই শেষ';
   static const actionProductActivated = 'পণ্য সক্রিয় হয়েছে';
   static const filterByCategory = 'ক্যাটাগরি অনুযায়ী';
+
+  // Phase 4: Reports dashboard
+  static const dashboard = 'ড্যাশবোর্ড';
+  static const dailySales = 'দৈনিক বিক্রি';
+  static const staffWiseSales = 'স্টাফ অনুযায়ী বিক্রি';
+  static const productWiseSales = 'পণ্য অনুযায়ী বিক্রি';
+  static const stockMovement = 'স্টক চলাচল';
+  static const lowStockAlerts = 'কম স্টক সতর্কতা';
+  static const today = 'আজ';
+  static const last7Days = 'গত ৭ দিন';
+  static const last30Days = 'গত ৩০ দিন';
+  static const totalSales = 'মোট বিক্রি';
+  static const totalTransactions = 'মোট লেনদেন';
+  static const noSalesInRange = 'এই সময়ে কোনো বিক্রি নেই';
+  static const noLowStockProducts = 'কম স্টকে কোনো পণ্য নেই';
+  static const sold = 'বিক্রি হয়েছে';
+  static const adjusted = 'সমন্বয়';
+  static const netChange = 'নিট পরিবর্তন';
+  static const noMovementInRange = 'এই সময়ে কোনো স্টক পরিবর্তন নেই';
+  static const reportsOwnerManagerOnly = 'রিপোর্ট শুধু মালিক/ম্যানেজারের জন্য';
 }
