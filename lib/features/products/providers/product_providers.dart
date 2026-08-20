@@ -134,7 +134,9 @@ class ProductListController extends StateNotifier<ProductListState> {
     if (_useOfflineCache ||
         state.isLoadingMore ||
         !state.hasMore ||
-        state.isLoading) return;
+        state.isLoading) {
+      return;
+    }
     state = state.copyWith(isLoadingMore: true, clearError: true);
     try {
       final more = await _repo.fetchProducts(

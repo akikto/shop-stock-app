@@ -46,9 +46,7 @@ class SyncMetadata extends Table {
 
 @DriftDatabase(tables: [CachedProducts, PendingTransactions, SyncMetadata])
 class SyncDatabase extends _$SyncDatabase {
-  SyncDatabase(QueryExecutor executor) : super(executor);
-
-  SyncDatabase.forTesting(super.e);
+  SyncDatabase(super.e);
 
   @override
   int get schemaVersion => 1;

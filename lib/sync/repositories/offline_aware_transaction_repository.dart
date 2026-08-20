@@ -105,7 +105,7 @@ class OfflineAwareTransactionRepository implements TransactionRepository {
       return await remoteCall();
     } on TransactionException catch (e) {
       if (_isBusinessError(e.message)) {
-        throw e;
+        rethrow;
       }
       return await onQueue();
     } catch (_) {
