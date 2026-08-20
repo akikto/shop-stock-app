@@ -42,8 +42,14 @@ void main() {
       final start = rpcSql.indexOf('update public.products set', rpcSql.indexOf('update_product'));
       final end = rpcSql.indexOf('where id = p_id', start);
       final setClause = rpcSql.substring(start, end);
+      // Comments in the SET block may mention current_stock to document why
+      // it is absent — only actual column assignments matter for this check.
+      final assignmentsOnly = setClause
+          .split('\n')
+          .where((line) => !line.trim().startsWith('--'))
+          .join('\n');
       expect(
-        setClause,
+        assignmentsOnly,
         isNot(contains('current_stock')),
         reason: 'Product Management must never be able to change stock — only a future '
             'sale/stock-in/adjustment RPC may.',

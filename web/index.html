@@ -77,9 +77,9 @@
           showError(
             'Still loading after 20 seconds.',
             'Possible causes: slow connection still fetching the Flutter engine, ' +
-            'or the app started but Supabase configuration/connection failed silently. ' +
-            'Try refreshing; if this persists, check that SUPABASE_URL and ' +
-            'SUPABASE_ANON_KEY were set correctly when this build was made.'
+            'or the app started but backend configuration/connection failed silently. ' +
+            'Try refreshing; if this persists, check that the preview build was ' +
+            'made with the correct server URL and public API key.'
           );
         }
       }, 20000);
