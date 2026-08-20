@@ -20,7 +20,8 @@ abstract class NotificationRepository {
 }
 
 class SupabaseNotificationRepository implements NotificationRepository {
-  SupabaseNotificationRepository({SupabaseClient? client}) : _client = client ?? SupabaseService.client;
+  SupabaseNotificationRepository({SupabaseClient? client})
+      : _client = client ?? SupabaseService.client;
 
   final SupabaseClient _client;
 
@@ -33,10 +34,12 @@ class SupabaseNotificationRepository implements NotificationRepository {
           .order('created_at', ascending: false)
           .limit(limit);
       return (result as List)
-          .map((row) => AppNotification.fromJson(Map<String, dynamic>.from(row as Map)))
+          .map((row) =>
+              AppNotification.fromJson(Map<String, dynamic>.from(row as Map)))
           .toList();
     } on PostgrestException catch (e) {
-      throw NotificationException(e.message.isNotEmpty ? e.message : 'Could not load notifications.');
+      throw NotificationException(
+          e.message.isNotEmpty ? e.message : 'Could not load notifications.');
     } catch (_) {
       throw NotificationException('Could not load notifications.');
     }
@@ -45,10 +48,8 @@ class SupabaseNotificationRepository implements NotificationRepository {
   @override
   Future<int> fetchUnreadCount() async {
     try {
-      final result = await _client
-          .from('notifications')
-          .select('id')
-          .eq('read', false);
+      final result =
+          await _client.from('notifications').select('id').eq('read', false);
       return (result as List).length;
     } catch (_) {
       return 0;
@@ -60,7 +61,8 @@ class SupabaseNotificationRepository implements NotificationRepository {
     try {
       await _client.from('notifications').update({'read': true}).eq('id', id);
     } on PostgrestException catch (e) {
-      throw NotificationException(e.message.isNotEmpty ? e.message : 'Could not update notification.');
+      throw NotificationException(
+          e.message.isNotEmpty ? e.message : 'Could not update notification.');
     }
   }
 
@@ -69,9 +71,14 @@ class SupabaseNotificationRepository implements NotificationRepository {
     try {
       final userId = _client.auth.currentUser?.id;
       if (userId == null) return;
-      await _client.from('notifications').update({'read': true}).eq('recipient_id', userId).eq('read', false);
+      await _client
+          .from('notifications')
+          .update({'read': true})
+          .eq('recipient_id', userId)
+          .eq('read', false);
     } on PostgrestException catch (e) {
-      throw NotificationException(e.message.isNotEmpty ? e.message : 'Could not update notifications.');
+      throw NotificationException(
+          e.message.isNotEmpty ? e.message : 'Could not update notifications.');
     }
   }
 
@@ -84,7 +91,10 @@ class SupabaseNotificationRepository implements NotificationRepository {
           event: PostgresChangeEvent.all,
           schema: 'public',
           table: 'notifications',
-          filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'recipient_id', value: userId ?? ''),
+          filter: PostgresChangeFilter(
+              type: PostgresChangeFilterType.eq,
+              column: 'recipient_id',
+              value: userId ?? ''),
           callback: (_) => onChange(),
         )
         .subscribe();

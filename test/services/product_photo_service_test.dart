@@ -72,7 +72,8 @@ void main() {
       expect(compressor.calls.length, 2);
     });
 
-    test('full variant uses the configured full max dimension and quality', () async {
+    test('full variant uses the configured full max dimension and quality',
+        () async {
       await service.compressAndUpload(Uint8List.fromList([1, 2, 3]));
 
       final fullCall = compressor.calls.firstWhere(
@@ -81,7 +82,8 @@ void main() {
       expect(fullCall.quality, ProductPhotoConstants.fullQuality);
     });
 
-    test('thumb variant uses the configured thumb max dimension and quality', () async {
+    test('thumb variant uses the configured thumb max dimension and quality',
+        () async {
       await service.compressAndUpload(Uint8List.fromList([1, 2, 3]));
 
       final thumbCall = compressor.calls.firstWhere(
@@ -90,15 +92,20 @@ void main() {
       expect(thumbCall.quality, ProductPhotoConstants.thumbQuality);
     });
 
-    test('thumb max dimension is smaller than full max dimension (bandwidth goal)', () {
+    test(
+        'thumb max dimension is smaller than full max dimension (bandwidth goal)',
+        () {
       expect(
         ProductPhotoConstants.thumbMaxDimension,
         lessThan(ProductPhotoConstants.fullMaxDimension),
       );
     });
 
-    test('uploads both variants under the same generated product-independent id', () async {
-      final result = await service.compressAndUpload(Uint8List.fromList([1, 2, 3]));
+    test(
+        'uploads both variants under the same generated product-independent id',
+        () async {
+      final result =
+          await service.compressAndUpload(Uint8List.fromList([1, 2, 3]));
 
       expect(uploader.uploads.length, 2);
       expect(result.photoPath, contains('products/'));
@@ -110,7 +117,8 @@ void main() {
       expect(photoId, thumbId);
     });
 
-    test('two separate uploads generate two different product-independent ids', () async {
+    test('two separate uploads generate two different product-independent ids',
+        () async {
       final first = await service.compressAndUpload(Uint8List.fromList([1]));
       final second = await service.compressAndUpload(Uint8List.fromList([2]));
 
@@ -124,7 +132,9 @@ void main() {
       expect(await service.resolveSignedUrl(''), isNull);
     });
 
-    test('resolves and caches a signed URL, avoiding a second uploader call for the same path', () async {
+    test(
+        'resolves and caches a signed URL, avoiding a second uploader call for the same path',
+        () async {
       const path = 'products/abc/photo.jpg';
 
       final first = await service.resolveSignedUrl(path);
@@ -132,7 +142,8 @@ void main() {
       final second = await service.resolveSignedUrl(path);
 
       expect(first, isNotNull);
-      expect(second, first, reason: 'cached value should be reused within its TTL');
+      expect(second, first,
+          reason: 'cached value should be reused within its TTL');
     });
 
     test('clearCache forces a fresh resolution on the next call', () async {

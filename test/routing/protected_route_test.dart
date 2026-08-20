@@ -24,6 +24,7 @@ import 'package:shop_stock_app/repositories/notification_repository.dart';
 import 'package:shop_stock_app/repositories/product_repository.dart';
 import 'package:shop_stock_app/repositories/reports_repository.dart';
 import 'package:shop_stock_app/repositories/transaction_repository.dart';
+import 'package:shop_stock_app/sync/models/transaction_write_result.dart';
 import 'package:shop_stock_app/services/image_compressor.dart';
 import 'package:shop_stock_app/services/product_photo_service.dart';
 import 'package:shop_stock_app/services/product_photo_uploader.dart';
@@ -84,15 +85,18 @@ class _EmptyProductRepository implements ProductRepository {
       throw UnimplementedError();
 
   @override
-  Future<Product> deactivateProduct(String id) async => throw UnimplementedError();
+  Future<Product> deactivateProduct(String id) async =>
+      throw UnimplementedError();
 
   @override
-  Future<Product> activateProduct(String id) async => throw UnimplementedError();
+  Future<Product> activateProduct(String id) async =>
+      throw UnimplementedError();
 }
 
 class _EmptyReportsRepository implements ReportsRepository {
   @override
-  Future<DashboardStats> fetchDashboardStats({required DateTime from, required DateTime to}) async =>
+  Future<DashboardStats> fetchDashboardStats(
+          {required DateTime from, required DateTime to}) async =>
       const DashboardStats(
         roleScope: 'self',
         saleCount: 0,
@@ -103,16 +107,20 @@ class _EmptyReportsRepository implements ReportsRepository {
       );
 
   @override
-  Future<List<StaffSalesRow>> fetchStaffSalesReport({required DateTime from, required DateTime to}) async => [];
+  Future<List<StaffSalesRow>> fetchStaffSalesReport(
+          {required DateTime from, required DateTime to}) async =>
+      [];
 
   @override
-  Future<List<ProductSalesRow>> fetchProductSalesReport({required DateTime from, required DateTime to}) async =>
+  Future<List<ProductSalesRow>> fetchProductSalesReport(
+          {required DateTime from, required DateTime to}) async =>
       [];
 }
 
 class _EmptyNotificationRepository implements NotificationRepository {
   @override
-  Future<List<AppNotification>> fetchNotifications({int limit = 50}) async => [];
+  Future<List<AppNotification>> fetchNotifications({int limit = 50}) async =>
+      [];
 
   @override
   Future<int> fetchUnreadCount() async => 0;
@@ -124,27 +132,42 @@ class _EmptyNotificationRepository implements NotificationRepository {
   Future<void> markAllAsRead() async {}
 
   @override
-  RealtimeChannel subscribeToNotifications(void Function() onChange) => throw UnimplementedError();
+  RealtimeChannel subscribeToNotifications(void Function() onChange) =>
+      throw UnimplementedError();
 }
 
 class _EmptyActivityLogRepository implements ActivityLogRepository {
   @override
-  Future<List<ActivityLog>> fetchActivityLogs({int limit = 20, int offset = 0}) async => [];
+  Future<List<ActivityLog>> fetchActivityLogs(
+          {int limit = 20, int offset = 0}) async =>
+      [];
 }
 
 class _NoOpTransactionRepository implements TransactionRepository {
   @override
-  Future<void> recordSale({required String productId, required num quantity}) async {}
+  Future<TransactionWriteResult> recordSale({
+    required String productId,
+    required num quantity,
+    String? deviceTxnId,
+  }) async =>
+      TransactionWriteResult.synced;
 
   @override
-  Future<void> recordStockIn({required String productId, required num quantity}) async {}
+  Future<TransactionWriteResult> recordStockIn({
+    required String productId,
+    required num quantity,
+    String? deviceTxnId,
+  }) async =>
+      TransactionWriteResult.synced;
 
   @override
-  Future<void> recordAdjustment({
+  Future<TransactionWriteResult> recordAdjustment({
     required String productId,
     required num quantityChange,
     required String reason,
-  }) async {}
+    String? deviceTxnId,
+  }) async =>
+      TransactionWriteResult.synced;
 }
 
 class _NoOpImageCompressor implements ImageCompressor {
@@ -178,9 +201,12 @@ List<Override> _shellTestOverrides(FakeAuthRepository fake) {
       ),
     ),
     reportsRepositoryProvider.overrideWithValue(_EmptyReportsRepository()),
-    notificationRepositoryProvider.overrideWithValue(_EmptyNotificationRepository()),
-    activityLogRepositoryProvider.overrideWithValue(_EmptyActivityLogRepository()),
-    transactionRepositoryProvider.overrideWithValue(_NoOpTransactionRepository()),
+    notificationRepositoryProvider
+        .overrideWithValue(_EmptyNotificationRepository()),
+    activityLogRepositoryProvider
+        .overrideWithValue(_EmptyActivityLogRepository()),
+    transactionRepositoryProvider
+        .overrideWithValue(_NoOpTransactionRepository()),
     notificationRealtimeProvider.overrideWith((ref) {}),
     productRealtimeProvider.overrideWith((ref) {}),
   ];
@@ -200,7 +226,8 @@ Widget _appWithRouter(FakeAuthRepository fake) {
 
 /// pumpAndSettle never completes when the protected shell is visible:
 /// IndexedStack keeps every tab's CircularProgressIndicator animating.
-Future<void> _settleProtectedShell(WidgetTester tester, FakeAuthRepository fake) async {
+Future<void> _settleProtectedShell(
+    WidgetTester tester, FakeAuthRepository fake) async {
   await tester.pumpWidget(_appWithRouter(fake));
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 500));
@@ -208,7 +235,8 @@ Future<void> _settleProtectedShell(WidgetTester tester, FakeAuthRepository fake)
 
 void main() {
   group('protected route redirects', () {
-    testWidgets('unauthenticated user is redirected to Login and never sees the app shell',
+    testWidgets(
+        'unauthenticated user is redirected to Login and never sees the app shell',
         (tester) async {
       final fake = FakeAuthRepository(signedIn: false);
       addTearDown(fake.dispose);
@@ -221,7 +249,8 @@ void main() {
       expect(find.byType(NavigationBar), findsNothing);
     });
 
-    testWidgets('authenticated user with an active profile reaches the protected shell',
+    testWidgets(
+        'authenticated user with an active profile reaches the protected shell',
         (tester) async {
       final fake = FakeAuthRepository(
         signedIn: true,
@@ -242,7 +271,8 @@ void main() {
       expect(find.text(AppStrings.login), findsNothing);
     });
 
-    testWidgets('authenticated but deactivated account is blocked from the shell with a clear message',
+    testWidgets(
+        'authenticated but deactivated account is blocked from the shell with a clear message',
         (tester) async {
       final fake = FakeAuthRepository(
         signedIn: true,
@@ -261,7 +291,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(NavigationBar), findsNothing);
-      expect(find.textContaining(AppStrings.accountDeactivated), findsOneWidget);
+      expect(
+          find.textContaining(AppStrings.accountDeactivated), findsOneWidget);
     });
   });
 }

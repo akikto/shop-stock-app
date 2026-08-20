@@ -1,11 +1,37 @@
-# sync/ — reserved for a later phase
+# sync/ — Phase 5 offline transaction queue
 
-This folder is intentionally empty in Phase 0.
+Offline Sale, Stock In, and Stock Adjustment for **Android native** builds.
 
-Per the approved architecture, offline transaction support will live
-here: a local SQLite (Drift) queue of pending Sale / Stock In /
-Adjustment actions, plus a sync engine that replays them against the
-server-side RPC functions once connectivity returns, using
-`device_txn_id` for idempotent retries.
+## Architecture
 
-Not implemented yet — see the phased implementation plan.
+- `database/sync_database_io.dart` — Drift SQLite schema (conditional export; web uses stub)
+- `repositories/` — product cache + pending transaction queue
+- `services/connectivity_service.dart` — online/offline detection
+- `services/sync_engine.dart` — FIFO replay via RPC with stable `device_txn_id`
+- `services/sync_coordinator.dart` — reconnect / resume triggers (debounced)
+- `repositories/offline_aware_transaction_repository.dart` — online RPC vs local queue
+- `providers/sync_providers.dart` — Riverpod wiring
+- `sync_bootstrap.dart` — opens DB after Supabase init (skipped on web)
+
+## Server idempotency
+
+Migration `0011_offline_sync_idempotency.sql` makes `record_sale`, `record_stock_in`,
+and `record_adjustment` return existing ledger rows for duplicate `device_txn_id`
+without double stock mutation.
+
+## Offline-supported operations
+
+- Sale, Stock In, Stock Adjustment (queued locally)
+- Active product picker from cache (stale OK)
+
+## Out of scope
+
+- Product CRUD offline, photo upload, push, History/Dashboard/Reports, login, web offline sync
+
+## Queue / sync behavior
+
+- UUID `device_txn_id` generated once per offline write
+- FIFO replay; network errors stay pending; business errors (e.g. insufficient stock) fail
+- Successful sync refreshes product cache and invalidates providers
+
+Web preview builds skip offline sync (`kIsWeb`).

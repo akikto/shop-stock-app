@@ -8,7 +8,11 @@ void main() {
         'action': 'sale',
         'reference_table': 'sales',
         'reference_id': 'sale-1',
-        'details': {'product_name': 'Paracetamol', 'quantity': 2, 'total_amount': 20},
+        'details': {
+          'product_name': 'Paracetamol',
+          'quantity': 2,
+          'total_amount': 20
+        },
         'created_at': '2026-01-01T10:00:00Z',
       };
 
@@ -21,7 +25,8 @@ void main() {
       expect(log.action, 'sale');
       expect(log.referenceTable, 'sales');
       expect(log.details['quantity'], 2);
-      expect(log.actorName, isNull, reason: 'actor name is resolved separately, not part of the row');
+      expect(log.actorName, isNull,
+          reason: 'actor name is resolved separately, not part of the row');
     });
 
     test('defaults details to an empty map when null', () {
@@ -30,7 +35,9 @@ void main() {
       expect(log.details, isEmpty);
     });
 
-    test('handles a missing reference_table/reference_id (e.g. future action types)', () {
+    test(
+        'handles a missing reference_table/reference_id (e.g. future action types)',
+        () {
       final json = baseJson()
         ..['reference_table'] = null
         ..['reference_id'] = null;

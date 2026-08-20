@@ -34,21 +34,26 @@ class ProductCard extends StatelessWidget {
                   aspectRatio: 1,
                   child: Stack(
                     children: [
-                      ProductPhoto(path: product.photoThumbUrl, size: double.infinity, borderRadius: 10),
+                      ProductPhoto(
+                          path: product.photoThumbUrl,
+                          size: double.infinity,
+                          borderRadius: 10),
                       if (!product.isActive)
                         Positioned(
                           top: 4,
                           left: 4,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
                               color: theme.colorScheme.errorContainer,
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
                               AppStrings.inactive,
-                              style: theme.textTheme.labelSmall
-                                  ?.copyWith(color: theme.colorScheme.onErrorContainer, fontWeight: FontWeight.w600),
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                  color: theme.colorScheme.onErrorContainer,
+                                  fontWeight: FontWeight.w600),
                             ),
                           ),
                         ),
@@ -67,7 +72,8 @@ class ProductCard extends StatelessWidget {
                     product.company!,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
                 const SizedBox(height: 4),
                 Row(
@@ -75,7 +81,8 @@ class ProductCard extends StatelessWidget {
                   children: [
                     Text(
                       '৳${product.salePrice}',
-                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                      style: theme.textTheme.titleSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     _StockBadge(product: product),
                   ],
@@ -102,13 +109,17 @@ class _StockBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: isLow ? theme.colorScheme.errorContainer : theme.colorScheme.secondaryContainer,
+        color: isLow
+            ? theme.colorScheme.errorContainer
+            : theme.colorScheme.secondaryContainer,
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         '${product.currentStock}',
         style: theme.textTheme.labelSmall?.copyWith(
-          color: isLow ? theme.colorScheme.onErrorContainer : theme.colorScheme.onSecondaryContainer,
+          color: isLow
+              ? theme.colorScheme.onErrorContainer
+              : theme.colorScheme.onSecondaryContainer,
           fontWeight: FontWeight.w600,
         ),
         semanticsLabel: isLow

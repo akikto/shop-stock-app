@@ -17,7 +17,8 @@ class DateRange {
   /// Last 7 days including today.
   factory DateRange.last7Days() {
     final today = DateTime.now();
-    final start = DateTime(today.year, today.month, today.day).subtract(const Duration(days: 6));
+    final start = DateTime(today.year, today.month, today.day)
+        .subtract(const Duration(days: 6));
     return DateRange(from: start, to: DateRange.today().to);
   }
 }

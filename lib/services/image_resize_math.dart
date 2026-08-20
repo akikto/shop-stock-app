@@ -9,7 +9,9 @@ class TargetDimensions {
 
   @override
   bool operator ==(Object other) =>
-      other is TargetDimensions && other.width == width && other.height == height;
+      other is TargetDimensions &&
+      other.width == width &&
+      other.height == height;
 
   @override
   int get hashCode => Object.hash(width, height);
@@ -29,10 +31,12 @@ TargetDimensions computeTargetDimensions({
   required int maxDimension,
 }) {
   if (originalWidth <= 0 || originalHeight <= 0 || maxDimension <= 0) {
-    throw ArgumentError('Width, height, and maxDimension must all be positive.');
+    throw ArgumentError(
+        'Width, height, and maxDimension must all be positive.');
   }
 
-  final longestSide = originalWidth >= originalHeight ? originalWidth : originalHeight;
+  final longestSide =
+      originalWidth >= originalHeight ? originalWidth : originalHeight;
   if (longestSide <= maxDimension) {
     return TargetDimensions(originalWidth, originalHeight);
   }

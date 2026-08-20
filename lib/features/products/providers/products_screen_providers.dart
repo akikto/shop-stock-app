@@ -88,7 +88,10 @@ class ProductsScreenController extends StateNotifier<ProductsScreenState> {
         offset: 0,
         limit: _pageSize,
       );
-      state = state.copyWith(products: products, isLoading: false, hasMore: products.length == _pageSize);
+      state = state.copyWith(
+          products: products,
+          isLoading: false,
+          hasMore: products.length == _pageSize);
     } on ProductException catch (e) {
       state = state.copyWith(isLoading: false, error: e.message);
     }

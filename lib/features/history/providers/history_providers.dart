@@ -57,7 +57,8 @@ class HistoryListController extends StateNotifier<HistoryListState> {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final logs = await _repo.fetchActivityLogs(offset: 0, limit: _pageSize);
-      state = state.copyWith(logs: logs, isLoading: false, hasMore: logs.length == _pageSize);
+      state = state.copyWith(
+          logs: logs, isLoading: false, hasMore: logs.length == _pageSize);
     } on ActivityLogException catch (e) {
       state = state.copyWith(isLoading: false, error: e.message);
     }
@@ -67,7 +68,8 @@ class HistoryListController extends StateNotifier<HistoryListState> {
     if (state.isLoadingMore || !state.hasMore || state.isLoading) return;
     state = state.copyWith(isLoadingMore: true, clearError: true);
     try {
-      final more = await _repo.fetchActivityLogs(offset: state.logs.length, limit: _pageSize);
+      final more = await _repo.fetchActivityLogs(
+          offset: state.logs.length, limit: _pageSize);
       state = state.copyWith(
         logs: [...state.logs, ...more],
         isLoadingMore: false,
@@ -81,6 +83,7 @@ class HistoryListController extends StateNotifier<HistoryListState> {
   Future<void> refresh() => loadFirstPage();
 }
 
-final historyListControllerProvider = StateNotifierProvider<HistoryListController, HistoryListState>((ref) {
+final historyListControllerProvider =
+    StateNotifierProvider<HistoryListController, HistoryListState>((ref) {
   return HistoryListController(ref.watch(activityLogRepositoryProvider));
 });

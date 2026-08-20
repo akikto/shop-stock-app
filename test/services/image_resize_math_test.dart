@@ -12,7 +12,8 @@ void main() {
       expect(result, const TargetDimensions(200, 150));
     });
 
-    test('downscales a landscape image to fit maxDimension on the long side', () {
+    test('downscales a landscape image to fit maxDimension on the long side',
+        () {
       final result = computeTargetDimensions(
         originalWidth: 4000,
         originalHeight: 2000,
@@ -22,7 +23,8 @@ void main() {
       expect(result.height, 500);
     });
 
-    test('downscales a portrait image to fit maxDimension on the long side', () {
+    test('downscales a portrait image to fit maxDimension on the long side',
+        () {
       final result = computeTargetDimensions(
         originalWidth: 2000,
         originalHeight: 4000,
@@ -50,7 +52,9 @@ void main() {
       expect(result, const TargetDimensions(1024, 768));
     });
 
-    test('thumb sizing produces a much smaller result than full sizing for the same photo', () {
+    test(
+        'thumb sizing produces a much smaller result than full sizing for the same photo',
+        () {
       const originalWidth = 4032;
       const originalHeight = 3024;
 
@@ -71,15 +75,18 @@ void main() {
 
     test('throws for non-positive inputs', () {
       expect(
-        () => computeTargetDimensions(originalWidth: 0, originalHeight: 100, maxDimension: 100),
+        () => computeTargetDimensions(
+            originalWidth: 0, originalHeight: 100, maxDimension: 100),
         throwsArgumentError,
       );
       expect(
-        () => computeTargetDimensions(originalWidth: 100, originalHeight: -5, maxDimension: 100),
+        () => computeTargetDimensions(
+            originalWidth: 100, originalHeight: -5, maxDimension: 100),
         throwsArgumentError,
       );
       expect(
-        () => computeTargetDimensions(originalWidth: 100, originalHeight: 100, maxDimension: 0),
+        () => computeTargetDimensions(
+            originalWidth: 100, originalHeight: 100, maxDimension: 0),
         throwsArgumentError,
       );
     });

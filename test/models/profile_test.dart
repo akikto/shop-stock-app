@@ -10,7 +10,9 @@ void main() {
       expect(UserRole.fromString('staff'), UserRole.staff);
     });
 
-    test('fromString defaults to staff for unknown value (fail-safe, least privilege)', () {
+    test(
+        'fromString defaults to staff for unknown value (fail-safe, least privilege)',
+        () {
       expect(UserRole.fromString('something_unexpected'), UserRole.staff);
     });
 

@@ -297,7 +297,7 @@ lib/
  ├─ services/         # Supabase client bootstrap, image/photo services
  ├─ features/         # one folder per screen/domain area
  ├─ shared/widgets/   # reusable UI (loading, error, app shell, product photo)
- └─ sync/             # reserved, empty — offline queue lands in a later phase
+ └─ sync/             # Phase 5: Drift offline queue, product cache, sync engine
 supabase/migrations/  # numbered SQL, source of truth for the schema
 web/                  # Flutter Web preview platform files (index.html, manifest.json, icons)
 .github/workflows/    # CI: builds the web preview and deploys it to GitHub Pages
@@ -336,6 +336,69 @@ behavior against an actual Postgres instance (e.g., "can a `staff`
 row actually not `UPDATE` another user's role") — that requires a
 running Supabase project and is listed as a manual verification step
 in the Phase 0 completion report.
+
+---
+
+## Phase 5 — Offline sync (Android-first)
+
+Phase 5 adds **offline Sale, Stock In, and Stock Adjustment** on native
+Android. Web preview builds skip offline sync (`kIsWeb`).
+
+### Supported offline operations
+
+- Record Sale (`record_sale` RPC)
+- Record Stock In (`record_stock_in` RPC)
+- Record Stock Adjustment (`record_adjustment` RPC, Manager/Owner only)
+- Read active products from a **local cache** for Sale/Stock pickers
+
+### Out of scope (still require connectivity)
+
+- Product create/edit/deactivate
+- Photo upload
+- Firebase push notifications
+- History, Dashboard, Reports
+- Login / authentication
+- Web offline sync
+
+### Queue behavior
+
+- Each offline write generates a **stable `device_txn_id` (UUID)** once
+  and stores a row in local SQLite (`pending_transactions`).
+- Optimistic cache updates adjust `cached_products.current_stock` for UI.
+- UI receives `TransactionWriteResult.queuedLocally` and shows a Bengali
+  “saved locally” snackbar.
+
+### Sync behavior
+
+- `SyncCoordinator` triggers sync on reconnect, app resume, and manual retry.
+- `SyncEngine` replays the queue **FIFO** using the same `device_txn_id` on
+  every retry.
+- Network errors keep rows **pending**; business errors (e.g. insufficient
+  stock) mark rows **failed** (no automatic retry).
+- Successful sync refreshes the product cache and invalidates Riverpod providers.
+- Server migration `0011_offline_sync_idempotency.sql` makes RPC replay
+  idempotent — duplicate `device_txn_id` returns the existing ledger row
+  without double stock mutation.
+
+### Stale cache
+
+- Offline pickers show cached stock with a Bengali stale-data warning.
+- Cache is refreshed after successful sync when online.
+
+### Conflict resolution
+
+- Client queue is authoritative for replay order (FIFO).
+- Server enforces stock/role rules at sync time; conflicts become **failed**
+  pending rows (user can retry or delete from Settings).
+
+### Known limitations
+
+- Android-first: no offline sync on web.
+- Cache may be stale while offline; insufficient stock may only surface at sync.
+- Integration scenarios A–D in `integration_test/offline_sync_test.dart`
+  require **manual execution** on Android with network toggling.
+
+See also `lib/sync/README.md`.
 
 ---
 

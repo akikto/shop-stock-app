@@ -44,13 +44,21 @@ class NotificationsScreen extends ConsumerWidget {
             itemBuilder: (context, i) {
               final n = notifications[i];
               return ListTile(
-                leading: Icon(_iconForType(n.type), color: _colorForType(n.type)),
+                leading:
+                    Icon(_iconForType(n.type), color: _colorForType(n.type)),
                 title: Text(n.message),
                 subtitle: Text(_formatTime(n.createdAt)),
-                tileColor: n.read ? null : Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.15),
+                tileColor: n.read
+                    ? null
+                    : Theme.of(context)
+                        .colorScheme
+                        .primaryContainer
+                        .withValues(alpha: 0.15),
                 onTap: () async {
                   if (!n.read) {
-                    await ref.read(notificationRepositoryProvider).markAsRead(n.id);
+                    await ref
+                        .read(notificationRepositoryProvider)
+                        .markAsRead(n.id);
                     ref.invalidate(notificationsListProvider);
                     ref.invalidate(unreadNotificationCountProvider);
                   }

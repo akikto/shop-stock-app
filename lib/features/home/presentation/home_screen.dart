@@ -49,13 +49,15 @@ class HomeScreen extends ConsumerWidget {
               ),
               tooltip: AppStrings.notifications,
               onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const NotificationsScreen()),
+                MaterialPageRoute<void>(
+                    builder: (_) => const NotificationsScreen()),
               ),
             ),
             loading: () => IconButton(
               icon: const Icon(Icons.notifications_outlined),
               onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const NotificationsScreen()),
+                MaterialPageRoute<void>(
+                    builder: (_) => const NotificationsScreen()),
               ),
             ),
             error: (_, __) => const SizedBox.shrink(),
@@ -68,7 +70,8 @@ class HomeScreen extends ConsumerWidget {
           ref.invalidate(unreadNotificationCountProvider);
         },
         child: statsAsync.when(
-          loading: () => const LoadingIndicator(message: 'Loading dashboard...'),
+          loading: () =>
+              const LoadingIndicator(message: 'Loading dashboard...'),
           // Kept in English — transient state before Bengali context is ready.
           error: (error, _) => ErrorView(
             message: error.toString(),
@@ -78,7 +81,9 @@ class HomeScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             children: [
               Text(
-                stats.isShopScope ? AppStrings.todaySales : AppStrings.mySalesToday,
+                stats.isShopScope
+                    ? AppStrings.todaySales
+                    : AppStrings.mySalesToday,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 12),
@@ -89,14 +94,16 @@ class HomeScreen extends ConsumerWidget {
               ],
               if (canViewReports) ...[
                 const SizedBox(height: 24),
-                Text(AppStrings.quickActions, style: Theme.of(context).textTheme.titleMedium),
+                Text(AppStrings.quickActions,
+                    style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),
                 ListTile(
                   leading: const Icon(Icons.bar_chart),
                   title: const Text(AppStrings.viewReports),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(builder: (_) => const ReportsScreen()),
+                    MaterialPageRoute<void>(
+                        builder: (_) => const ReportsScreen()),
                   ),
                 ),
               ],
@@ -191,7 +198,11 @@ class _KpiCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Icon(icon, color: color, size: 28),
-            Text(value, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+            Text(value,
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineSmall
+                    ?.copyWith(fontWeight: FontWeight.bold)),
             Text(label, style: Theme.of(context).textTheme.bodySmall),
           ],
         ),

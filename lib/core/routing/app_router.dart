@@ -58,11 +58,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/products/:id',
-        builder: (context, state) => ProductDetailScreen(productId: state.pathParameters['id']!),
+        builder: (context, state) =>
+            ProductDetailScreen(productId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/products/:id/edit',
-        builder: (context, state) => ProductEditScreen(productId: state.pathParameters['id']!),
+        builder: (context, state) =>
+            ProductEditScreen(productId: state.pathParameters['id']!),
       ),
     ],
   );
@@ -81,7 +83,8 @@ class _ProtectedAppShell extends ConsumerWidget {
     final profileAsync = ref.watch(currentProfileProvider);
 
     return profileAsync.when(
-      loading: () => const Scaffold(body: LoadingIndicator(message: 'Loading your account...')),
+      loading: () => const Scaffold(
+          body: LoadingIndicator(message: 'Loading your account...')),
       // Note: kept in English intentionally — this appears before any
       // localization context is established and is a transient state.
       error: (error, _) => Scaffold(

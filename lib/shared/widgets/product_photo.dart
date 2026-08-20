@@ -37,7 +37,8 @@ class ProductPhoto extends ConsumerWidget {
         return ClipRRect(
           borderRadius: radius,
           child: FutureBuilder<String?>(
-            future: ref.read(productPhotoServiceProvider).resolveSignedUrl(path),
+            future:
+                ref.read(productPhotoServiceProvider).resolveSignedUrl(path),
             builder: (context, snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
                 return SizedBox(
@@ -73,7 +74,8 @@ class ProductPhoto extends ConsumerWidget {
                     ),
                   ),
                 ),
-                errorWidget: (context, _, __) => _placeholder(context, radius, resolvedSize),
+                errorWidget: (context, _, __) =>
+                    _placeholder(context, radius, resolvedSize),
               );
             },
           ),
@@ -95,7 +97,8 @@ class ProductPhoto extends ConsumerWidget {
     return 96;
   }
 
-  Widget _placeholder(BuildContext context, BorderRadius radius, double resolvedSize) {
+  Widget _placeholder(
+      BuildContext context, BorderRadius radius, double resolvedSize) {
     return Container(
       width: resolvedSize,
       height: resolvedSize,

@@ -17,29 +17,37 @@ void main() {
   late String rlsSql;
 
   setUpAll(() {
-    schemaSql = File('supabase/migrations/0001_initial_schema.sql').readAsStringSync();
-    functionsSql = File('supabase/migrations/0002_helper_functions.sql').readAsStringSync();
-    rlsSql = File('supabase/migrations/0003_row_level_security.sql').readAsStringSync();
+    schemaSql =
+        File('supabase/migrations/0001_initial_schema.sql').readAsStringSync();
+    functionsSql = File('supabase/migrations/0002_helper_functions.sql')
+        .readAsStringSync();
+    rlsSql = File('supabase/migrations/0003_row_level_security.sql')
+        .readAsStringSync();
   });
 
   group('database safety assumptions', () {
-    test('products.current_stock has a database-level non-negative constraint', () {
+    test('products.current_stock has a database-level non-negative constraint',
+        () {
       final pattern = RegExp(
         r'current_stock\s+numeric\(12,\s*3\)\s+not null default 0 check \(current_stock >= 0\)',
       );
       expect(
         pattern.hasMatch(schemaSql),
         isTrue,
-        reason: 'Negative stock must be impossible even if application logic has a bug.',
+        reason:
+            'Negative stock must be impossible even if application logic has a bug.',
       );
     });
 
-    test('sales/stock_entries/stock_adjustments have no client INSERT policy in Phase 0', () {
+    test(
+        'sales/stock_entries/stock_adjustments have no client INSERT policy in Phase 0',
+        () {
       for (final table in ['sales', 'stock_entries', 'stock_adjustments']) {
         expect(
           rlsSql,
           isNot(contains('create policy ${table}_insert')),
-          reason: '$table must only be writable via a future SECURITY DEFINER RPC, '
+          reason:
+              '$table must only be writable via a future SECURITY DEFINER RPC, '
               'never a direct client insert, in Phase 0.',
         );
       }
@@ -50,7 +58,9 @@ void main() {
       expect(rlsSql, isNot(contains('activity_logs for delete')));
     });
 
-    test('activity_logs has no client INSERT policy (written only by future RPC)', () {
+    test(
+        'activity_logs has no client INSERT policy (written only by future RPC)',
+        () {
       expect(rlsSql, isNot(contains('activity_logs for insert')));
     });
 
@@ -70,15 +80,20 @@ void main() {
         expect(
           pattern.hasMatch(rlsSql),
           isTrue,
-          reason: '$table must have RLS enabled — default-deny is the whole security model.',
+          reason:
+              '$table must have RLS enabled — default-deny is the whole security model.',
         );
       }
     });
 
-    test('device_txn_id uniqueness exists on transactional tables (idempotent sync)', () {
-      final matches = RegExp(r'device_txn_id\s+uuid not null unique').allMatches(schemaSql);
+    test(
+        'device_txn_id uniqueness exists on transactional tables (idempotent sync)',
+        () {
+      final matches =
+          RegExp(r'device_txn_id\s+uuid not null unique').allMatches(schemaSql);
       expect(matches.length, 3,
-          reason: 'sales, stock_entries, and stock_adjustments must each guard against '
+          reason:
+              'sales, stock_entries, and stock_adjustments must each guard against '
               'duplicate replay from the offline sync queue.');
     });
 
@@ -93,7 +108,8 @@ void main() {
       expect(
         rlsSql,
         isNot(contains('create policy products_insert')),
-        reason: 'Product creation must go through a future RPC, never a direct client insert — '
+        reason:
+            'Product creation must go through a future RPC, never a direct client insert — '
             'current_stock lives on this table and must never be client-writable.',
       );
     });
@@ -102,7 +118,8 @@ void main() {
       expect(
         rlsSql,
         isNot(contains('create policy products_update')),
-        reason: 'Product edits (including current_stock) must go through a future RPC, '
+        reason:
+            'Product edits (including current_stock) must go through a future RPC, '
             'never a direct client update.',
       );
     });
@@ -111,9 +128,13 @@ void main() {
       expect(rlsSql, isNot(contains('products for delete')));
     });
 
-    test('products retains exactly one policy: read-only SELECT for authenticated users', () {
-      final productPolicies =
-          RegExp(r'create policy products_[a-z_]+').allMatches(rlsSql).map((m) => m.group(0)).toList();
+    test(
+        'products retains exactly one policy: read-only SELECT for authenticated users',
+        () {
+      final productPolicies = RegExp(r'create policy products_[a-z_]+')
+          .allMatches(rlsSql)
+          .map((m) => m.group(0))
+          .toList();
       expect(productPolicies, ['create policy products_select_authenticated']);
     });
 
@@ -125,22 +146,30 @@ void main() {
     // with a column-limited function for cross-user name lookups.
     // -------------------------------------------------------------
 
-    test('profiles has no blanket "select every row/column" policy for all authenticated users', () {
+    test(
+        'profiles has no blanket "select every row/column" policy for all authenticated users',
+        () {
       expect(
         rlsSql,
         isNot(contains('create policy profiles_select_authenticated')),
-        reason: 'A blanket policy would expose every user\'s phone number to every '
+        reason:
+            'A blanket policy would expose every user\'s phone number to every '
             'authenticated user, including plain staff, with no operational need.',
       );
     });
 
-    test('profiles SELECT is split into self-row and manager/owner-only policies', () {
+    test(
+        'profiles SELECT is split into self-row and manager/owner-only policies',
+        () {
       expect(rlsSql, contains('create policy profiles_select_self'));
       expect(rlsSql, contains('create policy profiles_select_manager_owner'));
     });
 
-    test('list_profiles_public() exists, is SECURITY DEFINER, and excludes phone', () {
-      expect(functionsSql, contains('create or replace function public.list_profiles_public()'));
+    test(
+        'list_profiles_public() exists, is SECURITY DEFINER, and excludes phone',
+        () {
+      expect(functionsSql,
+          contains('create or replace function public.list_profiles_public()'));
       // The function body must be defined before any "security definer"
       // keyword that could theoretically belong to a different function,
       // so scope the check to the function's own block.
@@ -151,14 +180,23 @@ void main() {
       expect(
         functionBlock.substring(0, functionBlock.indexOf(r'$$;')),
         isNot(contains('phone')),
-        reason: 'list_profiles_public() must never return the phone column — that is the '
+        reason:
+            'list_profiles_public() must never return the phone column — that is the '
             'entire point of having it instead of a blanket SELECT policy.',
       );
     });
 
-    test('list_profiles_public() execute privilege is explicitly restricted to authenticated', () {
-      expect(functionsSql, contains('revoke all on function public.list_profiles_public() from public;'));
-      expect(functionsSql, contains('grant execute on function public.list_profiles_public() to authenticated;'));
+    test(
+        'list_profiles_public() execute privilege is explicitly restricted to authenticated',
+        () {
+      expect(
+          functionsSql,
+          contains(
+              'revoke all on function public.list_profiles_public() from public;'));
+      expect(
+          functionsSql,
+          contains(
+              'grant execute on function public.list_profiles_public() to authenticated;'));
     });
   });
 }

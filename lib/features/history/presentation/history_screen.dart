@@ -33,7 +33,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 300) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 300) {
       ref.read(historyListControllerProvider.notifier).loadMore();
     }
   }
@@ -102,7 +103,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text(AppStrings.history)),
       body: RefreshIndicator(
-        onRefresh: () => ref.read(historyListControllerProvider.notifier).refresh(),
+        onRefresh: () =>
+            ref.read(historyListControllerProvider.notifier).refresh(),
         child: _buildBody(state),
       ),
     );
@@ -125,7 +127,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   Text(state.error!, textAlign: TextAlign.center),
                   const SizedBox(height: 12),
                   FilledButton(
-                    onPressed: () => ref.read(historyListControllerProvider.notifier).refresh(),
+                    onPressed: () => ref
+                        .read(historyListControllerProvider.notifier)
+                        .refresh(),
                     child: const Text(AppStrings.retry),
                   ),
                 ],
@@ -152,7 +156,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       separatorBuilder: (context, index) => const Divider(height: 1),
       itemBuilder: (context, index) {
         if (index >= state.logs.length) {
-          return const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()));
+          return const Center(
+              child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: CircularProgressIndicator()));
         }
         final log = state.logs[index];
         return ListTile(

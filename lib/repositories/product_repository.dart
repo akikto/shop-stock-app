@@ -75,7 +75,8 @@ abstract class ProductRepository {
 }
 
 class SupabaseProductRepository implements ProductRepository {
-  SupabaseProductRepository({SupabaseClient? client}) : _client = client ?? SupabaseService.client;
+  SupabaseProductRepository({SupabaseClient? client})
+      : _client = client ?? SupabaseService.client;
 
   final SupabaseClient _client;
 
@@ -102,16 +103,20 @@ class SupabaseProductRepository implements ProductRepository {
       }
 
       final rows = await query.order('name').range(offset, offset + limit - 1);
-      return (rows as List).map((row) => Product.fromJson(row as Map<String, dynamic>)).toList();
+      return (rows as List)
+          .map((row) => Product.fromJson(row as Map<String, dynamic>))
+          .toList();
     } catch (e) {
-      throw ProductException('Could not load products. Please check your connection.');
+      throw ProductException(
+          'Could not load products. Please check your connection.');
     }
   }
 
   @override
   Future<Product?> fetchProductById(String id) async {
     try {
-      final row = await _client.from('products').select().eq('id', id).maybeSingle();
+      final row =
+          await _client.from('products').select().eq('id', id).maybeSingle();
       if (row == null) return null;
       return Product.fromJson(row);
     } catch (e) {
@@ -122,7 +127,10 @@ class SupabaseProductRepository implements ProductRepository {
   @override
   Future<List<String>> fetchDistinctCategories() async {
     try {
-      final rows = await _client.from('products').select('category').not('category', 'is', null);
+      final rows = await _client
+          .from('products')
+          .select('category')
+          .not('category', 'is', null);
       final categories = (rows as List)
           .map((row) => (row as Map<String, dynamic>)['category'] as String?)
           .whereType<String>()
@@ -224,7 +232,8 @@ class SupabaseProductRepository implements ProductRepository {
     } on PostgrestException catch (e) {
       throw ProductException(_mapRpcError(e));
     } catch (e) {
-      throw ProductException('Could not deactivate the product. Please try again.');
+      throw ProductException(
+          'Could not deactivate the product. Please try again.');
     }
   }
 
@@ -236,7 +245,8 @@ class SupabaseProductRepository implements ProductRepository {
     } on PostgrestException catch (e) {
       throw ProductException(_mapRpcError(e));
     } catch (e) {
-      throw ProductException('Could not activate the product. Please try again.');
+      throw ProductException(
+          'Could not activate the product. Please try again.');
     }
   }
 
