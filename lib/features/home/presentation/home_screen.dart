@@ -16,8 +16,7 @@ class HomeScreen extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.all(24),
           child: Text(
-            'Dashboard coming soon.\n\nThis screen will show daily sales, '
-            'low-stock alerts, and quick actions.',
+            AppStrings.dashboardComingSoon,
             textAlign: TextAlign.center,
           ),
         ),

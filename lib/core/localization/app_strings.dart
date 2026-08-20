@@ -67,6 +67,10 @@ class AppStrings {
   static const stockIn = 'স্টক';
   static const history = 'ইতিহাস';
   static const settings = 'সেটিংস';
+  static const dashboardComingSoon =
+      'ড্যাশবোর্ড শীঘ্রই আসছে।\n\nএখানে দৈনিক বিক্রয়, কম স্টকের সতর্কতা এবং দ্রুত কাজগুলো দেখা যাবে।';
+  static const historyComingSoon =
+      'ইতিহাস ও অডিট ট্রেইল শীঘ্রই আসছে।\n\nপ্রতিটি বিক্রয়, স্টক ইন এবং সমন্বয় এখানে স্থায়ীভাবে দেখা যাবে।';
 
   // Auth / login
   static const appName = 'Shop Stock & Sales';

@@ -16,8 +16,7 @@ class HistoryScreen extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.all(24),
           child: Text(
-            'History / Audit Trail coming soon.\n\nEvery sale, stock '
-            'entry, and adjustment will appear here permanently.',
+            AppStrings.historyComingSoon,
             textAlign: TextAlign.center,
           ),
         ),
