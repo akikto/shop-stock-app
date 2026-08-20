@@ -130,4 +130,24 @@ class AppStrings {
   static const quickActions = 'দ্রুত কাজ';
   static const totalActivity = 'মোট কার্যক্রম';
   static const currencySymbol = '৳';
+
+  // Auth / Login
+  static const appName = 'Shop Stock & Sales';
+  static const email = 'ইমেইল';
+  static const password = 'পাসওয়ার্ড';
+  static const login = 'লগ ইন';
+  static const logout = 'লগ আউট';
+  static const enterEmail = 'আপনার ইমেইল দিন';
+  static const enterPassword = 'আপনার পাসওয়ার্ড দিন';
+  static const accountCreatedbyOwner = 'অ্যাকাউন্ট মালিক তৈরি করেন। প্রবেশ করতে মালিকের সাথে যোগাযোগ করুন।';
+
+  // Settings
+  static const settings = 'সেটিংস';
+  static const role = 'ভূমিকা';
+
+  // Misc UI
+  static const loadingAccount = 'অ্যাকাউন্ট লোড হচ্ছে...';
+  static const loadingDashboard = 'ড্যাশবোর্ড লোড হচ্ছে...';
+  static const accountDeactivated = 'আপনার অ্যাকাউন্ট নিষ্ক্রিয় করা হয়েছে। মালিকের সাথে যোগাযোগ করুন।';
+  static const checkProductsTab = 'বিস্তারিত দেখতে পণ্য ট্যাব দেখুন';
 }

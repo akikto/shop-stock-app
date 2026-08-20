@@ -69,6 +69,7 @@ class HomeScreen extends ConsumerWidget {
         },
         child: statsAsync.when(
           loading: () => const LoadingIndicator(message: 'Loading dashboard...'),
+          // Kept in English — transient state before Bengali context is ready.
           error: (error, _) => ErrorView(
             message: error.toString(),
             onRetry: () => ref.invalidate(dashboardStatsProvider(range)),
@@ -211,7 +212,7 @@ class _LowStockBanner extends StatelessWidget {
       child: ListTile(
         leading: Icon(Icons.warning_amber, color: Colors.red.shade700),
         title: Text('$count ${AppStrings.lowStockProducts}'),
-        subtitle: const Text('Check Products tab for details'),
+        subtitle: const Text(AppStrings.checkProductsTab),
       ),
     );
   }

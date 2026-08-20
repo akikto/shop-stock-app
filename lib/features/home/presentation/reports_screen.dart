@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/localization/app_strings.dart';
 import '../../../core/utils/date_range.dart';
+import '../../../models/product_sales_row.dart';
+import '../../../models/staff_sales_row.dart';
 import '../../../shared/widgets/error_view.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../providers/dashboard_providers.dart';
@@ -90,7 +92,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> with SingleTicker
 class _StaffReportList extends StatelessWidget {
   const _StaffReportList({required this.rows});
 
-  final List<dynamic> rows;
+  final List<StaffSalesRow> rows;
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +120,7 @@ class _StaffReportList extends StatelessWidget {
 class _ProductReportList extends StatelessWidget {
   const _ProductReportList({required this.rows});
 
-  final List<dynamic> rows;
+  final List<ProductSalesRow> rows;
 
   @override
   Widget build(BuildContext context) {

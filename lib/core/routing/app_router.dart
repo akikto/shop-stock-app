@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/localization/app_strings.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../features/history/presentation/history_screen.dart';
@@ -81,6 +82,8 @@ class _ProtectedAppShell extends ConsumerWidget {
 
     return profileAsync.when(
       loading: () => const Scaffold(body: LoadingIndicator(message: 'Loading your account...')),
+      // Note: kept in English intentionally — this appears before any
+      // localization context is established and is a transient state.
       error: (error, _) => Scaffold(
         body: ErrorView(
           message: error.toString(),
@@ -91,7 +94,7 @@ class _ProtectedAppShell extends ConsumerWidget {
         if (!profile.isActive) {
           return Scaffold(
             body: ErrorView(
-              message: 'Your account has been deactivated. Contact the shop owner.',
+              message: AppStrings.accountDeactivated,
               onRetry: () async {
                 await ref.read(authRepositoryProvider).signOut();
               },
@@ -102,37 +105,37 @@ class _ProtectedAppShell extends ConsumerWidget {
         return AppShell(
           destinations: [
             ShellDestination(
-              label: 'Home',
+              label: AppStrings.home,
               icon: Icons.storefront_outlined,
               selectedIcon: Icons.storefront,
               screen: const HomeScreen(),
             ),
             ShellDestination(
-              label: 'Products',
+              label: AppStrings.products,
               icon: Icons.inventory_2_outlined,
               selectedIcon: Icons.inventory_2,
               screen: const ProductsScreen(),
             ),
             ShellDestination(
-              label: 'Sale',
+              label: AppStrings.sale,
               icon: Icons.point_of_sale_outlined,
               selectedIcon: Icons.point_of_sale,
               screen: const SaleScreen(),
             ),
             ShellDestination(
-              label: 'Stock',
+              label: AppStrings.stockIn,
               icon: Icons.add_box_outlined,
               selectedIcon: Icons.add_box,
               screen: const StockScreen(),
             ),
             ShellDestination(
-              label: 'History',
+              label: AppStrings.history,
               icon: Icons.history_outlined,
               selectedIcon: Icons.history,
               screen: const HistoryScreen(),
             ),
             ShellDestination(
-              label: 'Settings',
+              label: AppStrings.settings,
               icon: Icons.settings_outlined,
               selectedIcon: Icons.settings,
               screen: const SettingsScreen(),
