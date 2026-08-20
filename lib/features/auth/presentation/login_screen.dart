@@ -96,10 +96,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
                       autocorrect: false,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: AppStrings.email,
-                        prefixIcon: const Icon(Icons.person_outline),
-                        border: const OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.person_outline),
+                        border: OutlineInputBorder(),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
