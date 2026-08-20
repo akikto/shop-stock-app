@@ -6,8 +6,8 @@ import 'package:shop_stock_app/services/image_compressor.dart';
 import 'package:shop_stock_app/services/product_photo_service.dart';
 import 'package:shop_stock_app/services/product_photo_uploader.dart';
 
-class _CompressCall {
-  _CompressCall(this.maxDimension, this.quality);
+class CompressCall {
+  CompressCall(this.maxDimension, this.quality);
   final int maxDimension;
   final int quality;
 }
@@ -19,7 +19,7 @@ class _CompressCall {
 /// pixel-level compression, which is delegated to a native platform
 /// channel that only runs on-device.
 class FakeImageCompressor implements ImageCompressor {
-  final List<_CompressCall> calls = [];
+  final List<CompressCall> calls = [];
 
   @override
   Future<Uint8List> compress(
@@ -27,24 +27,24 @@ class FakeImageCompressor implements ImageCompressor {
     required int maxDimension,
     required int quality,
   }) async {
-    calls.add(_CompressCall(maxDimension, quality));
+    calls.add(CompressCall(maxDimension, quality));
     return Uint8List(maxDimension); // fake: byte length == maxDimension
   }
 }
 
-class _UploadCall {
-  _UploadCall(this.path, this.bytes);
+class UploadCall {
+  UploadCall(this.path, this.bytes);
   final String path;
   final Uint8List bytes;
 }
 
 class FakeProductPhotoUploader implements ProductPhotoUploader {
-  final List<_UploadCall> uploads = [];
+  final List<UploadCall> uploads = [];
   final Map<String, String> signedUrls = {};
 
   @override
   Future<void> upload(String path, Uint8List bytes) async {
-    uploads.add(_UploadCall(path, bytes));
+    uploads.add(UploadCall(path, bytes));
   }
 
   @override

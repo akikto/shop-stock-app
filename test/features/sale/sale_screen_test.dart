@@ -90,18 +90,18 @@ class FakeProductRepository implements ProductRepository {
   Future<Product> activateProduct(String id) async => throw UnimplementedError();
 }
 
-class _RecordSaleCall {
-  _RecordSaleCall(this.productId, this.quantity);
+class RecordSaleCall {
+  RecordSaleCall(this.productId, this.quantity);
   final String productId;
   final num quantity;
 }
 
 class FakeTransactionRepository implements TransactionRepository {
-  final List<_RecordSaleCall> saleCalls = [];
+  final List<RecordSaleCall> saleCalls = [];
 
   @override
   Future<void> recordSale({required String productId, required num quantity}) async {
-    saleCalls.add(_RecordSaleCall(productId, quantity));
+    saleCalls.add(RecordSaleCall(productId, quantity));
   }
 
   @override
@@ -117,10 +117,6 @@ class FakeTransactionRepository implements TransactionRepository {
   }) async {
     throw UnimplementedError();
   }
-}
-
-extension on List<Product> {
-  Product? get firstOrNull => length == 0 ? null : first;
 }
 
 void main() {

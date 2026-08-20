@@ -102,43 +102,43 @@ class _ProtectedAppShell extends ConsumerWidget {
           );
         }
 
-        return AppShell(
+        return const AppShell(
           destinations: [
             ShellDestination(
               label: AppStrings.home,
               icon: Icons.storefront_outlined,
               selectedIcon: Icons.storefront,
-              screen: const HomeScreen(),
+              screen: HomeScreen(),
             ),
             ShellDestination(
               label: AppStrings.products,
               icon: Icons.inventory_2_outlined,
               selectedIcon: Icons.inventory_2,
-              screen: const ProductsScreen(),
+              screen: ProductsScreen(),
             ),
             ShellDestination(
               label: AppStrings.sale,
               icon: Icons.point_of_sale_outlined,
               selectedIcon: Icons.point_of_sale,
-              screen: const SaleScreen(),
+              screen: SaleScreen(),
             ),
             ShellDestination(
               label: AppStrings.stockIn,
               icon: Icons.add_box_outlined,
               selectedIcon: Icons.add_box,
-              screen: const StockScreen(),
+              screen: StockScreen(),
             ),
             ShellDestination(
               label: AppStrings.history,
               icon: Icons.history_outlined,
               selectedIcon: Icons.history,
-              screen: const HistoryScreen(),
+              screen: HistoryScreen(),
             ),
             ShellDestination(
               label: AppStrings.settings,
               icon: Icons.settings_outlined,
               selectedIcon: Icons.settings,
-              screen: const SettingsScreen(),
+              screen: SettingsScreen(),
             ),
           ],
         );
