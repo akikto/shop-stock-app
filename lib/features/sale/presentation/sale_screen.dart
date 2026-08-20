@@ -7,7 +7,7 @@ import '../../../shared/widgets/error_view.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../../products/providers/product_providers.dart';
 import '../../products/presentation/widgets/product_picker_grid.dart';
-import '../providers/transaction_providers.dart';
+import '../../transactions/providers/transaction_providers.dart';
 import '../../../repositories/transaction_repository.dart';
 
 class SaleScreen extends ConsumerStatefulWidget {

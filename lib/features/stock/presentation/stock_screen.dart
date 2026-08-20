@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/localization/app_strings.dart';
 import '../../../models/product.dart';
-import '../../../models/user_role.dart';
 import '../../../repositories/transaction_repository.dart';
 import '../../../shared/widgets/error_view.dart';
 import '../../../shared/widgets/loading_indicator.dart';
@@ -249,7 +248,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                 const SizedBox(height: 8),
                 TextField(
                   controller: _quantityController,
-                  keyboardType: const TextInputType.numberWithOptions(
+                  keyboardType: TextInputType.numberWithOptions(
                     decimal: true,
                     signed: _mode == _StockMode.adjustment,
                   ),

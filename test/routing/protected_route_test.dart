@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shop_stock_app/core/localization/app_strings.dart';
 import 'package:shop_stock_app/core/routing/app_router.dart';
 import 'package:shop_stock_app/features/auth/providers/auth_provider.dart';
+import 'package:shop_stock_app/features/products/providers/product_providers.dart';
+import 'package:shop_stock_app/repositories/product_repository.dart';
 import 'package:shop_stock_app/models/profile.dart';
 import 'package:shop_stock_app/models/user_role.dart';
 
@@ -11,7 +13,12 @@ import '../auth/fake_auth_repository.dart';
 
 Widget _appWithRouter(FakeAuthRepository fake) {
   return ProviderScope(
-    overrides: [authRepositoryProvider.overrideWithValue(fake)],
+    overrides: [
+      authRepositoryProvider.overrideWithValue(fake),
+      productListControllerProvider.overrideWith((ref) {
+        return _FakeProductListController();
+      }),
+    ],
     child: Consumer(
       builder: (context, ref, _) {
         final router = ref.watch(appRouterProvider);
@@ -19,6 +26,25 @@ Widget _appWithRouter(FakeAuthRepository fake) {
       },
     ),
   );
+}
+
+/// A no-op controller that never touches Supabase, so the protected shell
+/// can render in tests without a live database connection.
+class _FakeProductListController extends ProductListController {
+  _FakeProductListController() : super(_NoOpProductRepository());
+  @override
+  Future<void> loadFirstPage() async {}
+  @override
+  Future<void> loadMore() async {}
+  @override
+  Future<void> setSearchQuery(String query) async {}
+  @override
+  Future<void> refresh() async {}
+}
+
+class _NoOpProductRepository implements ProductRepository {
+  @override
+  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 void main() {

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/localization/app_strings.dart';
 import '../../../../models/product.dart';
-import '../../../../shared/widgets/product_photo.dart';
 
 /// Compact product grid for the Sale and Stock screens. Shows active
 /// products with their current stock, and calls back when one is tapped.
@@ -113,15 +112,10 @@ class _ProductPickerCard extends StatelessWidget {
           children: [
             Expanded(
               flex: 3,
-              child: product.photoThumbUrl != null
-                  ? ProductPhoto(
-                      photoPath: product.photoThumbUrl!,
-                      fit: BoxFit.cover,
-                    )
-                  : Container(
-                      color: theme.colorScheme.surfaceContainerHighest,
-                      child: const Icon(Icons.inventory_2_outlined, size: 32),
-                    ),
+              child: Container(
+                color: theme.colorScheme.surfaceContainerHighest,
+                child: const Icon(Icons.inventory_2_outlined, size: 32),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),

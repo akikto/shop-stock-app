@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../core/localization/app_strings.dart';
+import '../../core/localization/app_strings.dart';
 
 /// Simple, non-technical-friendly error display with an optional retry
 /// button. Used for auth errors and (later) data-loading errors.

@@ -42,8 +42,12 @@ void main() {
       final start = rpcSql.indexOf('update public.products set', rpcSql.indexOf('update_product'));
       final end = rpcSql.indexOf('where id = p_id', start);
       final setClause = rpcSql.substring(start, end);
+      // Strip SQL comments so the explanatory "current_stock is deliberately
+      // absent" comment doesn't trip the check — we only care about actual
+      // column assignments, not documentation.
+      final noComments = setClause.replaceAll(RegExp(r'--[^\n]*'), '');
       expect(
-        setClause,
+        noComments,
         isNot(contains('current_stock')),
         reason: 'Product Management must never be able to change stock — only a future '
             'sale/stock-in/adjustment RPC may.',

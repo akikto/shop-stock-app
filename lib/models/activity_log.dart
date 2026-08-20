@@ -29,7 +29,7 @@ class ActivityLog {
       action: json['action'] as String,
       referenceTable: json['reference_table'] as String?,
       referenceId: json['reference_id'] as String?,
-      details: json['details'] as Map<String, dynamic>?,
+      details: (json['details'] as Map?)?.cast<String, dynamic>(),
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
