@@ -81,4 +81,30 @@ class AppStrings {
   static const accountDeactivated =
       'আপনার অ্যাকাউন্ট নিষ্ক্রিয় করা হয়েছে। মালিকের সাথে যোগাযোগ করুন।';
   static const role = 'ভূমিকা';
+
+  // Sale screen
+  static const quickSale = 'দ্রুত বিক্রয়';
+  static const selectProduct = 'পণ্য নির্বাচন করুন';
+  static const quantity = 'পরিমাণ';
+  static const confirmSale = 'বিক্রয় নিশ্চিত করুন';
+  static const saleSuccess = 'বিক্রয় সফল হয়েছে';
+  static const insufficientStock = 'পর্যাপ্ত স্টক নেই';
+  static const saleTotal = 'মোট মূল্য';
+  static const enterQuantity = 'পরিমাণ লিখুন';
+  static const quantityMustBePositive = 'পরিমাণ শূন্যের চেয়ে বেশি হতে হবে';
+
+  // Stock screen
+  static const stockInTitle = 'স্টক ইন';
+  static const stockAdjustment = 'স্টক সমন্বয়';
+  static const stockInSuccess = 'স্টক ইন সফল হয়েছে';
+  static const adjustmentSuccess = 'স্টক সমন্বয় সফল হয়েছে';
+  static const adjustmentReason = 'সমন্বয়ের কারণ';
+  static const enterReason = 'কারণ লিখুন';
+  static const reasonRequired = 'কারণ আবশ্যক';
+  static const adjustmentQuantity = 'পরিবর্তন পরিমাণ';
+  static const quantityChangeZero = 'পরিবর্তন শূন্য হতে পারবে না';
+  static const onlyManagerCanAdjust = 'শুধুমাত্র ম্যানেজার বা মালিক স্টক সমন্বয় করতে পারেন';
+  static const addStock = 'স্টক বাড়ান';
+  static const removeStock = 'স্টক কমান';
+  static const selectProductFirst = 'প্রথমে একটি পণ্য নির্বাচন করুন';
 }
