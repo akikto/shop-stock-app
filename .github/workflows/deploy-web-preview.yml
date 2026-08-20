@@ -88,6 +88,9 @@ jobs:
             --base-href "$BASE_HREF" \
             --dart-define-from-file=config/config.ci.json
 
+      - name: Remove secrets file before publishing web artifact
+        run: rm -f config/config.ci.json
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: build/web
@@ -98,6 +101,16 @@ jobs:
       # APK is built after Pages deploy so a transient Maven/Gradle
       # outage (e.g. Maven Central HTTP 429) does not block the web
       # preview from updating.
+      - name: Write build-time config for Android APK
+        run: |
+          mkdir -p config
+          cat > config/config.ci.json << EOF
+          {
+            "SUPABASE_URL": "${{ secrets.SUPABASE_URL }}",
+            "SUPABASE_ANON_KEY": "${{ secrets.SUPABASE_ANON_KEY }}"
+          }
+          EOF
+
       - name: Generate android/ platform scaffold (not committed to the repo)
         run: flutter create --platforms android .
 
