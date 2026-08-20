@@ -120,7 +120,7 @@ class FakeTransactionRepository implements TransactionRepository {
 }
 
 extension on List<Product> {
-  Product? get firstOrNull => isEmpty ? null : first;
+  Product? get firstOrNull => length == 0 ? null : first;
 }
 
 void main() {

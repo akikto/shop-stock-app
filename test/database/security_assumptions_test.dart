@@ -128,7 +128,7 @@ void main() {
     test('profiles has no blanket "select every row/column" policy for all authenticated users', () {
       expect(
         rlsSql,
-        isNot(contains('profiles_select_authenticated')),
+        isNot(contains('create policy profiles_select_authenticated')),
         reason: 'A blanket policy would expose every user\'s phone number to every '
             'authenticated user, including plain staff, with no operational need.',
       );

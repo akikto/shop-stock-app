@@ -4,7 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:shop_stock_app/models/profile.dart';
 import 'package:shop_stock_app/models/user_role.dart';
 import 'package:shop_stock_app/repositories/auth_repository.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide AuthException;
 
 class MockSupabaseClient extends Mock implements SupabaseClient {}
 

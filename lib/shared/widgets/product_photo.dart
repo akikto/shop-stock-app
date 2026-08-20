@@ -26,67 +26,86 @@ class ProductPhoto extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final radius = BorderRadius.circular(borderRadius);
 
-    if (path == null || path!.isEmpty) {
-      return _placeholder(context, radius);
-    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final resolvedSize = _resolveSize(constraints);
 
-    return ClipRRect(
-      borderRadius: radius,
-      child: FutureBuilder<String?>(
-        future: ref.read(productPhotoServiceProvider).resolveSignedUrl(path),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return SizedBox(
-              width: size,
-              height: size,
-              child: const Center(
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+        if (path == null || path!.isEmpty) {
+          return _placeholder(context, radius, resolvedSize);
+        }
+
+        return ClipRRect(
+          borderRadius: radius,
+          child: FutureBuilder<String?>(
+            future: ref.read(productPhotoServiceProvider).resolveSignedUrl(path),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return SizedBox(
+                  width: resolvedSize,
+                  height: resolvedSize,
+                  child: const Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                );
+              }
+              final url = snapshot.data;
+              if (url == null) {
+                return _placeholder(context, radius, resolvedSize);
+              }
+              return CachedNetworkImage(
+                imageUrl: url,
+                cacheKey: path, // stable key even though the signed URL rotates
+                width: resolvedSize,
+                height: resolvedSize,
+                fit: BoxFit.cover,
+                placeholder: (context, _) => SizedBox(
+                  width: resolvedSize,
+                  height: resolvedSize,
+                  child: const Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
                 ),
-              ),
-            );
-          }
-          final url = snapshot.data;
-          if (url == null) {
-            return _placeholder(context, radius);
-          }
-          return CachedNetworkImage(
-            imageUrl: url,
-            cacheKey: path, // stable key even though the signed URL rotates
-            width: size,
-            height: size,
-            fit: BoxFit.cover,
-            placeholder: (context, _) => SizedBox(
-              width: size,
-              height: size,
-              child: const Center(
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              ),
-            ),
-            errorWidget: (context, _, __) => _placeholder(context, radius),
-          );
-        },
-      ),
+                errorWidget: (context, _, __) => _placeholder(context, radius, resolvedSize),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
-  Widget _placeholder(BuildContext context, BorderRadius radius) {
+  double _resolveSize(BoxConstraints constraints) {
+    if (size.isFinite) return size;
+
+    final maxW = constraints.maxWidth;
+    final maxH = constraints.maxHeight;
+    if (maxW.isFinite && maxH.isFinite) {
+      return maxW < maxH ? maxW : maxH;
+    }
+    if (maxW.isFinite) return maxW;
+    if (maxH.isFinite) return maxH;
+    return 96;
+  }
+
+  Widget _placeholder(BuildContext context, BorderRadius radius, double resolvedSize) {
     return Container(
-      width: size,
-      height: size,
+      width: resolvedSize,
+      height: resolvedSize,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: radius,
       ),
       child: Icon(
         Icons.inventory_2_outlined,
-        size: size * 0.4,
+        size: resolvedSize * 0.4,
         color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
     );
