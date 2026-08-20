@@ -8,6 +8,7 @@ import 'package:shop_stock_app/features/transactions/providers/transaction_provi
 import 'package:shop_stock_app/models/product.dart';
 import 'package:shop_stock_app/repositories/product_repository.dart';
 import 'package:shop_stock_app/repositories/transaction_repository.dart';
+import 'package:shop_stock_app/sync/models/transaction_write_result.dart';
 
 Product _lowStockProduct({num currentStock = 2}) {
   return Product(
@@ -84,10 +85,12 @@ class FakeProductRepository implements ProductRepository {
       throw UnimplementedError();
 
   @override
-  Future<Product> deactivateProduct(String id) async => throw UnimplementedError();
+  Future<Product> deactivateProduct(String id) async =>
+      throw UnimplementedError();
 
   @override
-  Future<Product> activateProduct(String id) async => throw UnimplementedError();
+  Future<Product> activateProduct(String id) async =>
+      throw UnimplementedError();
 }
 
 class RecordSaleCall {
@@ -100,27 +103,38 @@ class FakeTransactionRepository implements TransactionRepository {
   final List<RecordSaleCall> saleCalls = [];
 
   @override
-  Future<void> recordSale({required String productId, required num quantity}) async {
+  Future<TransactionWriteResult> recordSale({
+    required String productId,
+    required num quantity,
+    String? deviceTxnId,
+  }) async {
     saleCalls.add(RecordSaleCall(productId, quantity));
+    return TransactionWriteResult.synced;
   }
 
   @override
-  Future<void> recordStockIn({required String productId, required num quantity}) async {
+  Future<TransactionWriteResult> recordStockIn({
+    required String productId,
+    required num quantity,
+    String? deviceTxnId,
+  }) async {
     throw UnimplementedError();
   }
 
   @override
-  Future<void> recordAdjustment({
+  Future<TransactionWriteResult> recordAdjustment({
     required String productId,
     required num quantityChange,
     required String reason,
+    String? deviceTxnId,
   }) async {
     throw UnimplementedError();
   }
 }
 
 void main() {
-  testWidgets('selecting a quantity above available stock shows an error and never calls recordSale',
+  testWidgets(
+      'selecting a quantity above available stock shows an error and never calls recordSale',
       (tester) async {
     final product = _lowStockProduct(currentStock: 2);
     final fakeProducts = FakeProductRepository([product]);
@@ -153,10 +167,12 @@ void main() {
     await tester.pump();
 
     expect(find.text(AppStrings.insufficientStock), findsOneWidget);
-    expect(fakeTransactions.saleCalls, isEmpty, reason: 'must not call the RPC when quantity exceeds stock');
+    expect(fakeTransactions.saleCalls, isEmpty,
+        reason: 'must not call the RPC when quantity exceeds stock');
   });
 
-  testWidgets('selecting a quantity within available stock calls recordSale with the right parameters',
+  testWidgets(
+      'selecting a quantity within available stock calls recordSale with the right parameters',
       (tester) async {
     final product = _lowStockProduct(currentStock: 5);
     final fakeProducts = FakeProductRepository([product]);

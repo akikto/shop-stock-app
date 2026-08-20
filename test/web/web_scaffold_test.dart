@@ -34,7 +34,9 @@ void main() {
     late String html;
     setUpAll(() => html = File('web/index.html').readAsStringSync());
 
-    test('references the FLUTTER_BASE_HREF build-time token, not a hardcoded path', () {
+    test(
+        'references the FLUTTER_BASE_HREF build-time token, not a hardcoded path',
+        () {
       expect(html, contains(r'<base href="$FLUTTER_BASE_HREF">'));
     });
 
@@ -53,7 +55,8 @@ void main() {
   group('web/manifest.json is valid and internally consistent', () {
     late Map<String, dynamic> manifest;
     setUpAll(() {
-      manifest = jsonDecode(File('web/manifest.json').readAsStringSync()) as Map<String, dynamic>;
+      manifest = jsonDecode(File('web/manifest.json').readAsStringSync())
+          as Map<String, dynamic>;
     });
 
     test('has the required PWA fields', () {
@@ -73,7 +76,8 @@ void main() {
       final icons = (manifest['icons'] as List).cast<Map<String, dynamic>>();
       for (final icon in icons) {
         final path = 'web/${icon['src']}';
-        expect(File(path).existsSync(), isTrue, reason: '$path referenced by manifest.json but missing');
+        expect(File(path).existsSync(), isTrue,
+            reason: '$path referenced by manifest.json but missing');
       }
     });
   });
@@ -84,44 +88,56 @@ void main() {
       final offenders = <String>[];
       for (final entity in webDir.listSync(recursive: true)) {
         if (entity is! File) continue;
-        if (!entity.path.endsWith('.html') && !entity.path.endsWith('.json') && !entity.path.endsWith('.js')) {
+        if (!entity.path.endsWith('.html') &&
+            !entity.path.endsWith('.json') &&
+            !entity.path.endsWith('.js')) {
           continue;
         }
         final content = entity.readAsStringSync().toLowerCase();
-        if (content.contains('service_role') || content.contains('sk_live') || content.contains('sk_test')) {
+        if (content.contains('service_role') ||
+            content.contains('sk_live') ||
+            content.contains('sk_test')) {
           offenders.add(entity.path);
         }
       }
-      expect(offenders, isEmpty, reason: 'Potential secret found in: $offenders');
+      expect(offenders, isEmpty,
+          reason: 'Potential secret found in: $offenders');
     });
   });
 
   group('CI workflow deploys web preview without exposing secrets', () {
     late String workflow;
     setUpAll(() {
-      workflow = File('.github/workflows/deploy-web-preview.yml').readAsStringSync();
+      workflow =
+          File('.github/workflows/deploy-web-preview.yml').readAsStringSync();
     });
 
     test('workflow file exists', () {
-      expect(File('.github/workflows/deploy-web-preview.yml').existsSync(), isTrue);
+      expect(File('.github/workflows/deploy-web-preview.yml').existsSync(),
+          isTrue);
     });
 
-    test('reads Supabase config from repository secrets, not hardcoded values', () {
+    test('reads Supabase config from repository secrets, not hardcoded values',
+        () {
       expect(workflow, contains(r'${{ secrets.SUPABASE_URL }}'));
       expect(workflow, contains(r'${{ secrets.SUPABASE_ANON_KEY }}'));
     });
 
-    test('never references a service_role secret value (the word appears only in cautionary comments)', () {
+    test(
+        'never references a service_role secret value (the word appears only in cautionary comments)',
+        () {
       expect(workflow, isNot(contains('secrets.SERVICE_ROLE')));
       expect(workflow, isNot(contains('secrets.SUPABASE_SERVICE_ROLE')));
     });
 
-    test('deletes the generated config file before publishing the artifact', () {
+    test('deletes the generated config file before publishing the artifact',
+        () {
       final removeIndex = workflow.indexOf('rm -f config/config.ci.json');
       final uploadIndex = workflow.indexOf('upload-pages-artifact');
       expect(removeIndex, greaterThanOrEqualTo(0));
       expect(uploadIndex, greaterThan(removeIndex),
-          reason: 'the CI config file must be removed before the build/web artifact is uploaded');
+          reason:
+              'the CI config file must be removed before the build/web artifact is uploaded');
     });
   });
 }

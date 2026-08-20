@@ -13,8 +13,11 @@ void main() {
   late String rlsSql;
 
   setUpAll(() {
-    sql = File('supabase/migrations/0009_product_expiry_composition_activate.sql').readAsStringSync();
-    rlsSql = File('supabase/migrations/0003_row_level_security.sql').readAsStringSync();
+    sql =
+        File('supabase/migrations/0009_product_expiry_composition_activate.sql')
+            .readAsStringSync();
+    rlsSql = File('supabase/migrations/0003_row_level_security.sql')
+        .readAsStringSync();
   });
 
   group('new product fields', () {
@@ -28,28 +31,50 @@ void main() {
   });
 
   group('avoiding duplicate function overloads', () {
-    test('the old-signature create_product is explicitly dropped before recreation', () {
-      final dropIdx = sql.indexOf('drop function if exists public.create_product(');
-      final createIdx = sql.indexOf('create or replace function public.create_product(');
+    test(
+        'the old-signature create_product is explicitly dropped before recreation',
+        () {
+      final dropIdx =
+          sql.indexOf('drop function if exists public.create_product(');
+      final createIdx =
+          sql.indexOf('create or replace function public.create_product(');
       expect(dropIdx, greaterThanOrEqualTo(0));
-      expect(createIdx, greaterThan(dropIdx), reason: 'must drop the old signature before creating the new one');
+      expect(createIdx, greaterThan(dropIdx),
+          reason: 'must drop the old signature before creating the new one');
     });
 
-    test('the old-signature update_product is explicitly dropped before recreation', () {
-      final dropIdx = sql.indexOf('drop function if exists public.update_product(');
-      final createIdx = sql.indexOf('create or replace function public.update_product(');
+    test(
+        'the old-signature update_product is explicitly dropped before recreation',
+        () {
+      final dropIdx =
+          sql.indexOf('drop function if exists public.update_product(');
+      final createIdx =
+          sql.indexOf('create or replace function public.update_product(');
       expect(dropIdx, greaterThanOrEqualTo(0));
       expect(createIdx, greaterThan(dropIdx));
     });
 
-    test('exactly one create_product and one update_product definition exist in this file', () {
-      expect(RegExp(r'create or replace function public\.create_product\(').allMatches(sql).length, 1);
-      expect(RegExp(r'create or replace function public\.update_product\(').allMatches(sql).length, 1);
+    test(
+        'exactly one create_product and one update_product definition exist in this file',
+        () {
+      expect(
+          RegExp(r'create or replace function public\.create_product\(')
+              .allMatches(sql)
+              .length,
+          1);
+      expect(
+          RegExp(r'create or replace function public\.update_product\(')
+              .allMatches(sql)
+              .length,
+          1);
     });
   });
 
-  group('activate_product() mirrors deactivate_product()\'s authorization pattern', () {
-    test('activate_product is defined, SECURITY DEFINER, manager/owner only', () {
+  group(
+      'activate_product() mirrors deactivate_product()\'s authorization pattern',
+      () {
+    test('activate_product is defined, SECURITY DEFINER, manager/owner only',
+        () {
       final start = sql.indexOf('function public.activate_product(');
       expect(start, greaterThanOrEqualTo(0));
       final authIdx = sql.indexOf('is_manager_or_owner()', start);
@@ -69,21 +94,26 @@ void main() {
   });
 
   group('current_stock guarantee still holds after this migration', () {
-    test('neither create_product nor update_product accept current_stock as a parameter', () {
+    test(
+        'neither create_product nor update_product accept current_stock as a parameter',
+        () {
       final createSig = sql.substring(
         sql.indexOf('create or replace function public.create_product('),
-        sql.indexOf('returns public.products', sql.indexOf('create or replace function public.create_product(')),
+        sql.indexOf('returns public.products',
+            sql.indexOf('create or replace function public.create_product(')),
       );
       final updateSig = sql.substring(
         sql.indexOf('create or replace function public.update_product('),
-        sql.indexOf('returns public.products', sql.indexOf('create or replace function public.update_product(')),
+        sql.indexOf('returns public.products',
+            sql.indexOf('create or replace function public.update_product(')),
       );
       expect(createSig, isNot(contains('current_stock')));
       expect(updateSig, isNot(contains('current_stock')));
     });
 
     test('update_product\'s SET clause still never assigns current_stock', () {
-      final setStart = sql.indexOf('update public.products set', sql.indexOf('function public.update_product('));
+      final setStart = sql.indexOf('update public.products set',
+          sql.indexOf('function public.update_product('));
       final setEnd = sql.indexOf('where id = p_id', setStart);
       final setClause = sql.substring(setStart, setEnd);
       // Check for an actual assignment (current_stock = ...), not just
@@ -94,13 +124,22 @@ void main() {
     });
   });
 
-  group('execute privilege follows the anon-revoked defense-in-depth pattern', () {
+  group('execute privilege follows the anon-revoked defense-in-depth pattern',
+      () {
     test('activate_product: anon revoked, authenticated granted', () {
-      expect(sql, contains('revoke execute on function public.activate_product(uuid) from anon;'));
-      expect(sql, contains('grant execute on function public.activate_product(uuid) to authenticated;'));
+      expect(
+          sql,
+          contains(
+              'revoke execute on function public.activate_product(uuid) from anon;'));
+      expect(
+          sql,
+          contains(
+              'grant execute on function public.activate_product(uuid) to authenticated;'));
     });
 
-    test('the new create_product/update_product signatures also revoke anon and grant authenticated', () {
+    test(
+        'the new create_product/update_product signatures also revoke anon and grant authenticated',
+        () {
       expect(
           sql,
           contains(
@@ -112,7 +151,9 @@ void main() {
     });
   });
 
-  group('products RLS still has no client INSERT/UPDATE policy (unchanged from Phase 0/1)', () {
+  group(
+      'products RLS still has no client INSERT/UPDATE policy (unchanged from Phase 0/1)',
+      () {
     test('no products_insert or products_update policy exists', () {
       expect(rlsSql, isNot(contains('create policy products_insert')));
       expect(rlsSql, isNot(contains('create policy products_update')));

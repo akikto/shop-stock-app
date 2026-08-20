@@ -42,7 +42,8 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 300) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 300) {
       ref.read(productsScreenControllerProvider.notifier).loadMore();
     }
   }
@@ -73,10 +74,14 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     prefixIcon: const Icon(Icons.search),
                     isDense: true,
                     filled: true,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        borderSide: BorderSide.none),
                   ),
                   onChanged: (value) {
-                    ref.read(productsScreenControllerProvider.notifier).setSearchQuery(value);
+                    ref
+                        .read(productsScreenControllerProvider.notifier)
+                        .setSearchQuery(value);
                   },
                 ),
               ),
@@ -94,10 +99,14 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                       Padding(
                         padding: const EdgeInsets.only(right: 8),
                         child: FilterChip(
-                          label: Text(state.activeOnly ? AppStrings.active : AppStrings.inactive),
+                          label: Text(state.activeOnly
+                              ? AppStrings.active
+                              : AppStrings.inactive),
                           selected: !state.activeOnly,
                           onSelected: (showInactive) {
-                            ref.read(productsScreenControllerProvider.notifier).setActiveOnly(!showInactive);
+                            ref
+                                .read(productsScreenControllerProvider.notifier)
+                                .setActiveOnly(!showInactive);
                           },
                         ),
                       ),
@@ -129,7 +138,8 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             )
           : null,
       body: RefreshIndicator(
-        onRefresh: () => ref.read(productsScreenControllerProvider.notifier).refresh(),
+        onRefresh: () =>
+            ref.read(productsScreenControllerProvider.notifier).refresh(),
         child: _buildBody(state),
       ),
     );
@@ -152,7 +162,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                   Text(state.error!, textAlign: TextAlign.center),
                   const SizedBox(height: 12),
                   FilledButton(
-                    onPressed: () => ref.read(productsScreenControllerProvider.notifier).refresh(),
+                    onPressed: () => ref
+                        .read(productsScreenControllerProvider.notifier)
+                        .refresh(),
                     child: const Text(AppStrings.retry),
                   ),
                 ],
@@ -184,7 +196,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
       itemCount: state.products.length + (state.hasMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index >= state.products.length) {
-          return const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()));
+          return const Center(
+              child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: CircularProgressIndicator()));
         }
         final product = state.products[index];
         return ProductCard(

@@ -42,7 +42,8 @@ class AuthRepository {
     } on AuthApiException catch (e) {
       throw AuthException(_mapAuthError(e));
     } catch (e) {
-      throw AuthException('Login failed. Please check your connection and try again.');
+      throw AuthException(
+          'Login failed. Please check your connection and try again.');
     }
   }
 
@@ -60,11 +61,8 @@ class AuthRepository {
       throw AuthException('Not signed in.');
     }
 
-    final response = await _client
-        .from('profiles')
-        .select()
-        .eq('id', user.id)
-        .maybeSingle();
+    final response =
+        await _client.from('profiles').select().eq('id', user.id).maybeSingle();
 
     if (response == null) {
       throw AuthException(

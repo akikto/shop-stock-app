@@ -62,22 +62,27 @@ void main() {
 
   group('Product.isLowStock', () {
     test('is true when current stock is at or below the low-stock limit', () {
-      final product = Product.fromJson(_baseJson(currentStock: 5, lowStockLimit: 5));
+      final product =
+          Product.fromJson(_baseJson(currentStock: 5, lowStockLimit: 5));
       expect(product.isLowStock, isTrue);
     });
 
     test('is true when current stock is below the low-stock limit', () {
-      final product = Product.fromJson(_baseJson(currentStock: 2, lowStockLimit: 5));
+      final product =
+          Product.fromJson(_baseJson(currentStock: 2, lowStockLimit: 5));
       expect(product.isLowStock, isTrue);
     });
 
     test('is false when current stock is comfortably above the limit', () {
-      final product = Product.fromJson(_baseJson(currentStock: 50, lowStockLimit: 5));
+      final product =
+          Product.fromJson(_baseJson(currentStock: 50, lowStockLimit: 5));
       expect(product.isLowStock, isFalse);
     });
 
-    test('is true at zero stock even with a zero low-stock limit (edge case)', () {
-      final product = Product.fromJson(_baseJson(currentStock: 0, lowStockLimit: 0));
+    test('is true at zero stock even with a zero low-stock limit (edge case)',
+        () {
+      final product =
+          Product.fromJson(_baseJson(currentStock: 0, lowStockLimit: 0));
       expect(product.isLowStock, isTrue);
     });
   });
@@ -110,21 +115,26 @@ void main() {
   group('Product.isExpired / isExpiringSoon', () {
     test('a past expiry date is expired, not "expiring soon"', () {
       final past = DateTime.now().subtract(const Duration(days: 5));
-      final product = Product.fromJson(_baseJson(expiryDate: past.toIso8601String().split('T').first));
+      final product = Product.fromJson(
+          _baseJson(expiryDate: past.toIso8601String().split('T').first));
       expect(product.isExpired, isTrue);
       expect(product.isExpiringSoon, isFalse);
     });
 
     test('an expiry date within 30 days is "expiring soon", not expired', () {
       final soon = DateTime.now().add(const Duration(days: 10));
-      final product = Product.fromJson(_baseJson(expiryDate: soon.toIso8601String().split('T').first));
+      final product = Product.fromJson(
+          _baseJson(expiryDate: soon.toIso8601String().split('T').first));
       expect(product.isExpired, isFalse);
       expect(product.isExpiringSoon, isTrue);
     });
 
-    test('an expiry date far in the future is neither expired nor expiring soon', () {
+    test(
+        'an expiry date far in the future is neither expired nor expiring soon',
+        () {
       final future = DateTime.now().add(const Duration(days: 365));
-      final product = Product.fromJson(_baseJson(expiryDate: future.toIso8601String().split('T').first));
+      final product = Product.fromJson(
+          _baseJson(expiryDate: future.toIso8601String().split('T').first));
       expect(product.isExpired, isFalse);
       expect(product.isExpiringSoon, isFalse);
     });

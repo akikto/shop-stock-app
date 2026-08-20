@@ -39,7 +39,8 @@ class _ProductPickerGridState extends ConsumerState<ProductPickerGrid> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 300) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 300) {
       ref.read(productListControllerProvider.notifier).loadMore();
     }
   }
@@ -50,6 +51,17 @@ class _ProductPickerGridState extends ConsumerState<ProductPickerGrid> {
 
     return Column(
       children: [
+        if (state.usingCachedData)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+            child: Text(
+              AppStrings.staleCachedData,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ),
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
           child: TextField(
@@ -60,10 +72,14 @@ class _ProductPickerGridState extends ConsumerState<ProductPickerGrid> {
               prefixIcon: const Icon(Icons.search),
               isDense: true,
               filled: true,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(24),
+                  borderSide: BorderSide.none),
             ),
             onChanged: (value) {
-              ref.read(productListControllerProvider.notifier).setSearchQuery(value);
+              ref
+                  .read(productListControllerProvider.notifier)
+                  .setSearchQuery(value);
             },
           ),
         ),
@@ -87,7 +103,8 @@ class _ProductPickerGridState extends ConsumerState<ProductPickerGrid> {
               Text(state.error!, textAlign: TextAlign.center),
               const SizedBox(height: 12),
               FilledButton(
-                onPressed: () => ref.read(productListControllerProvider.notifier).refresh(),
+                onPressed: () =>
+                    ref.read(productListControllerProvider.notifier).refresh(),
                 child: const Text(AppStrings.retry),
               ),
             ],
@@ -112,7 +129,10 @@ class _ProductPickerGridState extends ConsumerState<ProductPickerGrid> {
       itemCount: state.products.length + (state.hasMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index >= state.products.length) {
-          return const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()));
+          return const Center(
+              child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: CircularProgressIndicator()));
         }
         final product = state.products[index];
         return ProductCard(

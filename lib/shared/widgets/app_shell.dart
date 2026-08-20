@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'offline_status_banner.dart';
+
 class ShellDestination {
   const ShellDestination({
     required this.label,
@@ -15,10 +17,10 @@ class ShellDestination {
 }
 
 /// Mobile-first bottom-navigation shell for the protected area of the
-/// app. Each destination's screen is a placeholder in Phase 0 —
-/// business logic is added in later phases.
+/// app.
 class AppShell extends StatefulWidget {
-  const AppShell({super.key, required this.destinations, this.initialIndex = 0});
+  const AppShell(
+      {super.key, required this.destinations, this.initialIndex = 0});
 
   final List<ShellDestination> destinations;
   final int initialIndex;
@@ -34,9 +36,16 @@ class _AppShellState extends State<AppShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: IndexedStack(
-          index: _index,
-          children: [for (final d in widget.destinations) d.screen],
+        child: Column(
+          children: [
+            const OfflineStatusBanner(),
+            Expanded(
+              child: IndexedStack(
+                index: _index,
+                children: [for (final d in widget.destinations) d.screen],
+              ),
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: NavigationBar(

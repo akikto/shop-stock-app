@@ -20,7 +20,8 @@ void main() {
       expect(container.read(isAuthenticatedProvider), isTrue);
     });
 
-    test('currentProfileProvider surfaces the signed-in user\'s profile', () async {
+    test('currentProfileProvider surfaces the signed-in user\'s profile',
+        () async {
       final profile = Profile(
         id: 'user-1',
         name: 'Owner Name',
@@ -42,10 +43,12 @@ void main() {
       expect(result.isActive, isTrue);
     });
 
-    test('currentProfileProvider propagates an error when no profile exists', () async {
+    test('currentProfileProvider propagates an error when no profile exists',
+        () async {
       final fake = FakeAuthRepository(
         signedIn: true,
-        profileError: AuthException('No profile found for this account. Contact the shop owner.'),
+        profileError: AuthException(
+            'No profile found for this account. Contact the shop owner.'),
       );
       final container = ProviderContainer(
         overrides: [authRepositoryProvider.overrideWithValue(fake)],
@@ -59,7 +62,9 @@ void main() {
       );
     });
 
-    test('a deactivated account is still readable but flagged is_active = false', () async {
+    test(
+        'a deactivated account is still readable but flagged is_active = false',
+        () async {
       final profile = Profile(
         id: 'user-2',
         name: 'Disabled Staff',
@@ -78,7 +83,8 @@ void main() {
       final result = await container.read(currentProfileProvider.future);
 
       expect(result.isActive, isFalse,
-          reason: 'App-level UI is responsible for blocking access when isActive is false');
+          reason:
+              'App-level UI is responsible for blocking access when isActive is false');
     });
   });
 }

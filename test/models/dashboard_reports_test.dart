@@ -23,7 +23,8 @@ void main() {
     });
 
     test('parses self scope JSON with defaults', () {
-      final stats = DashboardStats.fromJson({'role_scope': 'self', 'sale_count': 1});
+      final stats =
+          DashboardStats.fromJson({'role_scope': 'self', 'sale_count': 1});
       expect(stats.isShopScope, isFalse);
       expect(stats.totalSalesAmount, 0);
     });

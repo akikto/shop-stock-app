@@ -12,12 +12,14 @@ final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
   return SupabaseNotificationRepository();
 });
 
-final unreadNotificationCountProvider = FutureProvider.autoDispose<int>((ref) async {
+final unreadNotificationCountProvider =
+    FutureProvider.autoDispose<int>((ref) async {
   final repo = ref.watch(notificationRepositoryProvider);
   return repo.fetchUnreadCount();
 });
 
-final notificationsListProvider = FutureProvider.autoDispose<List<AppNotification>>((ref) async {
+final notificationsListProvider =
+    FutureProvider.autoDispose<List<AppNotification>>((ref) async {
   final repo = ref.watch(notificationRepositoryProvider);
   return repo.fetchNotifications();
 });
@@ -35,7 +37,10 @@ final notificationRealtimeProvider = Provider.autoDispose<void>((ref) {
         event: PostgresChangeEvent.all,
         schema: 'public',
         table: 'notifications',
-        filter: PostgresChangeFilter(type: PostgresChangeFilterType.eq, column: 'recipient_id', value: userId),
+        filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'recipient_id',
+            value: userId),
         callback: (_) {
           ref.invalidate(unreadNotificationCountProvider);
           ref.invalidate(notificationsListProvider);

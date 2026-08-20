@@ -48,12 +48,15 @@ class Product {
 
   bool get isLowStock => currentStock <= lowStockLimit;
 
-  bool get isExpired => expiryDate != null && expiryDate!.isBefore(DateTime.now());
+  bool get isExpired =>
+      expiryDate != null && expiryDate!.isBefore(DateTime.now());
 
   /// Within 30 days of expiry, but not yet expired — informational
   /// only, no automated alerting exists yet (see migration 0009).
   bool get isExpiringSoon =>
-      expiryDate != null && !isExpired && expiryDate!.isBefore(DateTime.now().add(const Duration(days: 30)));
+      expiryDate != null &&
+      !isExpired &&
+      expiryDate!.isBefore(DateTime.now().add(const Duration(days: 30)));
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
@@ -73,7 +76,9 @@ class Product {
       createdBy: json['created_by'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
-      expiryDate: json['expiry_date'] != null ? DateTime.parse(json['expiry_date'] as String) : null,
+      expiryDate: json['expiry_date'] != null
+          ? DateTime.parse(json['expiry_date'] as String)
+          : null,
       composition: json['composition'] as String?,
     );
   }

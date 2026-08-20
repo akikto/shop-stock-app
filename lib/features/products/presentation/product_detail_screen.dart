@@ -55,9 +55,15 @@ class _DetailBody extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        Center(child: ProductPhoto(path: product.photoUrl ?? product.photoThumbUrl, size: 200, borderRadius: 16)),
+        Center(
+            child: ProductPhoto(
+                path: product.photoUrl ?? product.photoThumbUrl,
+                size: 200,
+                borderRadius: 16)),
         const SizedBox(height: 20),
-        Text(product.name, style: Theme.of(context).textTheme.headlineSmall, textAlign: TextAlign.center),
+        Text(product.name,
+            style: Theme.of(context).textTheme.headlineSmall,
+            textAlign: TextAlign.center),
         const SizedBox(height: 4),
         if (!product.isActive)
           Center(
@@ -70,7 +76,8 @@ class _DetailBody extends ConsumerWidget {
               ),
               child: Text(
                 AppStrings.inactive,
-                style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
+                style: TextStyle(
+                    color: Theme.of(context).colorScheme.onErrorContainer),
               ),
             ),
           ),
@@ -80,7 +87,8 @@ class _DetailBody extends ConsumerWidget {
         _row(context, AppStrings.composition, product.composition),
         _row(context, AppStrings.packSize, product.packSize),
         _row(context, AppStrings.mrp, product.mrp?.toString()),
-        _row(context, AppStrings.purchasePrice, product.purchasePrice?.toString()),
+        _row(context, AppStrings.purchasePrice,
+            product.purchasePrice?.toString()),
         _row(context, AppStrings.salePrice, '৳${product.salePrice}'),
         _row(context, AppStrings.currentStock, '${product.currentStock}'),
         _row(context, AppStrings.lowStockLimit, '${product.lowStockLimit}'),
@@ -91,7 +99,8 @@ class _DetailBody extends ConsumerWidget {
             '${_formatDate(product.expiryDate!)}'
             '${product.isExpired ? "  (${AppStrings.expired})" : product.isExpiringSoon ? "  (${AppStrings.expiringSoon})" : ""}',
           ),
-        _row(context, AppStrings.active, product.isActive ? AppStrings.active : AppStrings.inactive),
+        _row(context, AppStrings.active,
+            product.isActive ? AppStrings.active : AppStrings.inactive),
         _row(context, AppStrings.createdAt, _formatDate(product.createdAt)),
         _row(context, AppStrings.updatedAt, _formatDate(product.updatedAt)),
         if (canManage) ...[
@@ -133,8 +142,16 @@ class _DetailBody extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 130, child: Text(label, style: Theme.of(context).textTheme.bodyMedium)),
-          Expanded(child: Text(value, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600))),
+          SizedBox(
+              width: 130,
+              child:
+                  Text(label, style: Theme.of(context).textTheme.bodyMedium)),
+          Expanded(
+              child: Text(value,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(fontWeight: FontWeight.w600))),
         ],
       ),
     );
@@ -152,8 +169,12 @@ class _DetailBody extends ConsumerWidget {
         title: const Text(AppStrings.deactivate),
         content: const Text(AppStrings.areYouSure),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text(AppStrings.cancel)),
-          FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text(AppStrings.confirm)),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text(AppStrings.cancel)),
+          FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text(AppStrings.confirm)),
         ],
       ),
     );
@@ -173,7 +194,8 @@ class _DetailBody extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
       }
     }
   }
@@ -191,7 +213,8 @@ class _DetailBody extends ConsumerWidget {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
       }
     }
   }

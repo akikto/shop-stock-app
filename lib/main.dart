@@ -5,6 +5,7 @@ import 'core/responsive/mobile_frame.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'services/supabase_service.dart';
+import 'sync/sync_bootstrap.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,7 +14,15 @@ Future<void> main() async {
   // core/config/app_config.dart and README.md.
   await SupabaseService.initialize();
 
-  runApp(const ProviderScope(child: ShopStockApp()));
+  final container = ProviderContainer();
+  await SyncBootstrap.initialize(container);
+
+  runApp(
+    UncontrolledProviderScope(
+      container: container,
+      child: const ShopStockApp(),
+    ),
+  );
 }
 
 class ShopStockApp extends ConsumerWidget {
@@ -32,7 +41,8 @@ class ShopStockApp extends ConsumerWidget {
       // the native Android app) — it only letterboxes wide desktop
       // browser windows so the web preview looks like a phone. See
       // lib/core/responsive/mobile_frame.dart.
-      builder: (context, child) => MobileFrame(child: child ?? const SizedBox.shrink()),
+      builder: (context, child) =>
+          MobileFrame(child: child ?? const SizedBox.shrink()),
     );
   }
 }

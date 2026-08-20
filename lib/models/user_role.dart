@@ -19,5 +19,6 @@ enum UserRole {
 
   bool get canViewReports => this == UserRole.owner || this == UserRole.manager;
 
-  bool get canManageProducts => this == UserRole.owner || this == UserRole.manager;
+  bool get canManageProducts =>
+      this == UserRole.owner || this == UserRole.manager;
 }

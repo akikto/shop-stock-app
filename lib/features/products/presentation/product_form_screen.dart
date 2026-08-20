@@ -66,17 +66,22 @@ class ProductFormScreen extends ConsumerStatefulWidget {
 class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  late final _nameController = TextEditingController(text: widget.existingProduct?.name ?? '');
-  late final _companyController = TextEditingController(text: widget.existingProduct?.company ?? '');
-  late final _categoryController = TextEditingController(text: widget.existingProduct?.category ?? '');
-  late final _packSizeController = TextEditingController(text: widget.existingProduct?.packSize ?? '');
-  late final _mrpController = TextEditingController(text: widget.existingProduct?.mrp?.toString() ?? '');
-  late final _purchasePriceController =
-      TextEditingController(text: widget.existingProduct?.purchasePrice?.toString() ?? '');
-  late final _salePriceController =
-      TextEditingController(text: widget.existingProduct?.salePrice.toString() ?? '');
-  late final _lowStockLimitController =
-      TextEditingController(text: widget.existingProduct?.lowStockLimit.toString() ?? '');
+  late final _nameController =
+      TextEditingController(text: widget.existingProduct?.name ?? '');
+  late final _companyController =
+      TextEditingController(text: widget.existingProduct?.company ?? '');
+  late final _categoryController =
+      TextEditingController(text: widget.existingProduct?.category ?? '');
+  late final _packSizeController =
+      TextEditingController(text: widget.existingProduct?.packSize ?? '');
+  late final _mrpController = TextEditingController(
+      text: widget.existingProduct?.mrp?.toString() ?? '');
+  late final _purchasePriceController = TextEditingController(
+      text: widget.existingProduct?.purchasePrice?.toString() ?? '');
+  late final _salePriceController = TextEditingController(
+      text: widget.existingProduct?.salePrice.toString() ?? '');
+  late final _lowStockLimitController = TextEditingController(
+      text: widget.existingProduct?.lowStockLimit.toString() ?? '');
   late final _compositionController =
       TextEditingController(text: widget.existingProduct?.composition ?? '');
 
@@ -196,7 +201,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     }
   }
 
-  String? _emptyToNull(String value) => value.trim().isEmpty ? null : value.trim();
+  String? _emptyToNull(String value) =>
+      value.trim().isEmpty ? null : value.trim();
 
   num? _parseOrNull(String value) {
     final trimmed = value.trim();
@@ -204,12 +210,16 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     return num.tryParse(trimmed);
   }
 
-  String _formatDate(DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+  String _formatDate(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.isEditing ? AppStrings.editProduct : AppStrings.addProduct)),
+      appBar: AppBar(
+          title: Text(widget.isEditing
+              ? AppStrings.editProduct
+              : AppStrings.addProduct)),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -228,7 +238,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(_submitError!,
-                    style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer)),
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onErrorContainer)),
               ),
               const SizedBox(height: 16),
             ],
@@ -238,32 +249,44 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
               validator: ProductValidator.validateName,
               textCapitalization: TextCapitalization.words,
             ),
-            _field(controller: _companyController, label: AppStrings.company, textCapitalization: TextCapitalization.words),
-            _field(controller: _categoryController, label: AppStrings.category, textCapitalization: TextCapitalization.words),
-            _field(controller: _compositionController, label: AppStrings.composition),
+            _field(
+                controller: _companyController,
+                label: AppStrings.company,
+                textCapitalization: TextCapitalization.words),
+            _field(
+                controller: _categoryController,
+                label: AppStrings.category,
+                textCapitalization: TextCapitalization.words),
+            _field(
+                controller: _compositionController,
+                label: AppStrings.composition),
             _field(controller: _packSizeController, label: AppStrings.packSize),
             _field(
               controller: _mrpController,
               label: AppStrings.mrp,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               validator: ProductValidator.validateOptionalPrice,
             ),
             _field(
               controller: _purchasePriceController,
               label: AppStrings.purchasePrice,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               validator: ProductValidator.validateOptionalPrice,
             ),
             _field(
               controller: _salePriceController,
               label: AppStrings.salePrice,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               validator: ProductValidator.validateRequiredPrice,
             ),
             _field(
               controller: _lowStockLimitController,
               label: AppStrings.lowStockLimit,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               validator: ProductValidator.validateLowStockLimit,
             ),
             Padding(
@@ -271,11 +294,15 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
               child: InkWell(
                 onTap: _pickExpiryDate,
                 child: InputDecorator(
-                  decoration: const InputDecoration(labelText: AppStrings.expiryDate, border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                      labelText: AppStrings.expiryDate,
+                      border: OutlineInputBorder()),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(_expiryDate == null ? AppStrings.notSet : _formatDate(_expiryDate!)),
+                      Text(_expiryDate == null
+                          ? AppStrings.notSet
+                          : _formatDate(_expiryDate!)),
                       const Icon(Icons.calendar_today_outlined, size: 18),
                     ],
                   ),
@@ -286,8 +313,12 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
             FilledButton(
               onPressed: _isSubmitting ? null : _submit,
               child: _isSubmitting
-                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                  : Text(widget.isEditing ? AppStrings.update : AppStrings.save),
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2))
+                  : Text(
+                      widget.isEditing ? AppStrings.update : AppStrings.save),
             ),
           ],
         ),
@@ -308,7 +339,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         controller: controller,
         keyboardType: keyboardType,
         textCapitalization: textCapitalization,
-        decoration: InputDecoration(labelText: label, border: const OutlineInputBorder()),
+        decoration: InputDecoration(
+            labelText: label, border: const OutlineInputBorder()),
         validator: validator,
       ),
     );

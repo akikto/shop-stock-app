@@ -22,12 +22,14 @@ abstract class ActivityLogRepository {
 }
 
 class SupabaseActivityLogRepository implements ActivityLogRepository {
-  SupabaseActivityLogRepository({SupabaseClient? client}) : _client = client ?? SupabaseService.client;
+  SupabaseActivityLogRepository({SupabaseClient? client})
+      : _client = client ?? SupabaseService.client;
 
   final SupabaseClient _client;
 
   @override
-  Future<List<ActivityLog>> fetchActivityLogs({int limit = 20, int offset = 0}) async {
+  Future<List<ActivityLog>> fetchActivityLogs(
+      {int limit = 20, int offset = 0}) async {
     try {
       final rows = await _client
           .from('activity_logs')
@@ -54,11 +56,15 @@ class SupabaseActivityLogRepository implements ActivityLogRepository {
         // failing the whole screen.
       }
 
-      return logs.map((log) => log.copyWithActorName(nameById[log.actorId])).toList();
+      return logs
+          .map((log) => log.copyWithActorName(nameById[log.actorId]))
+          .toList();
     } on PostgrestException catch (e) {
-      throw ActivityLogException(e.message.isNotEmpty ? e.message : 'Could not load history.');
+      throw ActivityLogException(
+          e.message.isNotEmpty ? e.message : 'Could not load history.');
     } catch (e) {
-      throw ActivityLogException('Could not load history. Please check your connection.');
+      throw ActivityLogException(
+          'Could not load history. Please check your connection.');
     }
   }
 }

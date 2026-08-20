@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../models/product.dart';
 import '../../../repositories/transaction_repository.dart';
+import '../../../sync/models/transaction_write_result.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../products/presentation/widgets/product_picker_grid.dart';
 import '../../products/providers/product_providers.dart';
@@ -28,7 +29,8 @@ class _StockScreenState extends ConsumerState<StockScreen> {
   @override
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(currentProfileProvider);
-    final canAdjust = profileAsync.maybeWhen(data: (p) => p.role.canAdjustStock, orElse: () => false);
+    final canAdjust = profileAsync.maybeWhen(
+        data: (p) => p.role.canAdjustStock, orElse: () => false);
 
     return Scaffold(
       appBar: AppBar(
@@ -39,7 +41,8 @@ class _StockScreenState extends ConsumerState<StockScreen> {
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: SegmentedButton<_StockMode>(
               segments: [
-                const ButtonSegment(value: _StockMode.stockIn, label: Text(AppStrings.stockIn)),
+                const ButtonSegment(
+                    value: _StockMode.stockIn, label: Text(AppStrings.stockIn)),
                 ButtonSegment(
                   value: _StockMode.adjustment,
                   label: const Text(AppStrings.stockAdjustment),
@@ -47,7 +50,8 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                 ),
               ],
               selected: {_mode},
-              onSelectionChanged: (selection) => setState(() => _mode = selection.first),
+              onSelectionChanged: (selection) =>
+                  setState(() => _mode = selection.first),
             ),
           ),
         ),
@@ -83,7 +87,8 @@ class _StockInSheetState extends ConsumerState<_StockInSheet> {
   String? _error;
 
   void _increment() => setState(() => _quantity++);
-  void _decrement() => setState(() => _quantity = _quantity > 1 ? _quantity - 1 : 1);
+  void _decrement() =>
+      setState(() => _quantity = _quantity > 1 ? _quantity - 1 : 1);
 
   Future<void> _confirm() async {
     setState(() {
@@ -91,15 +96,19 @@ class _StockInSheetState extends ConsumerState<_StockInSheet> {
       _error = null;
     });
     try {
-      await ref.read(transactionRepositoryProvider).recordStockIn(
-            productId: widget.product.id,
-            quantity: _quantity,
-          );
+      final result =
+          await ref.read(transactionRepositoryProvider).recordStockIn(
+                productId: widget.product.id,
+                quantity: _quantity,
+              );
       await ref.read(productListControllerProvider.notifier).refresh();
       if (mounted) {
         Navigator.of(context).pop();
+        final message = result == TransactionWriteResult.queuedLocally
+            ? AppStrings.savedLocallyWillSync
+            : AppStrings.stockAddedSuccessfully;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text(AppStrings.stockAddedSuccessfully)),
+          SnackBar(content: Text(message)),
         );
       }
     } on TransactionException catch (e) {
@@ -114,25 +123,35 @@ class _StockInSheetState extends ConsumerState<_StockInSheet> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(left: 20, right: 20, top: 20, bottom: MediaQuery.of(context).viewInsets.bottom + 20),
+      padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 20,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 20),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(widget.product.name, style: Theme.of(context).textTheme.titleLarge, textAlign: TextAlign.center),
+          Text(widget.product.name,
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center),
           const SizedBox(height: 4),
           Text('${AppStrings.currentStock}: ${widget.product.currentStock}',
-              textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton.filledTonal(onPressed: _decrement, icon: const Icon(Icons.remove)),
+              IconButton.filledTonal(
+                  onPressed: _decrement, icon: const Icon(Icons.remove)),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Text('$_quantity', style: Theme.of(context).textTheme.headlineMedium),
+                child: Text('$_quantity',
+                    style: Theme.of(context).textTheme.headlineMedium),
               ),
-              IconButton.filledTonal(onPressed: _increment, icon: const Icon(Icons.add)),
+              IconButton.filledTonal(
+                  onPressed: _increment, icon: const Icon(Icons.add)),
             ],
           ),
           if (_error != null) ...[
@@ -143,15 +162,20 @@ class _StockInSheetState extends ConsumerState<_StockInSheet> {
                 color: Theme.of(context).colorScheme.errorContainer,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(_error!, textAlign: TextAlign.center,
-                  style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer)),
+              child: Text(_error!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onErrorContainer)),
             ),
           ],
           const SizedBox(height: 20),
           FilledButton(
             onPressed: _isSubmitting ? null : _confirm,
             child: _isSubmitting
-                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2))
                 : const Text(AppStrings.addStock),
           ),
         ],
@@ -182,7 +206,8 @@ class _AdjustmentSheetState extends ConsumerState<_AdjustmentSheet> {
   }
 
   void _increment() => setState(() => _quantity++);
-  void _decrement() => setState(() => _quantity = _quantity > 1 ? _quantity - 1 : 1);
+  void _decrement() =>
+      setState(() => _quantity = _quantity > 1 ? _quantity - 1 : 1);
 
   Future<void> _confirm() async {
     final reason = _reasonController.text.trim();
@@ -196,16 +221,20 @@ class _AdjustmentSheetState extends ConsumerState<_AdjustmentSheet> {
     });
     final change = _isIncrease ? _quantity : -_quantity;
     try {
-      await ref.read(transactionRepositoryProvider).recordAdjustment(
-            productId: widget.product.id,
-            quantityChange: change,
-            reason: reason,
-          );
+      final result =
+          await ref.read(transactionRepositoryProvider).recordAdjustment(
+                productId: widget.product.id,
+                quantityChange: change,
+                reason: reason,
+              );
       await ref.read(productListControllerProvider.notifier).refresh();
       if (mounted) {
         Navigator.of(context).pop();
+        final message = result == TransactionWriteResult.queuedLocally
+            ? AppStrings.savedLocallyWillSync
+            : AppStrings.stockAdjustedSuccessfully;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text(AppStrings.stockAdjustedSuccessfully)),
+          SnackBar(content: Text(message)),
         );
       }
     } on TransactionException catch (e) {
@@ -220,20 +249,33 @@ class _AdjustmentSheetState extends ConsumerState<_AdjustmentSheet> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(left: 20, right: 20, top: 20, bottom: MediaQuery.of(context).viewInsets.bottom + 20),
+      padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 20,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 20),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(widget.product.name, style: Theme.of(context).textTheme.titleLarge, textAlign: TextAlign.center),
+          Text(widget.product.name,
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center),
           const SizedBox(height: 4),
           Text('${AppStrings.currentStock}: ${widget.product.currentStock}',
-              textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium),
           const SizedBox(height: 16),
           SegmentedButton<bool>(
             segments: const [
-              ButtonSegment(value: true, label: Text(AppStrings.increaseStock), icon: Icon(Icons.add)),
-              ButtonSegment(value: false, label: Text(AppStrings.decreaseStock), icon: Icon(Icons.remove)),
+              ButtonSegment(
+                  value: true,
+                  label: Text(AppStrings.increaseStock),
+                  icon: Icon(Icons.add)),
+              ButtonSegment(
+                  value: false,
+                  label: Text(AppStrings.decreaseStock),
+                  icon: Icon(Icons.remove)),
             ],
             selected: {_isIncrease},
             onSelectionChanged: (s) => setState(() => _isIncrease = s.first),
@@ -242,18 +284,22 @@ class _AdjustmentSheetState extends ConsumerState<_AdjustmentSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton.filledTonal(onPressed: _decrement, icon: const Icon(Icons.remove)),
+              IconButton.filledTonal(
+                  onPressed: _decrement, icon: const Icon(Icons.remove)),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Text('$_quantity', style: Theme.of(context).textTheme.headlineMedium),
+                child: Text('$_quantity',
+                    style: Theme.of(context).textTheme.headlineMedium),
               ),
-              IconButton.filledTonal(onPressed: _increment, icon: const Icon(Icons.add)),
+              IconButton.filledTonal(
+                  onPressed: _increment, icon: const Icon(Icons.add)),
             ],
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _reasonController,
-            decoration: const InputDecoration(labelText: AppStrings.reason, border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+                labelText: AppStrings.reason, border: OutlineInputBorder()),
             maxLines: 2,
           ),
           if (_error != null) ...[
@@ -264,15 +310,20 @@ class _AdjustmentSheetState extends ConsumerState<_AdjustmentSheet> {
                 color: Theme.of(context).colorScheme.errorContainer,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(_error!, textAlign: TextAlign.center,
-                  style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer)),
+              child: Text(_error!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onErrorContainer)),
             ),
           ],
           const SizedBox(height: 20),
           FilledButton(
             onPressed: _isSubmitting ? null : _confirm,
             child: _isSubmitting
-                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2))
                 : const Text(AppStrings.adjustStock),
           ),
         ],

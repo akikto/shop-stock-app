@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../models/product.dart';
 import '../../../repositories/transaction_repository.dart';
+import '../../../sync/models/transaction_write_result.dart';
 import '../../products/presentation/widgets/product_picker_grid.dart';
 import '../../products/providers/product_providers.dart';
 import '../../transactions/providers/transaction_providers.dart';
@@ -24,7 +25,8 @@ class SaleScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _openSaleSheet(BuildContext context, WidgetRef ref, Product product) async {
+  Future<void> _openSaleSheet(
+      BuildContext context, WidgetRef ref, Product product) async {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -50,7 +52,8 @@ class _SaleSheetState extends ConsumerState<_SaleSheet> {
   bool get _exceedsStock => _quantity > _availableStock;
 
   void _increment() => setState(() => _quantity++);
-  void _decrement() => setState(() => _quantity = _quantity > 1 ? _quantity - 1 : 1);
+  void _decrement() =>
+      setState(() => _quantity = _quantity > 1 ? _quantity - 1 : 1);
 
   Future<void> _confirm() async {
     if (_exceedsStock) {
@@ -62,15 +65,18 @@ class _SaleSheetState extends ConsumerState<_SaleSheet> {
       _error = null;
     });
     try {
-      await ref.read(transactionRepositoryProvider).recordSale(
+      final result = await ref.read(transactionRepositoryProvider).recordSale(
             productId: widget.product.id,
             quantity: _quantity,
           );
       await ref.read(productListControllerProvider.notifier).refresh();
       if (mounted) {
         Navigator.of(context).pop();
+        final message = result == TransactionWriteResult.queuedLocally
+            ? AppStrings.savedLocallyWillSync
+            : AppStrings.saleSuccessful;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text(AppStrings.saleSuccessful)),
+          SnackBar(content: Text(message)),
         );
       }
     } on TransactionException catch (e) {
@@ -97,7 +103,9 @@ class _SaleSheetState extends ConsumerState<_SaleSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(widget.product.name, style: Theme.of(context).textTheme.titleLarge, textAlign: TextAlign.center),
+          Text(widget.product.name,
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center),
           const SizedBox(height: 4),
           Text(
             '${AppStrings.availableStock}: ${widget.product.currentStock}',
@@ -108,19 +116,25 @@ class _SaleSheetState extends ConsumerState<_SaleSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton.filledTonal(onPressed: _decrement, icon: const Icon(Icons.remove)),
+              IconButton.filledTonal(
+                  onPressed: _decrement, icon: const Icon(Icons.remove)),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Text('$_quantity', style: Theme.of(context).textTheme.headlineMedium),
+                child: Text('$_quantity',
+                    style: Theme.of(context).textTheme.headlineMedium),
               ),
-              IconButton.filledTonal(onPressed: _increment, icon: const Icon(Icons.add)),
+              IconButton.filledTonal(
+                  onPressed: _increment, icon: const Icon(Icons.add)),
             ],
           ),
           const SizedBox(height: 16),
           Text(
             '${AppStrings.total}: ৳$total',
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
           if (_error != null) ...[
             const SizedBox(height: 12),
@@ -130,15 +144,20 @@ class _SaleSheetState extends ConsumerState<_SaleSheet> {
                 color: Theme.of(context).colorScheme.errorContainer,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(_error!, textAlign: TextAlign.center,
-                  style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer)),
+              child: Text(_error!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onErrorContainer)),
             ),
           ],
           const SizedBox(height: 20),
           FilledButton(
             onPressed: _isSubmitting ? null : _confirm,
             child: _isSubmitting
-                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2))
                 : const Text(AppStrings.confirmSale),
           ),
         ],

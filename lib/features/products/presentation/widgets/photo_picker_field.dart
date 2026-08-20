@@ -75,7 +75,8 @@ class _PhotoPickerFieldState extends State<PhotoPickerField> {
   @override
   Widget build(BuildContext context) {
     final hasNewPhoto = _newlyPickedBytes != null;
-    final hasExistingPhoto = widget.existingPhotoPath != null && widget.existingPhotoPath!.isNotEmpty;
+    final hasExistingPhoto = widget.existingPhotoPath != null &&
+        widget.existingPhotoPath!.isNotEmpty;
 
     return Center(
       child: Column(
@@ -86,15 +87,21 @@ class _PhotoPickerFieldState extends State<PhotoPickerField> {
             child: hasNewPhoto
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(16),
-                    child: Image.memory(_newlyPickedBytes!, width: 140, height: 140, fit: BoxFit.cover),
+                    child: Image.memory(_newlyPickedBytes!,
+                        width: 140, height: 140, fit: BoxFit.cover),
                   )
                 : hasExistingPhoto
-                    ? ProductPhoto(path: widget.existingPhotoPath, size: 140, borderRadius: 16)
+                    ? ProductPhoto(
+                        path: widget.existingPhotoPath,
+                        size: 140,
+                        borderRadius: 16)
                     : Container(
                         width: 140,
                         height: 140,
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Icon(
@@ -109,7 +116,9 @@ class _PhotoPickerFieldState extends State<PhotoPickerField> {
             onPressed: _openPicker,
             icon: const Icon(Icons.camera_alt_outlined, size: 18),
             label: Text(
-              hasNewPhoto || hasExistingPhoto ? AppStrings.changePhoto : AppStrings.addPhoto,
+              hasNewPhoto || hasExistingPhoto
+                  ? AppStrings.changePhoto
+                  : AppStrings.addPhoto,
             ),
           ),
         ],

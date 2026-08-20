@@ -17,9 +17,11 @@ class ReportsScreen extends ConsumerStatefulWidget {
   ConsumerState<ReportsScreen> createState() => _ReportsScreenState();
 }
 
-class _ReportsScreenState extends ConsumerState<ReportsScreen> with SingleTickerProviderStateMixin {
+class _ReportsScreenState extends ConsumerState<ReportsScreen>
+    with SingleTickerProviderStateMixin {
   late DateRange _range = DateRange.today();
-  late final TabController _tabController = TabController(length: 2, vsync: this);
+  late final TabController _tabController =
+      TabController(length: 2, vsync: this);
 
   void _setToday() => setState(() => _range = DateRange.today());
   void _setLast7Days() => setState(() => _range = DateRange.last7Days());
@@ -54,7 +56,8 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> with SingleTicker
               children: [
                 ChoiceChip(
                   label: const Text(AppStrings.today),
-                  selected: _range.from.day == DateTime.now().day && _range.to.difference(_range.from).inDays == 1,
+                  selected: _range.from.day == DateTime.now().day &&
+                      _range.to.difference(_range.from).inDays == 1,
                   onSelected: (_) => _setToday(),
                 ),
                 const SizedBox(width: 8),
@@ -72,12 +75,18 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> with SingleTicker
               children: [
                 staffAsync.when(
                   loading: () => const LoadingIndicator(),
-                  error: (e, _) => ErrorView(message: e.toString(), onRetry: () => ref.invalidate(staffSalesReportProvider(_range))),
+                  error: (e, _) => ErrorView(
+                      message: e.toString(),
+                      onRetry: () =>
+                          ref.invalidate(staffSalesReportProvider(_range))),
                   data: (rows) => _StaffReportList(rows: rows),
                 ),
                 productAsync.when(
                   loading: () => const LoadingIndicator(),
-                  error: (e, _) => ErrorView(message: e.toString(), onRetry: () => ref.invalidate(productSalesReportProvider(_range))),
+                  error: (e, _) => ErrorView(
+                      message: e.toString(),
+                      onRetry: () =>
+                          ref.invalidate(productSalesReportProvider(_range))),
                   data: (rows) => _ProductReportList(rows: rows),
                 ),
               ],

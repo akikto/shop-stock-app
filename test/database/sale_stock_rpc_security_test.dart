@@ -11,15 +11,21 @@ void main() {
   late String rlsSql;
 
   setUpAll(() {
-    sql = File('supabase/migrations/0008_sale_stock_rpc.sql').readAsStringSync();
-    rlsSql = File('supabase/migrations/0003_row_level_security.sql').readAsStringSync();
+    sql =
+        File('supabase/migrations/0008_sale_stock_rpc.sql').readAsStringSync();
+    rlsSql = File('supabase/migrations/0003_row_level_security.sql')
+        .readAsStringSync();
   });
 
-  group('all three functions exist and are SECURITY DEFINER with pinned search_path', () {
+  group(
+      'all three functions exist and are SECURITY DEFINER with pinned search_path',
+      () {
     test('record_sale, record_stock_in, record_adjustment are all defined', () {
       expect(sql, contains('create or replace function public.record_sale('));
-      expect(sql, contains('create or replace function public.record_stock_in('));
-      expect(sql, contains('create or replace function public.record_adjustment('));
+      expect(
+          sql, contains('create or replace function public.record_stock_in('));
+      expect(sql,
+          contains('create or replace function public.record_adjustment('));
     });
 
     test('all three are SECURITY DEFINER', () {
@@ -32,13 +38,18 @@ void main() {
   });
 
   group('authorization matches intended role design', () {
-    test('record_adjustment requires is_manager_or_owner() — staff cannot adjust stock', () {
+    test(
+        'record_adjustment requires is_manager_or_owner() — staff cannot adjust stock',
+        () {
       final start = sql.indexOf('function public.record_adjustment(');
       final authIdx = sql.indexOf('is_manager_or_owner()', start);
-      expect(authIdx, greaterThan(start), reason: 'record_adjustment must check manager/owner role');
+      expect(authIdx, greaterThan(start),
+          reason: 'record_adjustment must check manager/owner role');
     });
 
-    test('record_sale and record_stock_in do NOT require manager/owner (any active staff may use them)', () {
+    test(
+        'record_sale and record_stock_in do NOT require manager/owner (any active staff may use them)',
+        () {
       final saleStart = sql.indexOf('function public.record_sale(');
       final saleEnd = sql.indexOf('function public.record_stock_in(');
       final saleBody = sql.substring(saleStart, saleEnd);
@@ -56,20 +67,28 @@ void main() {
       expect(sql.substring(saleStart, saleEnd), contains('is_active'));
     });
 
-    test('all three require auth.uid() to be non-null before doing anything else', () {
-      final occurrences = RegExp(r'auth\.uid\(\) is null').allMatches(sql).length;
+    test(
+        'all three require auth.uid() to be non-null before doing anything else',
+        () {
+      final occurrences =
+          RegExp(r'auth\.uid\(\) is null').allMatches(sql).length;
       expect(occurrences, 3);
     });
   });
 
   group('negative stock is structurally impossible', () {
-    test('record_sale\'s stock decrement re-checks sufficient stock in the same atomic UPDATE', () {
+    test(
+        'record_sale\'s stock decrement re-checks sufficient stock in the same atomic UPDATE',
+        () {
       expect(sql, contains('current_stock = current_stock - p_quantity'));
       expect(sql, contains('and current_stock >= p_quantity'));
     });
 
-    test('record_adjustment\'s UPDATE guards the resulting stock against going negative', () {
-      expect(sql, contains('current_stock = current_stock + p_quantity_change'));
+    test(
+        'record_adjustment\'s UPDATE guards the resulting stock against going negative',
+        () {
+      expect(
+          sql, contains('current_stock = current_stock + p_quantity_change'));
       expect(sql, contains('and current_stock + p_quantity_change >= 0'));
     });
 
@@ -77,7 +96,9 @@ void main() {
       expect(sql, contains("'Insufficient stock.'"));
     });
 
-    test('a would-go-negative adjustment raises a distinct, user-readable error', () {
+    test(
+        'a would-go-negative adjustment raises a distinct, user-readable error',
+        () {
       expect(sql, contains("'Adjustment would result in negative stock.'"));
     });
   });
@@ -89,7 +110,8 @@ void main() {
     });
   });
 
-  group('execute privilege follows the anon-revoked defense-in-depth pattern', () {
+  group('execute privilege follows the anon-revoked defense-in-depth pattern',
+      () {
     test('anon execute is explicitly revoked for all three functions', () {
       expect(
           RegExp(r'revoke execute on function public\.record_(sale|stock_in|adjustment)\([^)]*\) from anon;')
@@ -98,7 +120,8 @@ void main() {
           3);
     });
 
-    test('authenticated execute is explicitly granted for all three functions', () {
+    test('authenticated execute is explicitly granted for all three functions',
+        () {
       expect(
           RegExp(r'grant execute on function public\.record_(sale|stock_in|adjustment)\([^)]*\) to authenticated;')
               .allMatches(sql)
@@ -107,21 +130,29 @@ void main() {
     });
   });
 
-  group('mutating ledger tables still have no client INSERT policy (Phase 0/1 pattern preserved)', () {
-    test('sales/stock_entries/stock_adjustments have no INSERT policy anywhere', () {
+  group(
+      'mutating ledger tables still have no client INSERT policy (Phase 0/1 pattern preserved)',
+      () {
+    test('sales/stock_entries/stock_adjustments have no INSERT policy anywhere',
+        () {
       for (final table in ['sales', 'stock_entries', 'stock_adjustments']) {
         expect(rlsSql, isNot(contains('create policy ${table}_insert')));
       }
     });
 
-    test('products still has no UPDATE policy (stock changes only via these RPCs)', () {
+    test(
+        'products still has no UPDATE policy (stock changes only via these RPCs)',
+        () {
       expect(rlsSql, isNot(contains('create policy products_update')));
     });
   });
 
   group('activity_logs entries are written for every mutating action', () {
-    test('record_sale logs a sale entry', () => expect(sql, contains("'sale',")));
-    test('record_stock_in logs a stock_in entry', () => expect(sql, contains("'stock_in',")));
-    test('record_adjustment logs a stock_adjustment entry', () => expect(sql, contains("'stock_adjustment',")));
+    test('record_sale logs a sale entry',
+        () => expect(sql, contains("'sale',")));
+    test('record_stock_in logs a stock_in entry',
+        () => expect(sql, contains("'stock_in',")));
+    test('record_adjustment logs a stock_adjustment entry',
+        () => expect(sql, contains("'stock_adjustment',")));
   });
 }

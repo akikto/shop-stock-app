@@ -131,6 +131,24 @@ class AppStrings {
   static const totalActivity = 'মোট কার্যক্রম';
   static const currencySymbol = '৳';
 
+  // Phase 5: Offline sync
+  static const offlineMode = 'অফলাইন মোড';
+  static const savedLocallyWillSync =
+      'স্থানীয়ভাবে সংরক্ষিত হয়েছে। অনলাইন হলে সিঙ্ক হবে।';
+  static const syncing = 'সিঙ্ক হচ্ছে...';
+  static const pendingSync = 'অপেক্ষমান সিঙ্ক';
+  static const syncFailed = 'সিঙ্ক ব্যর্থ';
+  static const retrySync = 'আবার সিঙ্ক করুন';
+  static const staleCachedData = 'সংরক্ষিত তথ্য — স্টক আপডেট নাও হতে পারে';
+  static const queuedTransaction = 'অপেক্ষমান লেনদেন';
+  static const pendingTransactions = 'অপেক্ষমান লেনদেন';
+  static const noCachedProducts =
+      'কোনো সংরক্ষিত পণ্য নেই। একবার অনলাইনে থাকলে তালিকা আপডেট হবে।';
+  static const deleteFailedTransaction = 'বাতিল করুন';
+  static const retryFailedTransaction = 'আবার চেষ্টা';
+  static const transactionSynced = 'সিঙ্ক সম্পন্ন';
+  static const pendingCountLabel = 'অপেক্ষমান';
+
   // Auth / Login
   static const appName = 'Shop Stock & Sales';
   static const email = 'ইমেইল';
@@ -139,7 +157,8 @@ class AppStrings {
   static const logout = 'লগ আউট';
   static const enterEmail = 'আপনার ইমেইল দিন';
   static const enterPassword = 'আপনার পাসওয়ার্ড দিন';
-  static const accountCreatedbyOwner = 'অ্যাকাউন্ট মালিক তৈরি করেন। প্রবেশ করতে মালিকের সাথে যোগাযোগ করুন।';
+  static const accountCreatedbyOwner =
+      'অ্যাকাউন্ট মালিক তৈরি করেন। প্রবেশ করতে মালিকের সাথে যোগাযোগ করুন।';
 
   // Settings
   static const settings = 'সেটিংস';
@@ -148,6 +167,7 @@ class AppStrings {
   // Misc UI
   static const loadingAccount = 'অ্যাকাউন্ট লোড হচ্ছে...';
   static const loadingDashboard = 'ড্যাশবোর্ড লোড হচ্ছে...';
-  static const accountDeactivated = 'আপনার অ্যাকাউন্ট নিষ্ক্রিয় করা হয়েছে। মালিকের সাথে যোগাযোগ করুন।';
+  static const accountDeactivated =
+      'আপনার অ্যাকাউন্ট নিষ্ক্রিয় করা হয়েছে। মালিকের সাথে যোগাযোগ করুন।';
   static const checkProductsTab = 'বিস্তারিত দেখতে পণ্য ট্যাব দেখুন';
 }

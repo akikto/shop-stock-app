@@ -21,7 +21,8 @@ class MobileFrame extends StatelessWidget {
   /// frame.
   static const double _maxContentWidth = 480;
 
-  static const Color _letterboxColor = Color(0xFF10241A); // matches web/index.html
+  static const Color _letterboxColor =
+      Color(0xFF10241A); // matches web/index.html
 
   @override
   Widget build(BuildContext context) {

@@ -88,7 +88,8 @@ class ProductPhotoService {
     _signedUrlCache[path] = _CachedSignedUrl(
       url,
       DateTime.now().add(
-        const Duration(seconds: ProductPhotoConstants.signedUrlExpirySeconds - 60),
+        const Duration(
+            seconds: ProductPhotoConstants.signedUrlExpirySeconds - 60),
       ),
     );
     return url;
