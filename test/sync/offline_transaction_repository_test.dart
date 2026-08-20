@@ -1,7 +1,7 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shop_stock_app/repositories/transaction_repository.dart';
-import 'package:shop_stock_app/sync/database/sync_database.dart';
+import 'package:shop_stock_app/sync/database/sync_database_io.dart';
 import 'package:shop_stock_app/sync/models/cached_product.dart' as models;
 import 'package:shop_stock_app/sync/models/transaction_write_result.dart';
 import 'package:shop_stock_app/sync/repositories/offline_aware_transaction_repository.dart';

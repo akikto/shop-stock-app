@@ -4,7 +4,7 @@ import 'package:shop_stock_app/sync/models/pending_transaction_status.dart';
 import 'package:shop_stock_app/sync/models/pending_transaction_type.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:shop_stock_app/sync/database/sync_database.dart';
+import 'package:shop_stock_app/sync/database/sync_database_io.dart';
 import 'package:shop_stock_app/sync/repositories/pending_transaction_repository.dart';
 
 void main() {

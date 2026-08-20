@@ -4,7 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:shop_stock_app/models/product.dart';
 import 'package:shop_stock_app/repositories/product_repository.dart';
 import 'package:shop_stock_app/repositories/transaction_repository.dart';
-import 'package:shop_stock_app/sync/database/sync_database.dart';
+import 'package:shop_stock_app/sync/database/sync_database_io.dart';
 import 'package:shop_stock_app/sync/models/pending_transaction_status.dart';
 import 'package:shop_stock_app/sync/models/transaction_write_result.dart';
 import 'package:shop_stock_app/sync/repositories/pending_transaction_repository.dart';

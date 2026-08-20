@@ -7,7 +7,7 @@ import 'package:shop_stock_app/core/localization/app_strings.dart';
 import 'package:shop_stock_app/repositories/product_repository.dart';
 import 'package:shop_stock_app/repositories/transaction_repository.dart';
 import 'package:shop_stock_app/shared/widgets/offline_status_banner.dart';
-import 'package:shop_stock_app/sync/database/sync_database.dart';
+import 'package:shop_stock_app/sync/database/sync_database_io.dart';
 import 'package:shop_stock_app/sync/providers/sync_providers.dart';
 import 'package:shop_stock_app/sync/repositories/pending_transaction_repository.dart';
 import 'package:shop_stock_app/sync/repositories/product_cache_repository.dart';

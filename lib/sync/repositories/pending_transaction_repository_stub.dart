@@ -1,6 +1,4 @@
 import '../models/pending_transaction.dart' as models;
-import '../models/pending_transaction_status.dart';
-import '../models/pending_transaction_type.dart';
 
 /// Web stub — never used when [SyncBootstrap] skips initialization on web.
 class PendingTransactionRepository {
