@@ -88,24 +88,36 @@ jobs:
             --base-href "$BASE_HREF" \
             --dart-define-from-file=config/config.ci.json
 
-      - name: Generate android/ platform scaffold (not committed to the repo)
-        run: flutter create --platforms android .
-
-      - name: flutter build apk
-        run: |
-          flutter build apk \
-            --release \
-            --dart-define-from-file=config/config.ci.json
-
-      - name: Remove secrets file (never publish it)
-        run: rm -f config/config.ci.json
-
       - uses: actions/upload-pages-artifact@v3
         with:
           path: build/web
 
       - id: deployment
         uses: actions/deploy-pages@v4
+
+      # APK is built after Pages deploy so a transient Maven/Gradle
+      # outage (e.g. Maven Central HTTP 429) does not block the web
+      # preview from updating.
+      - name: Generate android/ platform scaffold (not committed to the repo)
+        run: flutter create --platforms android .
+
+      - name: flutter build apk
+        run: |
+          set -e
+          for attempt in 1 2 3 4; do
+            if flutter build apk \
+              --release \
+              --dart-define-from-file=config/config.ci.json; then
+              exit 0
+            fi
+            echo "APK build failed on attempt ${attempt}; retrying in $((attempt * 15))s..."
+            sleep $((attempt * 15))
+          done
+          echo "APK build failed after 4 attempts."
+          exit 1
+
+      - name: Remove secrets file (never publish it)
+        run: rm -f config/config.ci.json
 
       - name: Upload Android APK artifact
         uses: actions/upload-artifact@v4
