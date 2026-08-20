@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/localization/app_strings.dart';
+
 /// Placeholder Quick Sale screen.
 /// Phase 0 scope: static UI only. The actual Sale flow
 /// (photo -> quantity -> confirm, via secure server-side RPC) is
@@ -10,7 +12,7 @@ class SaleScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Sale')),
+      appBar: AppBar(title: const Text(AppStrings.sale)),
       body: const Center(
         child: Padding(
           padding: EdgeInsets.all(24),

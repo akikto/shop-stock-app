@@ -60,4 +60,25 @@ class AppStrings {
   static const somethingWentWrong = 'কিছু ভুল হয়েছে';
   static const retry = 'আবার চেষ্টা করুন';
   static const loadMore = 'আরও দেখুন';
+
+  // Navigation / screen titles
+  static const home = 'হোম';
+  static const sale = 'বিক্রয়';
+  static const stockIn = 'স্টক';
+  static const history = 'ইতিহাস';
+  static const settings = 'সেটিংস';
+
+  // Auth / login
+  static const appName = 'Shop Stock & Sales';
+  static const email = 'ইমেইল';
+  static const password = 'পাসওয়ার্ড';
+  static const login = 'লগ ইন';
+  static const logout = 'লগ আউট';
+  static const enterEmail = 'আপনার ইমেইল দিন';
+  static const enterPassword = 'আপনার পাসওয়ার্ড দিন';
+  static const accountCreatedByOwner =
+      'অ্যাকাউন্ট মালিক তৈরি করেন। প্রবেশ করতে মালিকের সাথে যোগাযোগ করুন।';
+  static const accountDeactivated =
+      'আপনার অ্যাকাউন্ট নিষ্ক্রিয় করা হয়েছে। মালিকের সাথে যোগাযোগ করুন।';
+  static const role = 'ভূমিকা';
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../core/localization/app_strings.dart';
+
 /// Simple, non-technical-friendly error display with an optional retry
 /// button. Used for auth errors and (later) data-loading errors.
 class ErrorView extends StatelessWidget {
@@ -25,7 +27,7 @@ class ErrorView extends StatelessWidget {
             ),
             if (onRetry != null) ...[
               const SizedBox(height: 16),
-              FilledButton(onPressed: onRetry, child: const Text('Retry')),
+              FilledButton(onPressed: onRetry, child: const Text(AppStrings.retry)),
             ],
           ],
         ),

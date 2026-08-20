@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shop_stock_app/core/localization/app_strings.dart';
 import 'package:shop_stock_app/core/routing/app_router.dart';
 import 'package:shop_stock_app/features/auth/providers/auth_provider.dart';
 import 'package:shop_stock_app/models/profile.dart';
@@ -30,7 +31,7 @@ void main() {
       await tester.pumpWidget(_appWithRouter(fake));
       await tester.pumpAndSettle();
 
-      expect(find.text('Log in'), findsOneWidget);
+      expect(find.text(AppStrings.login), findsOneWidget);
       // Bottom navigation (protected shell) must not be present.
       expect(find.byType(NavigationBar), findsNothing);
     });
@@ -54,7 +55,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(NavigationBar), findsOneWidget);
-      expect(find.text('Log in'), findsNothing);
+      expect(find.text(AppStrings.login), findsNothing);
     });
 
     testWidgets('authenticated but deactivated account is blocked from the shell with a clear message',
@@ -76,7 +77,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(NavigationBar), findsNothing);
-      expect(find.textContaining('deactivated'), findsOneWidget);
+      expect(find.textContaining(AppStrings.accountDeactivated), findsOneWidget);
     });
   });
 }
