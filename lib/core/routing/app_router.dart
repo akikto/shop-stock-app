@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/localization/app_strings.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/providers/auth_provider.dart';
+import '../../features/home/providers/fcm_providers.dart';
 import '../../features/history/presentation/history_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/products/presentation/product_detail_screen.dart';
@@ -104,6 +105,8 @@ class _ProtectedAppShell extends ConsumerWidget {
             ),
           );
         }
+
+        ref.watch(fcmRegistrationProvider);
 
         return const AppShell(
           destinations: [

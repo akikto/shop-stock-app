@@ -5,6 +5,7 @@ import '../../../core/localization/app_strings.dart';
 import '../../../core/utils/date_range.dart';
 import '../../../models/product_sales_row.dart';
 import '../../../models/staff_sales_row.dart';
+import '../../../models/stock_movement_row.dart';
 import '../../../shared/widgets/error_view.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../providers/dashboard_providers.dart';
@@ -21,7 +22,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen>
     with SingleTickerProviderStateMixin {
   late DateRange _range = DateRange.today();
   late final TabController _tabController =
-      TabController(length: 2, vsync: this);
+      TabController(length: 3, vsync: this);
 
   void _setToday() => setState(() => _range = DateRange.today());
   void _setLast7Days() => setState(() => _range = DateRange.last7Days());
@@ -36,6 +37,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen>
   Widget build(BuildContext context) {
     final staffAsync = ref.watch(staffSalesReportProvider(_range));
     final productAsync = ref.watch(productSalesReportProvider(_range));
+    final movementAsync = ref.watch(stockMovementReportProvider(_range));
 
     return Scaffold(
       appBar: AppBar(
@@ -45,6 +47,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen>
           tabs: const [
             Tab(text: AppStrings.staffWiseSales),
             Tab(text: AppStrings.productWiseSales),
+            Tab(text: AppStrings.stockMovementReport),
           ],
         ),
       ),
@@ -88,6 +91,14 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen>
                       onRetry: () =>
                           ref.invalidate(productSalesReportProvider(_range))),
                   data: (rows) => _ProductReportList(rows: rows),
+                ),
+                movementAsync.when(
+                  loading: () => const LoadingIndicator(),
+                  error: (e, _) => ErrorView(
+                      message: e.toString(),
+                      onRetry: () =>
+                          ref.invalidate(stockMovementReportProvider(_range))),
+                  data: (rows) => _StockMovementList(rows: rows),
                 ),
               ],
             ),
@@ -146,6 +157,51 @@ class _ProductReportList extends StatelessWidget {
           subtitle: Text('${row.saleCount} sales · qty ${row.totalQuantity}'),
           trailing: Text(
             '${AppStrings.currencySymbol}${row.totalAmount}',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _StockMovementList extends StatelessWidget {
+  const _StockMovementList({required this.rows});
+
+  final List<StockMovementRow> rows;
+
+  String _movementLabel(String type) {
+    switch (type) {
+      case 'sale':
+        return AppStrings.movementSale;
+      case 'stock_in':
+        return AppStrings.movementStockIn;
+      case 'stock_adjustment':
+        return AppStrings.movementAdjustment;
+      default:
+        return type;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (rows.isEmpty) {
+      return const Center(child: Text(AppStrings.noReportData));
+    }
+    return ListView.separated(
+      itemCount: rows.length,
+      separatorBuilder: (_, __) => const Divider(height: 1),
+      itemBuilder: (context, i) {
+        final row = rows[i];
+        final changePrefix = row.quantityChange >= 0 ? '+' : '';
+        return ListTile(
+          title: Text(row.productName),
+          subtitle: Text(
+            '${_movementLabel(row.movementType)} · ${row.userName}\n'
+            '${row.createdAt.toLocal()}',
+          ),
+          trailing: Text(
+            '$changePrefix${row.quantityChange}',
             style: Theme.of(context).textTheme.titleMedium,
           ),
         );

@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/dashboard_stats.dart';
 import '../models/product_sales_row.dart';
 import '../models/staff_sales_row.dart';
+import '../models/stock_movement_row.dart';
 import '../services/supabase_service.dart';
 
 class ReportsException implements Exception {
@@ -19,6 +20,8 @@ abstract class ReportsRepository {
   Future<List<StaffSalesRow>> fetchStaffSalesReport(
       {required DateTime from, required DateTime to});
   Future<List<ProductSalesRow>> fetchProductSalesReport(
+      {required DateTime from, required DateTime to});
+  Future<List<StockMovementRow>> fetchStockMovementReport(
       {required DateTime from, required DateTime to});
 }
 
@@ -82,6 +85,26 @@ class SupabaseReportsRepository implements ReportsRepository {
           e.message.isNotEmpty ? e.message : 'Could not load product report.');
     } catch (_) {
       throw ReportsException('Could not load product report.');
+    }
+  }
+
+  @override
+  Future<List<StockMovementRow>> fetchStockMovementReport(
+      {required DateTime from, required DateTime to}) async {
+    try {
+      final result = await _client.rpc('get_stock_movement_report', params: {
+        'p_from': from.toUtc().toIso8601String(),
+        'p_to': to.toUtc().toIso8601String(),
+      });
+      return (result as List)
+          .map((row) =>
+              StockMovementRow.fromJson(Map<String, dynamic>.from(row as Map)))
+          .toList();
+    } on PostgrestException catch (e) {
+      throw ReportsException(
+          e.message.isNotEmpty ? e.message : 'Could not load stock movement report.');
+    } catch (_) {
+      throw ReportsException('Could not load stock movement report.');
     }
   }
 }

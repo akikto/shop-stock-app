@@ -7,12 +7,13 @@ import '../../../shared/widgets/loading_indicator.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../sync/providers/sync_providers.dart';
 import '../../../sync/sync_bootstrap.dart';
+import 'notification_preferences_screen.dart';
 import 'pending_transactions_screen.dart';
+import 'staff_management_screen.dart';
+import 'sync_conflicts_screen.dart';
 
-/// Settings screen. Phase 0 scope: shows the signed-in user's name and
-/// role, and provides Logout — the only fully "real" action on this
-/// screen for now. Language toggle and other preferences are added in
-/// a later phase.
+/// Settings: profile, offline queue, notification prefs, staff mgmt
+/// (Owner), and sync conflicts (Manager/Owner).
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -29,6 +30,9 @@ class SettingsScreen extends ConsumerWidget {
         loading: () => const LoadingIndicator(),
         error: (error, _) => ErrorView(message: error.toString()),
         data: (profile) {
+          final canManageStaff = profile.role.canManageStaff;
+          final canViewReports = profile.role.canViewReports;
+
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -39,6 +43,44 @@ class SettingsScreen extends ConsumerWidget {
                   subtitle: Text('${AppStrings.role}: ${profile.role.name}'),
                 ),
               ),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.notifications_active_outlined),
+                  title: const Text(AppStrings.notificationPreferences),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const NotificationPreferencesScreen(),
+                    ),
+                  ),
+                ),
+              ),
+              if (canManageStaff)
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.people_outline),
+                    title: const Text(AppStrings.staffManagement),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const StaffManagementScreen(),
+                      ),
+                    ),
+                  ),
+                ),
+              if (canViewReports)
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.sync_problem_outlined),
+                    title: const Text(AppStrings.syncConflicts),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const SyncConflictsScreen(),
+                      ),
+                    ),
+                  ),
+                ),
               if (pendingCount > 0)
                 Card(
                   child: ListTile(
