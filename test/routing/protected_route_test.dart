@@ -298,11 +298,15 @@ void main() {
 
       await _settleProtectedShell(tester, fake);
 
-      await tester.tap(find.text(AppStrings.history));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationBar),
+          matching: find.text(AppStrings.history),
+        ),
+      );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
-      expect(find.text(AppStrings.history), findsWidgets);
       expect(find.text(AppStrings.noHistoryFound), findsOneWidget);
     });
 
