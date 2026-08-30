@@ -34,13 +34,21 @@ ActivityLog sampleLog(String id, {String actorId = 'user-1'}) {
   );
 }
 
+Future<void> pumpUntilIdle(HistoryListController controller) async {
+  for (var i = 0; i < 100; i++) {
+    if (!controller.state.isLoading) return;
+    await Future<void>.delayed(const Duration(milliseconds: 1));
+  }
+  fail('HistoryListController did not finish loading');
+}
+
 void main() {
   group('HistoryListController', () {
     test('loads the first page on creation', () async {
       final repo = FakeActivityLogRepository([sampleLog('1')]);
       final controller = HistoryListController(repo);
 
-      await Future<void>.delayed(Duration.zero);
+      await pumpUntilIdle(controller);
 
       expect(controller.state.isLoading, isFalse);
       expect(controller.state.logs, hasLength(1));
@@ -49,7 +57,7 @@ void main() {
 
     test('exposes empty state when repository returns no rows', () async {
       final controller = HistoryListController(FakeActivityLogRepository([]));
-      await Future<void>.delayed(Duration.zero);
+      await pumpUntilIdle(controller);
 
       expect(controller.state.logs, isEmpty);
       expect(controller.state.error, isNull);
@@ -59,7 +67,7 @@ void main() {
       final repo = FakeActivityLogRepository([])
         ..shouldFail = true;
       final controller = HistoryListController(repo);
-      await Future<void>.delayed(Duration.zero);
+      await pumpUntilIdle(controller);
 
       expect(controller.state.logs, isEmpty);
       expect(controller.state.error, AppStrings.historyLoadFailed);
@@ -69,7 +77,7 @@ void main() {
       final repo = FakeActivityLogRepository([sampleLog('1')])
         ..shouldFail = true;
       final controller = HistoryListController(repo);
-      await Future<void>.delayed(Duration.zero);
+      await pumpUntilIdle(controller);
       expect(controller.state.error, isNotNull);
 
       repo.shouldFail = false;
@@ -85,7 +93,7 @@ void main() {
         List.generate(25, (i) => sampleLog('$i')),
       );
       final controller = HistoryListController(repo);
-      await Future<void>.delayed(Duration.zero);
+      await pumpUntilIdle(controller);
 
       expect(controller.state.logs, hasLength(20));
       expect(controller.state.hasMore, isTrue);
