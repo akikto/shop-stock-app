@@ -11,13 +11,13 @@ import '../../repositories/transaction_repository.dart';
 import '../database/sync_database.dart';
 import '../models/pending_transaction.dart' as models;
 import '../models/sync_state.dart';
-import '../sync_bootstrap.dart';
 import '../repositories/offline_aware_transaction_repository.dart';
 import '../repositories/pending_transaction_repository.dart';
 import '../repositories/product_cache_repository.dart';
 import '../services/connectivity_service.dart';
 import '../services/sync_coordinator.dart';
 import '../services/sync_engine.dart';
+import '../sync_bootstrap.dart';
 
 final syncDatabaseProvider = Provider<SyncDatabase>((ref) {
   throw UnimplementedError('SyncDatabase must be overridden at bootstrap');

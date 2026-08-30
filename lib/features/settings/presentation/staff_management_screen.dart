@@ -7,8 +7,8 @@ import '../../../models/user_role.dart';
 import '../../../repositories/staff_repository.dart';
 import '../../../shared/widgets/error_view.dart';
 import '../../../shared/widgets/loading_indicator.dart';
-import 'invite_staff_screen.dart';
 import '../providers/staff_providers.dart';
+import 'invite_staff_screen.dart';
 
 /// Owner-only staff role and activation management.
 class StaffManagementScreen extends ConsumerWidget {
@@ -153,22 +153,18 @@ class _RolePickerDialogState extends State<_RolePickerDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text(AppStrings.changeRole),
-      content: DropdownButtonFormField<UserRole>(
-        value: _selected,
-        decoration: const InputDecoration(
-          border: OutlineInputBorder(),
-        ),
-        items: UserRole.values
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: UserRole.values
             .map(
-              (role) => DropdownMenuItem<UserRole>(
-                value: role,
-                child: Text(role.name),
+              (role) => ListTile(
+                title: Text(role.name),
+                trailing:
+                    _selected == role ? const Icon(Icons.check) : null,
+                onTap: () => setState(() => _selected = role),
               ),
             )
             .toList(),
-        onChanged: (value) {
-          if (value != null) setState(() => _selected = value);
-        },
       ),
       actions: [
         TextButton(
