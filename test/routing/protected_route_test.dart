@@ -244,6 +244,18 @@ Future<void> _settleProtectedShell(
   await tester.pump(const Duration(milliseconds: 500));
 }
 
+/// HistoryScreen is built eagerly by IndexedStack; wait for the async
+/// first-page fetch to finish before asserting on empty-state UI.
+Future<void> _waitForHistoryEmptyState(WidgetTester tester) async {
+  for (var i = 0; i < 100; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+    if (find.text(AppStrings.noHistoryFound).evaluate().isNotEmpty) {
+      return;
+    }
+  }
+  fail('History empty state did not appear');
+}
+
 void main() {
   group('protected route redirects', () {
     testWidgets(
@@ -297,15 +309,10 @@ void main() {
       addTearDown(fake.dispose);
 
       await _settleProtectedShell(tester, fake);
+      await _waitForHistoryEmptyState(tester);
 
-      await tester.tap(
-        find.descendant(
-          of: find.byType(NavigationBar),
-          matching: find.text(AppStrings.history),
-        ),
-      );
+      await tester.tap(find.byIcon(Icons.history_outlined));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.text(AppStrings.noHistoryFound), findsOneWidget);
     });
