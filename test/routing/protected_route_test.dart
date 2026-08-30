@@ -282,6 +282,30 @@ void main() {
       expect(find.text(AppStrings.login), findsNothing);
     });
 
+    testWidgets('history tab shows Bengali title and empty state', (tester) async {
+      final fake = FakeAuthRepository(
+        signedIn: true,
+        profile: Profile(
+          id: 'user-1',
+          name: 'Staff Member',
+          role: UserRole.staff,
+          isActive: true,
+          createdAt: DateTime.utc(2026),
+          updatedAt: DateTime.utc(2026),
+        ),
+      );
+      addTearDown(fake.dispose);
+
+      await _settleProtectedShell(tester, fake);
+
+      await tester.tap(find.text(AppStrings.history));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.text(AppStrings.history), findsWidgets);
+      expect(find.text(AppStrings.noHistoryFound), findsOneWidget);
+    });
+
     testWidgets(
         'authenticated but deactivated account is blocked from the shell with a clear message',
         (tester) async {

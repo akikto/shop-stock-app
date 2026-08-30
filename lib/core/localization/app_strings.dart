@@ -86,6 +86,11 @@ class AppStrings {
   // History
   static const history = 'ইতিহাস';
   static const noHistoryFound = 'কোনো ইতিহাস পাওয়া যায়নি';
+  static const loadingHistory = 'ইতিহাস লোড হচ্ছে...';
+  static const historyLoadFailed = 'ইতিহাস লোড করা যায়নি';
+  static const historyConnectionFailed =
+      'ইতিহাস লোড করা যায়নি। ইন্টারনেট সংযোগ পরীক্ষা করুন।';
+  static const performedBy = 'কর্মী';
   static const actionSale = 'বিক্রি হয়েছে';
   static const actionStockIn = 'স্টক যোগ হয়েছে';
   static const actionStockAdjustment = 'স্টক সমন্বয় হয়েছে';
@@ -93,6 +98,9 @@ class AppStrings {
   static const actionProductUpdated = 'পণ্য হালনাগাদ হয়েছে';
   static const actionPriceUpdated = 'মূল্য হালনাগাদ হয়েছে';
   static const actionProductDeactivated = 'পণ্য নিষ্ক্রিয় হয়েছে';
+  static const actionUserCreated = 'কর্মী যোগ হয়েছে';
+  static const actionUserRoleChanged = 'ভূমিকা পরিবর্তন হয়েছে';
+  static const actionUserDeactivated = 'কর্মী নিষ্ক্রিয় হয়েছে';
 
   // Phase 3: Product filtering, expiry/composition, activation
   static const composition = 'উপাদান';

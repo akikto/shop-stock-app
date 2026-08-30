@@ -48,7 +48,44 @@ class ActivityLog {
     );
   }
 
-  /// Product name, if present in details — every Phase 1/2 action logs
-  /// this under a consistent key.
-  String? get productName => details['product_name'] as String?;
+  /// Product name from RPC details. Transaction RPCs use `product_name`;
+  /// product lifecycle RPCs use `name`.
+  String? get displayProductName {
+    final fromProductName = details['product_name'];
+    if (fromProductName is String && fromProductName.isNotEmpty) {
+      return fromProductName;
+    }
+    final fromName = details['name'];
+    if (fromName is String && fromName.isNotEmpty) {
+      return fromName;
+    }
+    return null;
+  }
+
+  /// Backwards-compatible alias used by earlier code.
+  String? get productName => displayProductName;
+
+  num? get quantity {
+    final value = details['quantity'];
+    if (value is num) return value;
+    return null;
+  }
+
+  num? get quantityChange {
+    final value = details['quantity_change'];
+    if (value is num) return value;
+    return null;
+  }
+
+  num? get saleAmount {
+    final value = details['total_amount'];
+    if (value is num) return value;
+    return null;
+  }
+
+  String? get reason {
+    final value = details['reason'];
+    if (value is String) return value;
+    return null;
+  }
 }

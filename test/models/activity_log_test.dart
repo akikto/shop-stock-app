@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shop_stock_app/core/localization/app_strings.dart';
+import 'package:shop_stock_app/models/activity_action.dart';
 import 'package:shop_stock_app/models/activity_log.dart';
 
 void main() {
@@ -47,16 +49,45 @@ void main() {
     });
   });
 
-  group('ActivityLog.productName', () {
+  group('ActivityLog.displayProductName', () {
     test('reads product_name from details when present', () {
       final log = ActivityLog.fromJson(baseJson());
+      expect(log.displayProductName, 'Paracetamol');
       expect(log.productName, 'Paracetamol');
     });
 
-    test('is null when details has no product_name key', () {
+    test('falls back to name key used by product lifecycle RPCs', () {
+      final json = baseJson()
+        ..['details'] = {'name': 'Vitamin C'};
+      final log = ActivityLog.fromJson(json);
+      expect(log.displayProductName, 'Vitamin C');
+    });
+
+    test('is null when details has no product name key', () {
       final json = baseJson()..['details'] = {'reason': 'damaged'};
       final log = ActivityLog.fromJson(json);
-      expect(log.productName, isNull);
+      expect(log.displayProductName, isNull);
+    });
+  });
+
+  group('ActivityLog detail getters', () {
+    test('reads quantity, quantity_change, total_amount, and reason', () {
+      final sale = ActivityLog.fromJson(baseJson());
+      expect(sale.quantity, 2);
+      expect(sale.quantityChange, isNull);
+      expect(sale.saleAmount, 20);
+      expect(sale.reason, isNull);
+
+      final adjustment = ActivityLog.fromJson(baseJson()
+        ..['action'] = 'stock_adjustment'
+        ..['details'] = {
+          'product_name': 'Paracetamol',
+          'quantity_change': -3,
+          'reason': 'expired',
+        });
+      expect(adjustment.quantity, isNull);
+      expect(adjustment.quantityChange, -3);
+      expect(adjustment.reason, 'expired');
     });
   });
 
@@ -69,6 +100,46 @@ void main() {
       expect(withName.id, log.id);
       expect(withName.action, log.action);
       expect(withName.details, log.details);
+    });
+  });
+
+  group('ActivityAction', () {
+    test('maps core transaction actions to Bengali labels', () {
+      expect(ActivityAction.label(ActivityAction.sale), AppStrings.actionSale);
+      expect(
+          ActivityAction.label(ActivityAction.stockIn), AppStrings.actionStockIn);
+      expect(ActivityAction.label(ActivityAction.stockAdjustment),
+          AppStrings.actionStockAdjustment);
+    });
+
+    test('maps staff lifecycle actions to Bengali labels', () {
+      expect(ActivityAction.label(ActivityAction.userCreated),
+          AppStrings.actionUserCreated);
+      expect(ActivityAction.label(ActivityAction.userRoleChanged),
+          AppStrings.actionUserRoleChanged);
+      expect(ActivityAction.label(ActivityAction.userDeactivated),
+          AppStrings.actionUserDeactivated);
+    });
+
+    test('identifies transaction actions for visual treatment', () {
+      expect(ActivityAction.isTransactionAction(ActivityAction.sale), isTrue);
+      expect(ActivityAction.isTransactionAction(ActivityAction.stockIn), isTrue);
+      expect(ActivityAction.isTransactionAction(ActivityAction.stockAdjustment),
+          isTrue);
+      expect(
+          ActivityAction.isTransactionAction(ActivityAction.productCreated),
+          isFalse);
+    });
+
+    test('uses distinct accent colors for sale, stock in, and adjustment', () {
+      expect(
+        ActivityAction.accentColor(ActivityAction.sale),
+        isNot(ActivityAction.accentColor(ActivityAction.stockIn)),
+      );
+      expect(
+        ActivityAction.accentColor(ActivityAction.stockIn),
+        isNot(ActivityAction.accentColor(ActivityAction.stockAdjustment)),
+      );
     });
   });
 }
