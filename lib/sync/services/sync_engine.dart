@@ -2,9 +2,9 @@ import '../../repositories/product_repository.dart';
 import '../../repositories/transaction_repository.dart';
 import '../models/cached_product.dart';
 import '../models/pending_transaction.dart';
-import '../models/pending_transaction_type.dart';
 import '../repositories/pending_transaction_repository.dart';
 import '../repositories/product_cache_repository.dart';
+import '../../repositories/sync_conflict_repository.dart';
 
 typedef SyncInvalidateCallback = void Function();
 
@@ -15,17 +15,20 @@ class SyncEngine {
     required ProductCacheRepository cacheRepo,
     required ProductRepository productRepo,
     required TransactionRepository remoteRepo,
+    SyncConflictRepository? conflictRepo,
     SyncInvalidateCallback? onInvalidate,
   })  : _pendingRepo = pendingRepo,
         _cacheRepo = cacheRepo,
         _productRepo = productRepo,
         _remoteRepo = remoteRepo,
+        _conflictRepo = conflictRepo,
         _onInvalidate = onInvalidate;
 
   final PendingTransactionRepository _pendingRepo;
   final ProductCacheRepository _cacheRepo;
   final ProductRepository _productRepo;
   final TransactionRepository _remoteRepo;
+  final SyncConflictRepository? _conflictRepo;
   final SyncInvalidateCallback? _onInvalidate;
 
   bool _running = false;
@@ -112,6 +115,7 @@ class SyncEngine {
     } on TransactionException catch (e) {
       if (_isBusinessError(e.message)) {
         await _pendingRepo.markFailed(item.localId, e.message);
+        await _logConflict(item, e.message);
       } else {
         await _pendingRepo.markPending(item.localId);
       }
@@ -125,6 +129,26 @@ class SyncEngine {
   Future<void> retryFailed(int localId) async {
     await _pendingRepo.markPending(localId);
     await processQueue();
+  }
+
+  Future<void> _logConflict(PendingTransaction item, String error) async {
+    final repo = _conflictRepo;
+    if (repo == null) return;
+    try {
+      await repo.logConflict(
+        deviceTxnId: item.deviceTxnId,
+        action: item.type.storageValue,
+        productId: item.productId,
+        details: {
+          'error': error,
+          if (item.quantity != null) 'quantity': item.quantity,
+          if (item.quantityChange != null) 'quantity_change': item.quantityChange,
+          if (item.reason != null) 'reason': item.reason,
+        },
+      );
+    } catch (_) {
+      // Best-effort — the failed pending row remains visible in Settings.
+    }
   }
 
   bool _isBusinessError(String message) {

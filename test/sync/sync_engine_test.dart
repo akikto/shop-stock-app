@@ -4,6 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:shop_stock_app/models/product.dart';
 import 'package:shop_stock_app/repositories/product_repository.dart';
 import 'package:shop_stock_app/repositories/transaction_repository.dart';
+import 'package:shop_stock_app/repositories/sync_conflict_repository.dart';
 import 'package:shop_stock_app/sync/database/sync_database_io.dart';
 import 'package:shop_stock_app/sync/models/pending_transaction_status.dart';
 import 'package:shop_stock_app/sync/models/transaction_write_result.dart';
@@ -16,12 +17,19 @@ class MockProductRepository extends Mock implements ProductRepository {}
 
 class MockTransactionRepository extends Mock implements TransactionRepository {}
 
+class MockSyncConflictRepository extends Mock implements SyncConflictRepository {}
+
 void main() {
+  setUpAll(() {
+    registerFallbackValue(<String, dynamic>{});
+  });
+
   late SyncDatabase db;
   late PendingTransactionRepository pendingRepo;
   late ProductCacheRepository cacheRepo;
   late MockProductRepository productRepo;
   late MockTransactionRepository remoteRepo;
+  late MockSyncConflictRepository conflictRepo;
   late SyncEngine engine;
 
   setUp(() async {
@@ -30,11 +38,13 @@ void main() {
     cacheRepo = ProductCacheRepository(db);
     productRepo = MockProductRepository();
     remoteRepo = MockTransactionRepository();
+    conflictRepo = MockSyncConflictRepository();
     engine = SyncEngine(
       pendingRepo: pendingRepo,
       cacheRepo: cacheRepo,
       productRepo: productRepo,
       remoteRepo: remoteRepo,
+      conflictRepo: conflictRepo,
     );
   });
 
@@ -82,11 +92,23 @@ void main() {
           quantity: any(named: 'quantity'),
           deviceTxnId: any(named: 'deviceTxnId'),
         )).thenThrow(TransactionException('Insufficient stock'));
+    when(() => conflictRepo.logConflict(
+          deviceTxnId: any(named: 'deviceTxnId'),
+          action: any(named: 'action'),
+          productId: any(named: 'productId'),
+          details: any(named: 'details'),
+        )).thenAnswer((_) async {});
 
     await engine.processQueue();
     final row = await pendingRepo.getByLocalId(txn.localId);
     expect(row!.status, PendingTransactionStatus.failed);
     expect(row.lastError!.toLowerCase(), contains('insufficient stock'));
+    verify(() => conflictRepo.logConflict(
+          deviceTxnId: txn.deviceTxnId,
+          action: 'sale',
+          productId: 'p1',
+          details: any(named: 'details'),
+        )).called(1);
   });
 
   test('network error keeps transaction pending', () async {

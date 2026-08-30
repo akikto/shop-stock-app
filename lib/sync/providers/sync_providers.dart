@@ -1,10 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/history/providers/history_providers.dart';
 import '../../features/home/providers/dashboard_providers.dart';
 import '../../features/home/providers/notification_providers.dart';
-import '../../features/history/providers/history_providers.dart';
 import '../../features/products/providers/product_providers.dart';
+import '../../features/settings/providers/staff_providers.dart'
+    show syncConflictRepositoryProvider, syncConflictsProvider;
 import '../../repositories/transaction_repository.dart';
 import '../database/sync_database.dart';
 import '../models/pending_transaction.dart' as models;
@@ -46,6 +48,7 @@ final syncEngineProvider = Provider<SyncEngine>((ref) {
     cacheRepo: ref.watch(productCacheRepositoryProvider),
     productRepo: ref.watch(productRepositoryProvider),
     remoteRepo: ref.watch(supabaseTransactionRepositoryProvider),
+    conflictRepo: ref.watch(syncConflictRepositoryProvider),
     onInvalidate: () {
       ref.invalidate(productListControllerProvider);
       ref.invalidate(dashboardStatsProvider);
@@ -53,6 +56,7 @@ final syncEngineProvider = Provider<SyncEngine>((ref) {
       ref.invalidate(historyListControllerProvider);
       ref.invalidate(pendingTransactionCountProvider);
       ref.invalidate(pendingTransactionsListProvider);
+      ref.invalidate(syncConflictsProvider);
     },
   );
 });

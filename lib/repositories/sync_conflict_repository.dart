@@ -13,6 +13,12 @@ class SyncConflictException implements Exception {
 abstract class SyncConflictRepository {
   Future<List<SyncConflict>> listConflicts({bool includeResolved = false});
   Future<void> resolveConflict(String conflictId);
+  Future<void> logConflict({
+    required String deviceTxnId,
+    required String action,
+    required String productId,
+    Map<String, dynamic> details = const {},
+  });
 }
 
 class SupabaseSyncConflictRepository implements SyncConflictRepository {
@@ -47,6 +53,26 @@ class SupabaseSyncConflictRepository implements SyncConflictRepository {
     } on PostgrestException catch (e) {
       throw SyncConflictException(
           e.message.isNotEmpty ? e.message : 'Could not resolve conflict.');
+    }
+  }
+
+  @override
+  Future<void> logConflict({
+    required String deviceTxnId,
+    required String action,
+    required String productId,
+    Map<String, dynamic> details = const {},
+  }) async {
+    try {
+      await _client.rpc('log_sync_conflict', params: {
+        'p_device_txn_id': deviceTxnId,
+        'p_action': action,
+        'p_product_id': productId,
+        'p_details': details,
+      });
+    } on PostgrestException catch (e) {
+      throw SyncConflictException(
+          e.message.isNotEmpty ? e.message : 'Could not log sync conflict.');
     }
   }
 }

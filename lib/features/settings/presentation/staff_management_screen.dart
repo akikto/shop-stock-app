@@ -7,6 +7,7 @@ import '../../../models/user_role.dart';
 import '../../../repositories/staff_repository.dart';
 import '../../../shared/widgets/error_view.dart';
 import '../../../shared/widgets/loading_indicator.dart';
+import 'invite_staff_screen.dart';
 import '../providers/staff_providers.dart';
 
 /// Owner-only staff role and activation management.
@@ -18,7 +19,18 @@ class StaffManagementScreen extends ConsumerWidget {
     final staffAsync = ref.watch(staffListProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.staffManagement)),
+      appBar: AppBar(
+        title: const Text(AppStrings.staffManagement),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person_add_alt_1_outlined),
+            tooltip: AppStrings.inviteStaff,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const InviteStaffScreen()),
+            ),
+          ),
+        ],
+      ),
       body: staffAsync.when(
         loading: () => const LoadingIndicator(),
         error: (error, _) => ErrorView(

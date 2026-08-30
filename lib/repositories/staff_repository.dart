@@ -55,6 +55,11 @@ abstract class StaffRepository {
   Future<void> setActive(String userId, bool isActive);
   Future<NotificationPreferences> getNotificationPreferences();
   Future<void> saveNotificationPreferences(NotificationPreferences prefs);
+  Future<void> inviteStaff({
+    required String email,
+    required String name,
+    required String password,
+  });
 }
 
 class SupabaseStaffRepository implements StaffRepository {
@@ -119,6 +124,42 @@ class SupabaseStaffRepository implements StaffRepository {
       });
     } on PostgrestException catch (e) {
       throw StaffException(e.message.isNotEmpty ? e.message : 'Could not save preferences.');
+    }
+  }
+
+  @override
+  Future<void> inviteStaff({
+    required String email,
+    required String name,
+    required String password,
+  }) async {
+    try {
+      final response = await _client.functions.invoke(
+        'invite-staff',
+        body: {
+          'email': email.trim(),
+          'name': name.trim(),
+          'password': password,
+        },
+      );
+      if (response.status != 200) {
+        final data = response.data;
+        final message = data is Map
+            ? (data['error'] as String? ?? 'Could not create staff account.')
+            : 'Could not create staff account.';
+        throw StaffException(message);
+      }
+    } on StaffException {
+      rethrow;
+    } catch (e) {
+      final message = e.toString();
+      if (message.contains('Function not found') ||
+          message.contains('Failed to fetch')) {
+        throw StaffException(
+            'Could not create staff account. Deploy the invite-staff edge function first.');
+      }
+      throw StaffException(
+          message.isNotEmpty ? message : 'Could not create staff account.');
     }
   }
 }
