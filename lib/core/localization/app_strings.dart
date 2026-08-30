@@ -149,6 +149,31 @@ class AppStrings {
   static const transactionSynced = 'সিঙ্ক সম্পন্ন';
   static const pendingCountLabel = 'অপেক্ষমান';
 
+  // Phase 6: Staff, notification prefs, reports, sync conflicts
+  static const staffManagement = 'কর্মী ব্যবস্থাপনা';
+  static const notificationPreferences = 'বিজ্ঞপ্তি পছন্দ';
+  static const syncConflicts = 'সিঙ্ক সংঘর্ষ';
+  static const stockMovementReport = 'স্টক চলাচল';
+  static const noLowStockProducts = 'কোনো কম স্টক পণ্য নেই';
+  static const noSyncConflicts = 'কোনো সিঙ্ক সংঘর্ষ নেই';
+  static const changeRole = 'ভূমিকা পরিবর্তন';
+  static const activateStaff = 'কর্মী সক্রিয় করুন';
+  static const deactivateStaff = 'কর্মী নিষ্ক্রিয় করুন';
+  static const deactivateStaffConfirm =
+      'এই কর্মীকে নিষ্ক্রিয় করলে তারা লগ ইন করতে পারবে না।';
+  static const staffUpdated = 'কর্মী তথ্য হালনাগাদ হয়েছে';
+  static const notifySales = 'বিক্রি বিজ্ঞপ্তি';
+  static const notifyStockIn = 'স্টক যোগ বিজ্ঞপ্তি';
+  static const notifyStockAdjustment = 'স্টক সমন্বয় বিজ্ঞপ্তি';
+  static const notifyLowStock = 'কম স্টক বিজ্ঞপ্তি';
+  static const preferencesSaved = 'পছন্দ সংরক্ষিত হয়েছে';
+  static const markResolved = 'সমাধান হয়েছে';
+  static const conflictResolved = 'সংঘর্ষ সমাধান হয়েছে';
+  static const viewLowStockList = 'কম স্টক তালিকা দেখুন';
+  static const movementSale = 'বিক্রি';
+  static const movementStockIn = 'স্টক যোগ';
+  static const movementAdjustment = 'সমন্বয়';
+
   // Auth / Login
   static const appName = 'Shop Stock & Sales';
   static const email = 'ইমেইল';

@@ -14,14 +14,8 @@ name: Deploy web preview to GitHub Pages + build Android APK
 #   3. If this repo is not named "shop-stock-app", update BASE_HREF
 #      below to match, e.g. /<your-repo-name>/.
 #
-# NOTE on the APK: this repo has never had an android/ platform folder
-# (only web/ was ever hand-authored). `flutter create --platforms
-# android .` below generates that platform scaffold fresh on every
-# run — it only adds the missing android/ folder, it does not touch
-# lib/, test/, web/, or pubspec.yaml. Because no release keystore is
-# configured, `flutter build apk --release` produces a debug-signed
-# APK: fine for installing on your own device to test, NOT suitable
-# for Play Store submission.
+# NOTE on the APK: if android/ is not committed, `flutter create --platforms
+# android .` generates the platform scaffold on each CI run.
 
 on:
   push:
@@ -75,11 +69,9 @@ jobs:
 
       - name: flutter analyze
         run: flutter analyze
-        continue-on-error: true # don't block a preview deploy on lint warnings
 
       - name: flutter test
         run: flutter test
-        continue-on-error: true # same — a preview build shouldn't be blocked by test flakiness
 
       - name: flutter build web
         run: |
@@ -111,8 +103,11 @@ jobs:
           }
           EOF
 
-      - name: Generate android/ platform scaffold (not committed to the repo)
-        run: flutter create --platforms android .
+      - name: Generate android/ platform scaffold if missing
+        run: |
+          if [ ! -d android ]; then
+            flutter create --platforms android .
+          fi
 
       - name: flutter build apk
         run: |

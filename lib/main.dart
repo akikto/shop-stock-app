@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/responsive/mobile_frame.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'services/fcm_service.dart';
 import 'services/supabase_service.dart';
 import 'sync/sync_bootstrap.dart';
 
@@ -13,6 +14,7 @@ Future<void> main() async {
   // Fails fast with a clear error if config wasn't supplied — see
   // core/config/app_config.dart and README.md.
   await SupabaseService.initialize();
+  await FcmService.initialize();
 
   final container = ProviderContainer();
   await SyncBootstrap.initialize(container);

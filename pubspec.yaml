@@ -1,7 +1,7 @@
 name: shop_stock_app
 description: Shop Stock & Sales Management App (mobile-first, Flutter + Supabase)
 publish_to: "none"
-version: 0.5.0-phase5
+version: 1.0.0
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -32,6 +32,10 @@ dependencies:
   path: ^1.9.0
   connectivity_plus: ^6.0.5
 
+  # Phase 3/6 — push notifications (Android; graceful no-op on web)
+  firebase_core: ^3.4.0
+  firebase_messaging: ^15.1.0
+
   cupertino_icons: ^1.0.6
 
 dev_dependencies:
@@ -47,10 +51,3 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# -----------------------------------------------------------------------
-# Dependencies intentionally NOT added yet (still deferred):
-#   - firebase_messaging / firebase_core     -> push notifications phase
-# Added in Phase 1: image_picker, flutter_image_compress,
-# cached_network_image, uuid — needed for product photo capture,
-# compression, display, and client-generated storage paths.
-# -----------------------------------------------------------------------

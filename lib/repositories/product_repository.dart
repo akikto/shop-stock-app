@@ -72,6 +72,9 @@ abstract class ProductRepository {
 
   /// Reactivates a previously-deactivated product (migration 0009).
   Future<Product> activateProduct(String id);
+
+  /// Manager/Owner low-stock alert list (migration 0012).
+  Future<List<Product>> fetchLowStockProducts();
 }
 
 class SupabaseProductRepository implements ProductRepository {
@@ -247,6 +250,21 @@ class SupabaseProductRepository implements ProductRepository {
     } catch (e) {
       throw ProductException(
           'Could not activate the product. Please try again.');
+    }
+  }
+
+  @override
+  Future<List<Product>> fetchLowStockProducts() async {
+    try {
+      final result = await _client.rpc('list_low_stock_products');
+      return (result as List)
+          .map((row) => Product.fromJson(row as Map<String, dynamic>))
+          .toList();
+    } on PostgrestException catch (e) {
+      throw ProductException(
+          e.message.isNotEmpty ? e.message : 'Could not load low-stock products.');
+    } catch (_) {
+      throw ProductException('Could not load low-stock products.');
     }
   }
 

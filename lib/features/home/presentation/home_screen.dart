@@ -10,6 +10,7 @@ import '../../../shared/widgets/loading_indicator.dart';
 import '../providers/dashboard_providers.dart';
 import '../providers/notification_providers.dart';
 import 'notifications_screen.dart';
+import 'low_stock_screen.dart';
 import 'reports_screen.dart';
 
 /// Role-aware home dashboard with today's KPIs, low-stock summary,
@@ -90,7 +91,13 @@ class HomeScreen extends ConsumerWidget {
               _KpiGrid(stats: stats),
               if (stats.isShopScope && stats.lowStockCount > 0) ...[
                 const SizedBox(height: 20),
-                _LowStockBanner(count: stats.lowStockCount),
+                _LowStockBanner(
+                  count: stats.lowStockCount,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                        builder: (_) => const LowStockScreen()),
+                  ),
+                ),
               ],
               if (canViewReports) ...[
                 const SizedBox(height: 24),
@@ -212,9 +219,10 @@ class _KpiCard extends StatelessWidget {
 }
 
 class _LowStockBanner extends StatelessWidget {
-  const _LowStockBanner({required this.count});
+  const _LowStockBanner({required this.count, this.onTap});
 
   final int count;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -223,7 +231,9 @@ class _LowStockBanner extends StatelessWidget {
       child: ListTile(
         leading: Icon(Icons.warning_amber, color: Colors.red.shade700),
         title: Text('$count ${AppStrings.lowStockProducts}'),
-        subtitle: const Text(AppStrings.checkProductsTab),
+        subtitle: const Text(AppStrings.viewLowStockList),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: onTap,
       ),
     );
   }

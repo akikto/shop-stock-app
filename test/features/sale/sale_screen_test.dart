@@ -91,6 +91,9 @@ class FakeProductRepository implements ProductRepository {
   @override
   Future<Product> activateProduct(String id) async =>
       throw UnimplementedError();
+
+  @override
+  Future<List<Product>> fetchLowStockProducts() async => [];
 }
 
 class RecordSaleCall {
