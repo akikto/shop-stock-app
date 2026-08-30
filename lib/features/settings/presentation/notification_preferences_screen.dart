@@ -88,20 +88,3 @@ class _NotificationPreferencesScreenState
     }
   }
 }
-
-extension on NotificationPreferences {
-  NotificationPreferences copyWith({
-    bool? notifySale,
-    bool? notifyStockIn,
-    bool? notifyStockAdjustment,
-    bool? notifyLowStock,
-  }) {
-    return NotificationPreferences(
-      notifySale: notifySale ?? this.notifySale,
-      notifyStockIn: notifyStockIn ?? this.notifyStockIn,
-      notifyStockAdjustment:
-          notifyStockAdjustment ?? this.notifyStockAdjustment,
-      notifyLowStock: notifyLowStock ?? this.notifyLowStock,
-    );
-  }
-}

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -34,11 +36,11 @@ class FcmService {
         'p_token': token,
         'p_platform': defaultTargetPlatform.name,
       });
-      FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
-        await _client.rpc('register_fcm_token', params: {
+      FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+        unawaited(_client.rpc('register_fcm_token', params: {
           'p_token': newToken,
           'p_platform': defaultTargetPlatform.name,
-        });
+        }));
       });
     } catch (_) {
       // Push is best-effort; in-app notifications remain authoritative.

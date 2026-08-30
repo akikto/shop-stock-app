@@ -173,6 +173,14 @@ class AppStrings {
   static const movementSale = 'বিক্রি';
   static const movementStockIn = 'স্টক যোগ';
   static const movementAdjustment = 'সমন্বয়';
+  static const inviteStaff = 'কর্মী যোগ করুন';
+  static const inviteStaffHelp =
+      'নতুন কর্মীর ইমেইল ও অস্থায়ী পাসওয়ার্ড দিন। তারা লগ ইন করে কাজ শুরু করতে পারবে।';
+  static const staffName = 'কর্মীর নাম';
+  static const temporaryPassword = 'অস্থায়ী পাসওয়ার্ড';
+  static const passwordTooShort = 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে';
+  static const createStaffAccount = 'অ্যাকাউন্ট তৈরি করুন';
+  static const staffInvited = 'কর্মী অ্যাকাউন্ট তৈরি হয়েছে';
 
   // Auth / Login
   static const appName = 'Shop Stock & Sales';

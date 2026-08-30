@@ -33,7 +33,7 @@ Mobile-first Flutter + Supabase app for a small shop (4–5 staff).
 1. Create a project at https://supabase.com
 2. Apply migrations **in order** via `supabase db push` or the SQL editor:
 
-   `0001` → `0002` → `0003` → `0004` → `0005` → `0006` → `0007` → `0008` → `0009` → `0010` → `0011` → `0012`
+   `0001` → `0002` → `0003` → `0004` → `0005` → `0006` → `0007` → `0008` → `0009` → `0010` → `0011` → `0012` → `0013`
 
 3. Enable Email/Password auth
 4. Create the first user (Owner), then promote once in SQL:
@@ -59,11 +59,19 @@ flutter run --dart-define-from-file=config/config.json
 
 - **Staff:** Sale, stock in, history, dashboard (self scope), offline transactions (Android)
 - **Manager:** + stock adjustment, shop-wide dashboard/reports, low-stock list, sync conflicts, notification preferences
-- **Owner:** + staff role/activation management
+- **Owner:** + staff role/activation management, invite new staff (Edge Function)
 
----
+### Staff invite (Owner)
 
-## Offline sync (Phase 5, Android)
+Deploy the Edge Function once:
+
+```bash
+supabase functions deploy invite-staff
+```
+
+Then use **Settings → Staff Management → +** to create email/password accounts for new staff.
+
+### Offline sync (Phase 5, Android)
 
 See `lib/sync/README.md`. Web builds skip offline sync (`kIsWeb`).
 

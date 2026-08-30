@@ -20,7 +20,7 @@ class ReportsScreen extends ConsumerStatefulWidget {
 
 class _ReportsScreenState extends ConsumerState<ReportsScreen>
     with SingleTickerProviderStateMixin {
-  late DateRange _range = DateRange.today();
+  DateRange _range = DateRange.today();
   late final TabController _tabController =
       TabController(length: 3, vsync: this);
 
