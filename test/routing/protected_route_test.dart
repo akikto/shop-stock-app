@@ -7,6 +7,7 @@ import 'package:shop_stock_app/core/localization/app_strings.dart';
 import 'package:shop_stock_app/core/routing/app_router.dart';
 import 'package:shop_stock_app/features/auth/providers/auth_provider.dart';
 import 'package:shop_stock_app/features/home/providers/dashboard_providers.dart';
+import 'package:shop_stock_app/features/home/providers/fcm_providers.dart';
 import 'package:shop_stock_app/features/home/providers/notification_providers.dart';
 import 'package:shop_stock_app/features/history/providers/history_providers.dart';
 import 'package:shop_stock_app/features/products/providers/product_providers.dart';
@@ -218,6 +219,7 @@ List<Override> _shellTestOverrides(FakeAuthRepository fake) {
         .overrideWithValue(_NoOpTransactionRepository()),
     notificationRealtimeProvider.overrideWith((ref) {}),
     productRealtimeProvider.overrideWith((ref) {}),
+    fcmRegistrationProvider.overrideWith((ref) {}),
   ];
 }
 
