@@ -3,6 +3,7 @@ import '../../repositories/sync_conflict_repository.dart';
 import '../../repositories/transaction_repository.dart';
 import '../models/cached_product.dart';
 import '../models/pending_transaction.dart';
+import '../models/pending_transaction_type.dart';
 import '../repositories/pending_transaction_repository.dart';
 import '../repositories/product_cache_repository.dart';
 
