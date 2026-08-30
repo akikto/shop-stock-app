@@ -129,26 +129,34 @@ class _RolePickerDialog extends StatefulWidget {
 }
 
 class _RolePickerDialogState extends State<_RolePickerDialog> {
-  late UserRole _selected = widget.current;
+  late UserRole _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = widget.current;
+  }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text(AppStrings.changeRole),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: UserRole.values
+      content: DropdownButtonFormField<UserRole>(
+        value: _selected,
+        decoration: const InputDecoration(
+          border: OutlineInputBorder(),
+        ),
+        items: UserRole.values
             .map(
-              (role) => RadioListTile<UserRole>(
-                title: Text(role.name),
+              (role) => DropdownMenuItem<UserRole>(
                 value: role,
-                groupValue: _selected,
-                onChanged: (value) {
-                  if (value != null) setState(() => _selected = value);
-                },
+                child: Text(role.name),
               ),
             )
             .toList(),
+        onChanged: (value) {
+          if (value != null) setState(() => _selected = value);
+        },
       ),
       actions: [
         TextButton(

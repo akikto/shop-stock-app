@@ -32,6 +32,21 @@ class NotificationPreferences {
       notifyLowStock: json['notify_low_stock'] as bool? ?? true,
     );
   }
+
+  NotificationPreferences copyWith({
+    bool? notifySale,
+    bool? notifyStockIn,
+    bool? notifyStockAdjustment,
+    bool? notifyLowStock,
+  }) {
+    return NotificationPreferences(
+      notifySale: notifySale ?? this.notifySale,
+      notifyStockIn: notifyStockIn ?? this.notifyStockIn,
+      notifyStockAdjustment:
+          notifyStockAdjustment ?? this.notifyStockAdjustment,
+      notifyLowStock: notifyLowStock ?? this.notifyLowStock,
+    );
+  }
 }
 
 abstract class StaffRepository {

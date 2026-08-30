@@ -9,8 +9,8 @@ import '../../../shared/widgets/error_view.dart';
 import '../../../shared/widgets/loading_indicator.dart';
 import '../providers/dashboard_providers.dart';
 import '../providers/notification_providers.dart';
-import 'notifications_screen.dart';
 import 'low_stock_screen.dart';
+import 'notifications_screen.dart';
 import 'reports_screen.dart';
 
 /// Role-aware home dashboard with today's KPIs, low-stock summary,

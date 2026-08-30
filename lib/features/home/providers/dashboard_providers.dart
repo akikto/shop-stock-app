@@ -2,10 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/date_range.dart';
 import '../../../models/dashboard_stats.dart';
+import '../../../models/product.dart';
 import '../../../models/product_sales_row.dart';
 import '../../../models/staff_sales_row.dart';
 import '../../../models/stock_movement_row.dart';
-import '../../../models/product.dart';
 import '../../../repositories/reports_repository.dart';
 import '../../products/providers/product_providers.dart';
 
