@@ -10,9 +10,10 @@ import 'supabase_service.dart';
 /// Registers FCM device tokens with Supabase when Firebase is configured.
 /// On web or when google-services.json is absent, this is a safe no-op.
 class FcmService {
-  FcmService({SupabaseClient? client}) : _client = client ?? SupabaseService.client;
+  FcmService({SupabaseClient? client}) : _clientOverride = client;
 
-  final SupabaseClient _client;
+  final SupabaseClient? _clientOverride;
+  SupabaseClient get _client => _clientOverride ?? SupabaseService.client;
   static bool _initialized = false;
 
   static Future<void> initialize() async {
