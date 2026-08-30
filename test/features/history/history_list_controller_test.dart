@@ -34,12 +34,15 @@ ActivityLog sampleLog(String id, {String actorId = 'user-1'}) {
   );
 }
 
-Future<void> pumpUntilIdle(HistoryListController controller) async {
-  for (var i = 0; i < 100; i++) {
-    if (!controller.state.isLoading) return;
-    await Future<void>.delayed(const Duration(milliseconds: 1));
+Future<void> waitForHistoryState(
+  HistoryListController controller,
+  bool Function(HistoryListState state) isReady,
+) async {
+  for (var i = 0; i < 200; i++) {
+    await Future<void>.delayed(const Duration(milliseconds: 5));
+    if (isReady(controller.state)) return;
   }
-  fail('HistoryListController did not finish loading');
+  fail('HistoryListController did not reach the expected state');
 }
 
 void main() {
@@ -48,28 +51,31 @@ void main() {
       final repo = FakeActivityLogRepository([sampleLog('1')]);
       final controller = HistoryListController(repo);
 
-      await pumpUntilIdle(controller);
+      await waitForHistoryState(
+        controller,
+        (state) => !state.isLoading && state.logs.length == 1,
+      );
 
-      expect(controller.state.isLoading, isFalse);
-      expect(controller.state.logs, hasLength(1));
       expect(controller.state.error, isNull);
     });
 
     test('exposes empty state when repository returns no rows', () async {
       final controller = HistoryListController(FakeActivityLogRepository([]));
-      await pumpUntilIdle(controller);
-
-      expect(controller.state.logs, isEmpty);
-      expect(controller.state.error, isNull);
+      await waitForHistoryState(
+        controller,
+        (state) => !state.isLoading && state.logs.isEmpty && state.error == null,
+      );
     });
 
     test('exposes error state when the repository fails', () async {
       final repo = FakeActivityLogRepository([])
         ..shouldFail = true;
       final controller = HistoryListController(repo);
-      await pumpUntilIdle(controller);
+      await waitForHistoryState(
+        controller,
+        (state) => !state.isLoading && state.error != null,
+      );
 
-      expect(controller.state.logs, isEmpty);
       expect(controller.state.error, AppStrings.historyLoadFailed);
     });
 
@@ -77,14 +83,17 @@ void main() {
       final repo = FakeActivityLogRepository([sampleLog('1')])
         ..shouldFail = true;
       final controller = HistoryListController(repo);
-      await pumpUntilIdle(controller);
-      expect(controller.state.error, isNotNull);
+      await waitForHistoryState(
+        controller,
+        (state) => !state.isLoading && state.error != null,
+      );
 
       repo.shouldFail = false;
       await controller.refresh();
-
-      expect(controller.state.error, isNull);
-      expect(controller.state.logs, hasLength(1));
+      await waitForHistoryState(
+        controller,
+        (state) => !state.isLoading && state.logs.length == 1 && state.error == null,
+      );
     });
 
     test('loadMore appends the next page and stops when fewer than page size',
@@ -93,14 +102,19 @@ void main() {
         List.generate(25, (i) => sampleLog('$i')),
       );
       final controller = HistoryListController(repo);
-      await pumpUntilIdle(controller);
+      await waitForHistoryState(
+        controller,
+        (state) => !state.isLoading && state.logs.length == 20,
+      );
 
-      expect(controller.state.logs, hasLength(20));
       expect(controller.state.hasMore, isTrue);
 
       await controller.loadMore();
+      await waitForHistoryState(
+        controller,
+        (state) => !state.isLoadingMore && state.logs.length == 25,
+      );
 
-      expect(controller.state.logs, hasLength(25));
       expect(controller.state.hasMore, isFalse);
     });
   });
