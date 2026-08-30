@@ -1,0 +1,99 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:shop_stock_app/core/localization/app_strings.dart';
+import 'package:shop_stock_app/features/history/providers/history_providers.dart';
+import 'package:shop_stock_app/models/activity_log.dart';
+import 'package:shop_stock_app/repositories/activity_log_repository.dart';
+
+class FakeActivityLogRepository implements ActivityLogRepository {
+  FakeActivityLogRepository(this.logs, {this.onFetch});
+
+  final List<ActivityLog> logs;
+  final void Function({required int limit, required int offset})? onFetch;
+  bool shouldFail = false;
+
+  @override
+  Future<List<ActivityLog>> fetchActivityLogs(
+      {int limit = 20, int offset = 0}) async {
+    onFetch?.call(limit: limit, offset: offset);
+    if (shouldFail) {
+      throw ActivityLogException(AppStrings.historyLoadFailed);
+    }
+    if (offset >= logs.length) return [];
+    final end = (offset + limit).clamp(0, logs.length);
+    return logs.sublist(offset, end);
+  }
+}
+
+ActivityLog sampleLog(String id, {String actorId = 'user-1'}) {
+  return ActivityLog(
+    id: id,
+    actorId: actorId,
+    action: 'sale',
+    details: const {'product_name': 'Paracetamol', 'quantity': 1},
+    createdAt: DateTime.utc(2026, 1, 1),
+  );
+}
+
+void main() {
+  group('HistoryListController', () {
+    test('loads the first page on creation', () async {
+      final repo = FakeActivityLogRepository([sampleLog('1')]);
+      final controller = HistoryListController(repo);
+
+      await Future<void>.delayed(Duration.zero);
+
+      expect(controller.state.isLoading, isFalse);
+      expect(controller.state.logs, hasLength(1));
+      expect(controller.state.error, isNull);
+    });
+
+    test('exposes empty state when repository returns no rows', () async {
+      final controller = HistoryListController(FakeActivityLogRepository([]));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(controller.state.logs, isEmpty);
+      expect(controller.state.error, isNull);
+    });
+
+    test('exposes error state when the repository fails', () async {
+      final repo = FakeActivityLogRepository([])
+        ..shouldFail = true;
+      final controller = HistoryListController(repo);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(controller.state.logs, isEmpty);
+      expect(controller.state.error, AppStrings.historyLoadFailed);
+    });
+
+    test('refresh clears a previous error and reloads data', () async {
+      final repo = FakeActivityLogRepository([sampleLog('1')])
+        ..shouldFail = true;
+      final controller = HistoryListController(repo);
+      await Future<void>.delayed(Duration.zero);
+      expect(controller.state.error, isNotNull);
+
+      repo.shouldFail = false;
+      await controller.refresh();
+
+      expect(controller.state.error, isNull);
+      expect(controller.state.logs, hasLength(1));
+    });
+
+    test('loadMore appends the next page and stops when fewer than page size',
+        () async {
+      final repo = FakeActivityLogRepository(
+        List.generate(25, (i) => sampleLog('$i')),
+      );
+      final controller = HistoryListController(repo);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(controller.state.logs, hasLength(20));
+      expect(controller.state.hasMore, isTrue);
+
+      await controller.loadMore();
+
+      expect(controller.state.logs, hasLength(25));
+      expect(controller.state.hasMore, isFalse);
+    });
+  });
+}

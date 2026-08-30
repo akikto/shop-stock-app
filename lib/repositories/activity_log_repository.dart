@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../core/localization/app_strings.dart';
 import '../models/activity_log.dart';
 import '../services/supabase_service.dart';
 
@@ -59,12 +60,10 @@ class SupabaseActivityLogRepository implements ActivityLogRepository {
       return logs
           .map((log) => log.copyWithActorName(nameById[log.actorId]))
           .toList();
-    } on PostgrestException catch (e) {
-      throw ActivityLogException(
-          e.message.isNotEmpty ? e.message : 'Could not load history.');
-    } catch (e) {
-      throw ActivityLogException(
-          'Could not load history. Please check your connection.');
+    } on PostgrestException catch (_) {
+      throw ActivityLogException(AppStrings.historyLoadFailed);
+    } catch (_) {
+      throw ActivityLogException(AppStrings.historyConnectionFailed);
     }
   }
 }
