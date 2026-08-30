@@ -18,6 +18,7 @@ import 'package:shop_stock_app/models/product.dart';
 import 'package:shop_stock_app/models/product_sales_row.dart';
 import 'package:shop_stock_app/models/profile.dart';
 import 'package:shop_stock_app/models/staff_sales_row.dart';
+import 'package:shop_stock_app/models/stock_movement_row.dart';
 import 'package:shop_stock_app/models/user_role.dart';
 import 'package:shop_stock_app/repositories/activity_log_repository.dart';
 import 'package:shop_stock_app/repositories/notification_repository.dart';
@@ -116,6 +117,11 @@ class _EmptyReportsRepository implements ReportsRepository {
 
   @override
   Future<List<ProductSalesRow>> fetchProductSalesReport(
+          {required DateTime from, required DateTime to}) async =>
+      [];
+
+  @override
+  Future<List<StockMovementRow>> fetchStockMovementReport(
           {required DateTime from, required DateTime to}) async =>
       [];
 }

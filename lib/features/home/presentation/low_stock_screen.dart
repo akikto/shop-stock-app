@@ -28,8 +28,8 @@ class LowStockScreen extends ConsumerWidget {
           ),
           data: (products) {
             if (products.isEmpty) {
-              return const ListView(
-                children: [
+              return ListView(
+                children: const [
                   SizedBox(height: 120),
                   Center(child: Text(AppStrings.noLowStockProducts)),
                 ],
