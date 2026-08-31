@@ -33,7 +33,7 @@ List<DashboardKpiDescriptor> buildDashboardKpis({
   required DashboardStats stats,
   int? activeProductCount,
 }) {
-  final currency = AppStrings.currencySymbol;
+  const currency = AppStrings.currencySymbol;
   final base = <DashboardKpiDescriptor>[
     DashboardKpiDescriptor(
       kind: DashboardKpiKind.totalSales,
