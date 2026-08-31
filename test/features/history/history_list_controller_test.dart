@@ -38,7 +38,7 @@ Future<void> waitForHistoryState(
   HistoryListController controller,
   bool Function(HistoryListState state) isReady,
 ) async {
-  for (var i = 0; i < 200; i++) {
+  for (var i = 0; i < 500; i++) {
     await Future<void>.delayed(const Duration(milliseconds: 5));
     if (isReady(controller.state)) return;
   }

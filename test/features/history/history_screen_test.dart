@@ -61,6 +61,14 @@ Widget _wrap(Widget child, ActivityLogRepository repo) {
   );
 }
 
+Future<void> _pumpUntilFound(WidgetTester tester, Finder finder) async {
+  for (var i = 0; i < 100; i++) {
+    await tester.pump(const Duration(milliseconds: 20));
+    if (finder.evaluate().isNotEmpty) return;
+  }
+  fail('Expected widget not found: $finder');
+}
+
 void main() {
   group('HistoryScreen', () {
     testWidgets('shows loading state initially', (tester) async {
@@ -82,7 +90,7 @@ void main() {
       await tester.pumpWidget(
         _wrap(const HistoryScreen(), FakeActivityLogRepository([])),
       );
-      await tester.pumpAndSettle();
+      await _pumpUntilFound(tester, find.text(AppStrings.noHistoryFound));
 
       expect(find.text(AppStrings.noHistoryFound), findsOneWidget);
     });
@@ -94,7 +102,7 @@ void main() {
           FakeActivityLogRepository([], shouldFail: true),
         ),
       );
-      await tester.pumpAndSettle();
+      await _pumpUntilFound(tester, find.text(AppStrings.historyLoadFailed));
 
       expect(find.text(AppStrings.historyLoadFailed), findsOneWidget);
       expect(find.text(AppStrings.retry), findsOneWidget);
@@ -127,7 +135,7 @@ void main() {
           ]),
         ),
       );
-      await tester.pumpAndSettle();
+      await _pumpUntilFound(tester, find.text(AppStrings.actionSale));
 
       expect(find.text(AppStrings.actionSale), findsOneWidget);
       expect(find.text(AppStrings.actionStockIn), findsOneWidget);
