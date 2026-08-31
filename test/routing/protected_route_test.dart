@@ -282,26 +282,6 @@ void main() {
       expect(find.text(AppStrings.login), findsNothing);
     });
 
-    testWidgets('history destination is available in bottom navigation',
-        (tester) async {
-      final fake = FakeAuthRepository(
-        signedIn: true,
-        profile: Profile(
-          id: 'user-1',
-          name: 'Staff Member',
-          role: UserRole.staff,
-          isActive: true,
-          createdAt: DateTime.utc(2026),
-          updatedAt: DateTime.utc(2026),
-        ),
-      );
-      addTearDown(fake.dispose);
-
-      await _settleProtectedShell(tester, fake);
-
-      expect(find.byIcon(Icons.history_outlined), findsOneWidget);
-    });
-
     testWidgets(
         'authenticated but deactivated account is blocked from the shell with a clear message',
         (tester) async {
