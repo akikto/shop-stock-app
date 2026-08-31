@@ -75,6 +75,9 @@ abstract class ProductRepository {
 
   /// Manager/Owner low-stock alert list (migration 0012).
   Future<List<Product>> fetchLowStockProducts();
+
+  /// Count of active products — RLS-safe SELECT on `products`.
+  Future<int> countActiveProducts();
 }
 
 class SupabaseProductRepository implements ProductRepository {
@@ -265,6 +268,17 @@ class SupabaseProductRepository implements ProductRepository {
           e.message.isNotEmpty ? e.message : 'Could not load low-stock products.');
     } catch (_) {
       throw ProductException('Could not load low-stock products.');
+    }
+  }
+
+  @override
+  Future<int> countActiveProducts() async {
+    try {
+      final rows =
+          await _client.from('products').select('id').eq('is_active', true);
+      return (rows as List).length;
+    } catch (_) {
+      throw ProductException('Could not count active products.');
     }
   }
 

@@ -111,6 +111,9 @@ class FakeProductRepository implements ProductRepository {
 
   @override
   Future<List<Product>> fetchLowStockProducts() async => [];
+
+  @override
+  Future<int> countActiveProducts() async => 1;
 }
 
 void main() {

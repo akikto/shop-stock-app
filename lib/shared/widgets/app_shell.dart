@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/navigation/shell_navigation_provider.dart';
 import 'offline_status_banner.dart';
 
 class ShellDestination {
@@ -18,22 +20,15 @@ class ShellDestination {
 
 /// Mobile-first bottom-navigation shell for the protected area of the
 /// app.
-class AppShell extends StatefulWidget {
-  const AppShell(
-      {super.key, required this.destinations, this.initialIndex = 0});
+class AppShell extends ConsumerWidget {
+  const AppShell({super.key, required this.destinations});
 
   final List<ShellDestination> destinations;
-  final int initialIndex;
 
   @override
-  State<AppShell> createState() => _AppShellState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final index = ref.watch(shellNavigationIndexProvider);
 
-class _AppShellState extends State<AppShell> {
-  late int _index = widget.initialIndex;
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -41,18 +36,19 @@ class _AppShellState extends State<AppShell> {
             const OfflineStatusBanner(),
             Expanded(
               child: IndexedStack(
-                index: _index,
-                children: [for (final d in widget.destinations) d.screen],
+                index: index,
+                children: [for (final d in destinations) d.screen],
               ),
             ),
           ],
         ),
       ),
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
+        selectedIndex: index.clamp(0, destinations.length - 1),
+        onDestinationSelected: (i) =>
+            ref.read(shellNavigationIndexProvider.notifier).state = i,
         destinations: [
-          for (final d in widget.destinations)
+          for (final d in destinations)
             NavigationDestination(
               icon: Icon(d.icon),
               selectedIcon: Icon(d.selectedIcon),

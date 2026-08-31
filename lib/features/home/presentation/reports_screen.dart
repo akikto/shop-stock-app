@@ -27,6 +27,44 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen>
   void _setToday() => setState(() => _range = DateRange.today());
   void _setLast7Days() => setState(() => _range = DateRange.last7Days());
 
+  Future<void> _pickCustomRange() async {
+    final now = DateTime.now();
+    final initialStart = _range.isCustom()
+        ? _range.from
+        : now.subtract(const Duration(days: 6));
+    final initialEnd = _range.isCustom()
+        ? _range.to.subtract(const Duration(days: 1))
+        : now;
+
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: now,
+      initialDateRange: DateTimeRange(start: initialStart, end: initialEnd),
+      helpText: AppStrings.pickDateRange,
+    );
+
+    if (picked == null || !mounted) return;
+
+    try {
+      setState(() => _range = DateRange.custom(picked.start, picked.end));
+    } on InvalidDateRangeException {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(AppStrings.invalidDateRange)),
+      );
+    }
+  }
+
+  Future<void> _refreshStaff() async =>
+      ref.invalidate(staffSalesReportProvider(_range));
+
+  Future<void> _refreshProduct() async =>
+      ref.invalidate(productSalesReportProvider(_range));
+
+  Future<void> _refreshMovement() async =>
+      ref.invalidate(stockMovementReportProvider(_range));
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -55,19 +93,28 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen>
         children: [
           Padding(
             padding: const EdgeInsets.all(12),
-            child: Row(
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
                 ChoiceChip(
                   label: const Text(AppStrings.today),
-                  selected: _range.from.day == DateTime.now().day &&
-                      _range.to.difference(_range.from).inDays == 1,
+                  selected: _range.isToday(),
                   onSelected: (_) => _setToday(),
                 ),
-                const SizedBox(width: 8),
                 ChoiceChip(
                   label: const Text(AppStrings.last7Days),
-                  selected: _range.to.difference(_range.from).inDays == 7,
+                  selected: _range.isLast7Days(),
                   onSelected: (_) => _setLast7Days(),
+                ),
+                ChoiceChip(
+                  label: Text(
+                    _range.isCustom()
+                        ? AppStrings.customDateRange
+                        : AppStrings.pickDateRange,
+                  ),
+                  selected: _range.isCustom(),
+                  onSelected: (_) => _pickCustomRange(),
                 ),
               ],
             ),
@@ -77,28 +124,43 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen>
               controller: _tabController,
               children: [
                 staffAsync.when(
-                  loading: () => const LoadingIndicator(),
+                  loading: () => const LoadingIndicator(
+                    message: AppStrings.loadingReports,
+                  ),
                   error: (e, _) => ErrorView(
-                      message: e.toString(),
-                      onRetry: () =>
-                          ref.invalidate(staffSalesReportProvider(_range))),
-                  data: (rows) => _StaffReportList(rows: rows),
+                    message: e.toString(),
+                    onRetry: _refreshStaff,
+                  ),
+                  data: (rows) => _StaffReportList(
+                    rows: rows,
+                    onRefresh: _refreshStaff,
+                  ),
                 ),
                 productAsync.when(
-                  loading: () => const LoadingIndicator(),
+                  loading: () => const LoadingIndicator(
+                    message: AppStrings.loadingReports,
+                  ),
                   error: (e, _) => ErrorView(
-                      message: e.toString(),
-                      onRetry: () =>
-                          ref.invalidate(productSalesReportProvider(_range))),
-                  data: (rows) => _ProductReportList(rows: rows),
+                    message: e.toString(),
+                    onRetry: _refreshProduct,
+                  ),
+                  data: (rows) => _ProductReportList(
+                    rows: rows,
+                    onRefresh: _refreshProduct,
+                  ),
                 ),
                 movementAsync.when(
-                  loading: () => const LoadingIndicator(),
+                  loading: () => const LoadingIndicator(
+                    message: AppStrings.loadingReports,
+                  ),
                   error: (e, _) => ErrorView(
-                      message: e.toString(),
-                      onRetry: () =>
-                          ref.invalidate(stockMovementReportProvider(_range))),
-                  data: (rows) => _StockMovementList(rows: rows),
+                    message: e.toString(),
+                    onRetry: _refreshMovement,
+                  ),
+                  data: (rows) => _StockMovementList(
+                    rows: rows,
+                    onRefresh: _refreshMovement,
+                  ),
                 ),
               ],
             ),
@@ -110,65 +172,89 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen>
 }
 
 class _StaffReportList extends StatelessWidget {
-  const _StaffReportList({required this.rows});
+  const _StaffReportList({required this.rows, required this.onRefresh});
 
   final List<StaffSalesRow> rows;
+  final Future<void> Function() onRefresh;
 
   @override
   Widget build(BuildContext context) {
-    if (rows.isEmpty) {
-      return const Center(child: Text(AppStrings.noReportData));
-    }
-    return ListView.separated(
-      itemCount: rows.length,
-      separatorBuilder: (_, __) => const Divider(height: 1),
-      itemBuilder: (context, i) {
-        final row = rows[i];
-        return ListTile(
-          title: Text(row.userName),
-          subtitle: Text('${row.saleCount} sales'),
-          trailing: Text(
-            '${AppStrings.currencySymbol}${row.totalAmount}',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-        );
-      },
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      child: rows.isEmpty
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const [
+                SizedBox(height: 120),
+                Center(child: Text(AppStrings.noReportData)),
+              ],
+            )
+          : ListView.separated(
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: rows.length,
+              separatorBuilder: (_, __) => const Divider(height: 1),
+              itemBuilder: (context, i) {
+                final row = rows[i];
+                return ListTile(
+                  title: Text(row.userName),
+                  subtitle: Text(AppStrings.reportSaleCount(row.saleCount)),
+                  trailing: Text(
+                    '${AppStrings.currencySymbol}${row.totalAmount}',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                );
+              },
+            ),
     );
   }
 }
 
 class _ProductReportList extends StatelessWidget {
-  const _ProductReportList({required this.rows});
+  const _ProductReportList({required this.rows, required this.onRefresh});
 
   final List<ProductSalesRow> rows;
+  final Future<void> Function() onRefresh;
 
   @override
   Widget build(BuildContext context) {
-    if (rows.isEmpty) {
-      return const Center(child: Text(AppStrings.noReportData));
-    }
-    return ListView.separated(
-      itemCount: rows.length,
-      separatorBuilder: (_, __) => const Divider(height: 1),
-      itemBuilder: (context, i) {
-        final row = rows[i];
-        return ListTile(
-          title: Text(row.productName),
-          subtitle: Text('${row.saleCount} sales · qty ${row.totalQuantity}'),
-          trailing: Text(
-            '${AppStrings.currencySymbol}${row.totalAmount}',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-        );
-      },
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      child: rows.isEmpty
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const [
+                SizedBox(height: 120),
+                Center(child: Text(AppStrings.noReportData)),
+              ],
+            )
+          : ListView.separated(
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: rows.length,
+              separatorBuilder: (_, __) => const Divider(height: 1),
+              itemBuilder: (context, i) {
+                final row = rows[i];
+                return ListTile(
+                  title: Text(row.productName),
+                  subtitle: Text(AppStrings.reportProductSubtitle(
+                    row.saleCount,
+                    row.totalQuantity,
+                  )),
+                  trailing: Text(
+                    '${AppStrings.currencySymbol}${row.totalAmount}',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                );
+              },
+            ),
     );
   }
 }
 
 class _StockMovementList extends StatelessWidget {
-  const _StockMovementList({required this.rows});
+  const _StockMovementList({required this.rows, required this.onRefresh});
 
   final List<StockMovementRow> rows;
+  final Future<void> Function() onRefresh;
 
   String _movementLabel(String type) {
     switch (type) {
@@ -185,27 +271,36 @@ class _StockMovementList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (rows.isEmpty) {
-      return const Center(child: Text(AppStrings.noReportData));
-    }
-    return ListView.separated(
-      itemCount: rows.length,
-      separatorBuilder: (_, __) => const Divider(height: 1),
-      itemBuilder: (context, i) {
-        final row = rows[i];
-        final changePrefix = row.quantityChange >= 0 ? '+' : '';
-        return ListTile(
-          title: Text(row.productName),
-          subtitle: Text(
-            '${_movementLabel(row.movementType)} · ${row.userName}\n'
-            '${row.createdAt.toLocal()}',
-          ),
-          trailing: Text(
-            '$changePrefix${row.quantityChange}',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-        );
-      },
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      child: rows.isEmpty
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const [
+                SizedBox(height: 120),
+                Center(child: Text(AppStrings.noReportData)),
+              ],
+            )
+          : ListView.separated(
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: rows.length,
+              separatorBuilder: (_, __) => const Divider(height: 1),
+              itemBuilder: (context, i) {
+                final row = rows[i];
+                final changePrefix = row.quantityChange >= 0 ? '+' : '';
+                return ListTile(
+                  title: Text(row.productName),
+                  subtitle: Text(
+                    '${_movementLabel(row.movementType)} · ${row.userName}\n'
+                    '${row.createdAt.toLocal()}',
+                  ),
+                  trailing: Text(
+                    '$changePrefix${row.quantityChange}',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                );
+              },
+            ),
     );
   }
 }
