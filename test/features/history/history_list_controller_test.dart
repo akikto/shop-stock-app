@@ -110,11 +110,8 @@ void main() {
       expect(controller.state.hasMore, isTrue);
 
       await controller.loadMore();
-      await waitForHistoryState(
-        controller,
-        (state) => !state.isLoadingMore && state.logs.length == 25,
-      );
 
+      expect(controller.state.logs, hasLength(25));
       expect(controller.state.hasMore, isFalse);
     });
   });
