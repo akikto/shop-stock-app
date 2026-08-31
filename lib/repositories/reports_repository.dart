@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../core/localization/app_strings.dart';
 import '../models/dashboard_stats.dart';
 import '../models/product_sales_row.dart';
 import '../models/staff_sales_row.dart';
@@ -31,20 +32,26 @@ class SupabaseReportsRepository implements ReportsRepository {
 
   final SupabaseClient _client;
 
+  Map<String, String> _rpcParams(DateTime from, DateTime to) => {
+        'p_from': from.toUtc().toIso8601String(),
+        'p_to': to.toUtc().toIso8601String(),
+      };
+
   @override
   Future<DashboardStats> fetchDashboardStats(
       {required DateTime from, required DateTime to}) async {
     try {
-      final result = await _client.rpc('get_dashboard_stats', params: {
-        'p_from': from.toUtc().toIso8601String(),
-        'p_to': to.toUtc().toIso8601String(),
-      });
+      final result = await _client.rpc(
+        'get_dashboard_stats',
+        params: _rpcParams(from, to),
+      );
       return DashboardStats.fromJson(Map<String, dynamic>.from(result as Map));
     } on PostgrestException catch (e) {
       throw ReportsException(
-          e.message.isNotEmpty ? e.message : 'Could not load dashboard.');
+        e.message.isNotEmpty ? e.message : AppStrings.dashboardLoadFailed,
+      );
     } catch (_) {
-      throw ReportsException('Could not load dashboard.');
+      throw ReportsException(AppStrings.dashboardLoadFailed);
     }
   }
 
@@ -52,19 +59,20 @@ class SupabaseReportsRepository implements ReportsRepository {
   Future<List<StaffSalesRow>> fetchStaffSalesReport(
       {required DateTime from, required DateTime to}) async {
     try {
-      final result = await _client.rpc('get_staff_sales_report', params: {
-        'p_from': from.toUtc().toIso8601String(),
-        'p_to': to.toUtc().toIso8601String(),
-      });
+      final result = await _client.rpc(
+        'get_staff_sales_report',
+        params: _rpcParams(from, to),
+      );
       return (result as List)
           .map((row) =>
               StaffSalesRow.fromJson(Map<String, dynamic>.from(row as Map)))
           .toList();
     } on PostgrestException catch (e) {
       throw ReportsException(
-          e.message.isNotEmpty ? e.message : 'Could not load staff report.');
+        e.message.isNotEmpty ? e.message : AppStrings.staffReportLoadFailed,
+      );
     } catch (_) {
-      throw ReportsException('Could not load staff report.');
+      throw ReportsException(AppStrings.staffReportLoadFailed);
     }
   }
 
@@ -72,19 +80,20 @@ class SupabaseReportsRepository implements ReportsRepository {
   Future<List<ProductSalesRow>> fetchProductSalesReport(
       {required DateTime from, required DateTime to}) async {
     try {
-      final result = await _client.rpc('get_product_sales_report', params: {
-        'p_from': from.toUtc().toIso8601String(),
-        'p_to': to.toUtc().toIso8601String(),
-      });
+      final result = await _client.rpc(
+        'get_product_sales_report',
+        params: _rpcParams(from, to),
+      );
       return (result as List)
           .map((row) =>
               ProductSalesRow.fromJson(Map<String, dynamic>.from(row as Map)))
           .toList();
     } on PostgrestException catch (e) {
       throw ReportsException(
-          e.message.isNotEmpty ? e.message : 'Could not load product report.');
+        e.message.isNotEmpty ? e.message : AppStrings.productReportLoadFailed,
+      );
     } catch (_) {
-      throw ReportsException('Could not load product report.');
+      throw ReportsException(AppStrings.productReportLoadFailed);
     }
   }
 
@@ -92,19 +101,22 @@ class SupabaseReportsRepository implements ReportsRepository {
   Future<List<StockMovementRow>> fetchStockMovementReport(
       {required DateTime from, required DateTime to}) async {
     try {
-      final result = await _client.rpc('get_stock_movement_report', params: {
-        'p_from': from.toUtc().toIso8601String(),
-        'p_to': to.toUtc().toIso8601String(),
-      });
+      final result = await _client.rpc(
+        'get_stock_movement_report',
+        params: _rpcParams(from, to),
+      );
       return (result as List)
           .map((row) =>
               StockMovementRow.fromJson(Map<String, dynamic>.from(row as Map)))
           .toList();
     } on PostgrestException catch (e) {
       throw ReportsException(
-          e.message.isNotEmpty ? e.message : 'Could not load stock movement report.');
+        e.message.isNotEmpty
+            ? e.message
+            : AppStrings.stockMovementReportLoadFailed,
+      );
     } catch (_) {
-      throw ReportsException('Could not load stock movement report.');
+      throw ReportsException(AppStrings.stockMovementReportLoadFailed);
     }
   }
 }

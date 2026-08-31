@@ -138,6 +138,24 @@ class AppStrings {
   static const quickActions = 'দ্রুত কাজ';
   static const totalActivity = 'মোট কার্যক্রম';
   static const currencySymbol = '৳';
+  static const activeProductCount = 'সক্রিয় পণ্য';
+  static const quickActionNewSale = 'নতুন বিক্রি';
+  static const quickActionStockIn = 'স্টক যোগ';
+  static const quickActionHistory = 'ইতিহাস';
+  static const customDateRange = 'নিজের তারিখ';
+  static const pickDateRange = 'তারিখ বাছাই';
+  static const invalidDateRange = 'অবৈধ তারিখের পরিসর';
+  static const loadingReports = 'রিপোর্ট লোড হচ্ছে...';
+  static const dashboardLoadFailed = 'ড্যাশবোর্ড লোড করা যায়নি';
+  static const staffReportLoadFailed = 'কর্মী রিপোর্ট লোড করা যায়নি';
+  static const productReportLoadFailed = 'পণ্য রিপোর্ট লোড করা যায়নি';
+  static const stockMovementReportLoadFailed =
+      'স্টক চলাচল রিপোর্ট লোড করা যায়নি';
+
+  static String reportSaleCount(int count) => '$countটি বিক্রি';
+
+  static String reportProductSubtitle(int saleCount, num totalQuantity) =>
+      '${reportSaleCount(saleCount)} · ${AppStrings.quantity} $totalQuantity';
 
   // Phase 5: Offline sync
   static const offlineMode = 'অফলাইন মোড';

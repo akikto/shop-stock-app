@@ -42,3 +42,8 @@ final lowStockProductsProvider =
   final repo = ref.watch(productRepositoryProvider);
   return repo.fetchLowStockProducts();
 });
+
+final activeProductCountProvider = FutureProvider.autoDispose<int>((ref) async {
+  final repo = ref.watch(productRepositoryProvider);
+  return repo.countActiveProducts();
+});

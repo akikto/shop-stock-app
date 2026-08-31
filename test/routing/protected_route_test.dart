@@ -96,6 +96,9 @@ class _EmptyProductRepository implements ProductRepository {
 
   @override
   Future<List<Product>> fetchLowStockProducts() async => [];
+
+  @override
+  Future<int> countActiveProducts() async => 0;
 }
 
 class _EmptyReportsRepository implements ReportsRepository {

@@ -94,6 +94,10 @@ class FakeProductRepository implements ProductRepository {
 
   @override
   Future<List<Product>> fetchLowStockProducts() async => [];
+
+  @override
+  Future<int> countActiveProducts() async =>
+      products.where((p) => p.isActive).length;
 }
 
 class RecordSaleCall {
