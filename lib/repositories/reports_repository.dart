@@ -1,4 +1,3 @@
-import 'package:meta/meta.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/localization/app_strings.dart';
@@ -16,14 +15,26 @@ class ReportsException implements Exception {
   String toString() => message;
 }
 
-/// Maps a [PostgrestException] to a user-facing [ReportsException].
-@visibleForTesting
-ReportsException mapReportsException(
+/// Resolves the user-facing message for report RPC failures.
+///
+/// Kept as a top-level helper so unit tests can verify Bengali fallbacks
+/// without constructing [PostgrestException] instances.
+String resolveReportsErrorMessage({
+  required String serverMessage,
+  required String fallbackMessage,
+}) {
+  return serverMessage.isNotEmpty ? serverMessage : fallbackMessage;
+}
+
+ReportsException _mapReportsException(
   PostgrestException error,
   String fallbackMessage,
 ) {
   return ReportsException(
-    error.message.isNotEmpty ? error.message : fallbackMessage,
+    resolveReportsErrorMessage(
+      serverMessage: error.message,
+      fallbackMessage: fallbackMessage,
+    ),
   );
 }
 
@@ -59,7 +70,7 @@ class SupabaseReportsRepository implements ReportsRepository {
       );
       return DashboardStats.fromJson(Map<String, dynamic>.from(result as Map));
     } on PostgrestException catch (e) {
-      throw mapReportsException(e, AppStrings.dashboardLoadFailed);
+      throw _mapReportsException(e, AppStrings.dashboardLoadFailed);
     } catch (_) {
       throw ReportsException(AppStrings.dashboardLoadFailed);
     }
@@ -78,7 +89,7 @@ class SupabaseReportsRepository implements ReportsRepository {
               StaffSalesRow.fromJson(Map<String, dynamic>.from(row as Map)))
           .toList();
     } on PostgrestException catch (e) {
-      throw mapReportsException(e, AppStrings.staffReportLoadFailed);
+      throw _mapReportsException(e, AppStrings.staffReportLoadFailed);
     } catch (_) {
       throw ReportsException(AppStrings.staffReportLoadFailed);
     }
@@ -97,7 +108,7 @@ class SupabaseReportsRepository implements ReportsRepository {
               ProductSalesRow.fromJson(Map<String, dynamic>.from(row as Map)))
           .toList();
     } on PostgrestException catch (e) {
-      throw mapReportsException(e, AppStrings.productReportLoadFailed);
+      throw _mapReportsException(e, AppStrings.productReportLoadFailed);
     } catch (_) {
       throw ReportsException(AppStrings.productReportLoadFailed);
     }
@@ -116,7 +127,7 @@ class SupabaseReportsRepository implements ReportsRepository {
               StockMovementRow.fromJson(Map<String, dynamic>.from(row as Map)))
           .toList();
     } on PostgrestException catch (e) {
-      throw mapReportsException(e, AppStrings.stockMovementReportLoadFailed);
+      throw _mapReportsException(e, AppStrings.stockMovementReportLoadFailed);
     } catch (_) {
       throw ReportsException(AppStrings.stockMovementReportLoadFailed);
     }
