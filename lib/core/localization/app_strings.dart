@@ -155,7 +155,7 @@ class AppStrings {
   static String reportSaleCount(int count) => '$countটি বিক্রি';
 
   static String reportProductSubtitle(int saleCount, num totalQuantity) =>
-      '${reportSaleCount(saleCount)} · ${AppStrings.quantity} $totalQuantity';
+      '${reportSaleCount(saleCount)} · $quantity $totalQuantity';
 
   // Phase 5: Offline sync
   static const offlineMode = 'অফলাইন মোড';
