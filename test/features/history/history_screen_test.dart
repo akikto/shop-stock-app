@@ -133,9 +133,18 @@ void main() {
       expect(find.text(AppStrings.actionStockIn), findsOneWidget);
       expect(find.text(AppStrings.actionStockAdjustment), findsOneWidget);
       expect(find.text('Paracetamol'), findsOneWidget);
-      expect(find.textContaining(AppStrings.performedBy), findsOneWidget);
-      expect(find.textContaining(AppStrings.total), findsOneWidget);
-      expect(find.textContaining(AppStrings.reason), findsOneWidget);
+      expect(
+        find.text('${AppStrings.performedBy}: Karim'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('${AppStrings.total}: ${AppStrings.currencySymbol}40'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('${AppStrings.reason}: expired'),
+        findsOneWidget,
+      );
     });
   });
 }
