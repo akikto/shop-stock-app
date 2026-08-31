@@ -47,7 +47,24 @@ dev_dependencies:
   mocktail: ^1.0.3
   drift_dev: ^2.20.0
   build_runner: ^2.4.12
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: assets/icon/app_icon.png
+  adaptive_icon_background: "#0F73EB"
+  adaptive_icon_foreground: assets/icon/app_icon_foreground.png
+  min_sdk_android: 21
+  web:
+    generate: true
+    image_path: assets/icon/app_icon.png
+    background_color: "#0F73EB"
+    theme_color: "#0F73EB"
+    favicon: true
 
 flutter:
   uses-material-design: true
 
+  assets:
+    - assets/icon/app_icon.png
