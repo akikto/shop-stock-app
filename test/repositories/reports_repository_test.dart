@@ -8,17 +8,17 @@ import 'package:shop_stock_app/models/stock_movement_row.dart';
 import 'package:shop_stock_app/repositories/reports_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class MockSupabaseClient extends Mock implements SupabaseClient {}
+class _ReportsMockSupabaseClient extends Mock implements SupabaseClient {}
 
 void main() {
-  late MockSupabaseClient client;
+  late _ReportsMockSupabaseClient client;
   late SupabaseReportsRepository repo;
 
   final from = DateTime(2026, 1, 1);
   final to = DateTime(2026, 1, 2);
 
   setUp(() {
-    client = MockSupabaseClient();
+    client = _ReportsMockSupabaseClient();
     repo = SupabaseReportsRepository(client: client);
   });
 
@@ -109,10 +109,10 @@ void main() {
 
     test('maps PostgrestException to Bengali dashboard error', () async {
       when(() => client.rpc('get_dashboard_stats', params: any(named: 'params')))
-          .thenThrow(const PostgrestException(message: ''));
+          .thenThrow(PostgrestException(''));
 
-      expect(
-        () => repo.fetchDashboardStats(from: from, to: to),
+      await expectLater(
+        repo.fetchDashboardStats(from: from, to: to),
         throwsA(
           predicate<ReportsException>(
             (e) => e.message == AppStrings.dashboardLoadFailed,
@@ -124,7 +124,7 @@ void main() {
     test('maps PostgrestException to Bengali staff report error', () async {
       when(
         () => client.rpc('get_staff_sales_report', params: any(named: 'params')),
-      ).thenThrow(const PostgrestException(message: 'denied'));
+      ).thenThrow(PostgrestException('denied'));
 
       await expectLater(
         repo.fetchStaffSalesReport(from: from, to: to),
@@ -140,8 +140,8 @@ void main() {
             client.rpc('get_product_sales_report', params: any(named: 'params')),
       ).thenThrow(Exception('network'));
 
-      expect(
-        () => repo.fetchProductSalesReport(from: from, to: to),
+      await expectLater(
+        repo.fetchProductSalesReport(from: from, to: to),
         throwsA(
           predicate<ReportsException>(
             (e) => e.message == AppStrings.productReportLoadFailed,

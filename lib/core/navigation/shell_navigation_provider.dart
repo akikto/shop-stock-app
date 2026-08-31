@@ -2,7 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Bottom-navigation tab indices — must stay aligned with
 /// [AppShell] destinations in `app_router.dart`.
-abstract final class ShellTab {
+class ShellTab {
+  const ShellTab._();
+
   static const int home = 0;
   static const int products = 1;
   static const int sale = 2;

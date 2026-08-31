@@ -88,32 +88,12 @@ class HomeScreen extends ConsumerWidget {
           ),
           data: (stats) {
             if (stats.isShopScope) {
-              final activeCountAsync = ref.watch(activeProductCountProvider);
-              return activeCountAsync.when(
-                loading: () => ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  children: const [
-                    SizedBox(height: 120),
-                    LoadingIndicator(message: AppStrings.loadingDashboard),
-                  ],
-                ),
-                error: (error, _) => ErrorView(
-                  message: error.toString(),
-                  onRetry: () => ref.invalidate(activeProductCountProvider),
-                ),
-                data: (activeCount) => _DashboardBody(
-                  stats: stats,
-                  activeProductCount: activeCount,
-                  canViewReports: canViewReports,
-                  onOpenReports: () => _openReports(context),
-                  onOpenLowStock: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                        builder: (_) => const LowStockScreen()),
-                  ),
-                  onNavigateTab: (tab) =>
-                      ref.read(shellNavigationIndexProvider.notifier).state =
-                          tab,
-                ),
+              return _ShopScopedDashboard(
+                stats: stats,
+                canViewReports: canViewReports,
+                onOpenReports: () => _openReports(context),
+                onNavigateTab: (tab) =>
+                    ref.read(shellNavigationIndexProvider.notifier).state = tab,
               );
             }
 
@@ -126,6 +106,51 @@ class HomeScreen extends ConsumerWidget {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+/// Loads active-product count only for shop-scoped dashboards so staff
+/// never trigger the extra products query.
+class _ShopScopedDashboard extends ConsumerWidget {
+  const _ShopScopedDashboard({
+    required this.stats,
+    required this.canViewReports,
+    required this.onOpenReports,
+    required this.onNavigateTab,
+  });
+
+  final DashboardStats stats;
+  final bool canViewReports;
+  final VoidCallback onOpenReports;
+  final void Function(int tab) onNavigateTab;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activeCountAsync = ref.watch(activeProductCountProvider);
+
+    return activeCountAsync.when(
+      loading: () => ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: const [
+          SizedBox(height: 120),
+          LoadingIndicator(message: AppStrings.loadingDashboard),
+        ],
+      ),
+      error: (error, _) => ErrorView(
+        message: error.toString(),
+        onRetry: () => ref.invalidate(activeProductCountProvider),
+      ),
+      data: (activeCount) => _DashboardBody(
+        stats: stats,
+        activeProductCount: activeCount,
+        canViewReports: canViewReports,
+        onOpenReports: onOpenReports,
+        onOpenLowStock: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => const LowStockScreen()),
+        ),
+        onNavigateTab: onNavigateTab,
       ),
     );
   }
