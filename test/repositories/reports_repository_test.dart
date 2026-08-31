@@ -5,7 +5,6 @@ import 'package:shop_stock_app/models/product_sales_row.dart';
 import 'package:shop_stock_app/models/staff_sales_row.dart';
 import 'package:shop_stock_app/models/stock_movement_row.dart';
 import 'package:shop_stock_app/repositories/reports_repository.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class FakeReportsRepository implements ReportsRepository {
   FakeReportsRepository({
@@ -70,23 +69,25 @@ void main() {
   final from = DateTime(2026, 1, 1);
   final to = DateTime(2026, 1, 2);
 
-  group('mapReportsException', () {
+  group('resolveReportsErrorMessage', () {
     test('uses server message when present', () {
-      final exception = mapReportsException(
-        PostgrestException(message: 'denied'),
-        AppStrings.dashboardLoadFailed,
+      expect(
+        resolveReportsErrorMessage(
+          serverMessage: 'denied',
+          fallbackMessage: AppStrings.dashboardLoadFailed,
+        ),
+        'denied',
       );
-
-      expect(exception.message, 'denied');
     });
 
-    test('uses Bengali fallback when PostgREST message is empty', () {
-      final exception = mapReportsException(
-        PostgrestException(message: ''),
+    test('uses Bengali fallback when server message is empty', () {
+      expect(
+        resolveReportsErrorMessage(
+          serverMessage: '',
+          fallbackMessage: AppStrings.staffReportLoadFailed,
+        ),
         AppStrings.staffReportLoadFailed,
       );
-
-      expect(exception.message, AppStrings.staffReportLoadFailed);
     });
   });
 
