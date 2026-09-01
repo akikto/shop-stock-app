@@ -61,7 +61,7 @@ class FcmMessageRouter {
               ? body
               : AppStrings.notifications,
         ),
-        action: SnackBarAction(
+        action: const SnackBarAction(
           label: AppStrings.viewNotifications,
           onPressed: openNotifications,
         ),
