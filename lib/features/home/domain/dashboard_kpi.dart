@@ -32,6 +32,8 @@ class DashboardKpiDescriptor {
 List<DashboardKpiDescriptor> buildDashboardKpis({
   required DashboardStats stats,
   int? activeProductCount,
+  bool activeProductCountPending = false,
+  bool activeProductCountError = false,
 }) {
   const currency = AppStrings.currencySymbol;
   final base = <DashboardKpiDescriptor>[
@@ -71,7 +73,11 @@ List<DashboardKpiDescriptor> buildDashboardKpis({
     DashboardKpiDescriptor(
       kind: DashboardKpiKind.activeProductCount,
       label: AppStrings.activeProductCount,
-      value: '${activeProductCount ?? 0}',
+      value: activeProductCountPending
+          ? '...'
+          : activeProductCountError
+              ? '—'
+              : '${activeProductCount ?? 0}',
     ),
   ];
 }

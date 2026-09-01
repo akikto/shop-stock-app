@@ -51,7 +51,9 @@ final syncEngineProvider = Provider<SyncEngine>((ref) {
     conflictRepo: ref.watch(syncConflictRepositoryProvider),
     onInvalidate: () {
       ref.invalidate(productListControllerProvider);
-      ref.invalidate(dashboardStatsProvider);
+      final range = ref.read(dashboardHomeRangeProvider);
+      ref.invalidate(dashboardStatsProvider(range));
+      ref.invalidate(activeProductCountProvider);
       ref.invalidate(unreadNotificationCountProvider);
       ref.invalidate(historyListControllerProvider);
       ref.invalidate(pendingTransactionCountProvider);
