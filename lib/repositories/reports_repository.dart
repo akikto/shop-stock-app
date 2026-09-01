@@ -95,8 +95,7 @@ class SupabaseReportsRepository implements ReportsRepository {
       throw ReportsException(
         e.message.isNotEmpty ? e.message : AppStrings.dashboardLoadFailed,
       );
-    } catch (e) {
-      if (e is ReportsException) rethrow;
+    } catch (_) {
       throw ReportsException(AppStrings.dashboardLoadFailed);
     }
   }

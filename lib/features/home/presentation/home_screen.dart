@@ -34,8 +34,7 @@ class HomeScreen extends ConsumerWidget {
     final canViewReports = profile?.role.canViewReports ?? false;
     final range = ref.watch(dashboardHomeRangeProvider);
     final statsAsync = ref.watch(dashboardStatsProvider(range));
-    final activeCountAsync =
-        canViewReports ? ref.watch(activeProductCountProvider) : null;
+    final activeCountAsync = ref.watch(shopActiveProductCountProvider);
     final unreadAsync = ref.watch(unreadNotificationCountProvider);
 
     return Scaffold(
@@ -77,7 +76,7 @@ class HomeScreen extends ConsumerWidget {
           ref.invalidate(dashboardStatsProvider(range));
           ref.invalidate(unreadNotificationCountProvider);
           if (canViewReports) {
-            ref.invalidate(activeProductCountProvider);
+            ref.invalidate(shopActiveProductCountProvider);
           }
         },
         child: statsAsync.when(
@@ -90,13 +89,11 @@ class HomeScreen extends ConsumerWidget {
           data: (stats) => _DashboardBody(
             stats: stats,
             canViewReports: canViewReports,
-            activeProductCount: stats.isShopScope
-                ? activeCountAsync?.valueOrNull
-                : null,
-            activeProductCountPending: stats.isShopScope &&
-                (activeCountAsync?.isLoading ?? false),
-            activeProductCountError: stats.isShopScope &&
-                (activeCountAsync?.hasError ?? false),
+            activeProductCount: stats.isShopScope ? activeCountAsync.valueOrNull : null,
+            activeProductCountPending:
+                stats.isShopScope && activeCountAsync.isLoading,
+            activeProductCountError:
+                stats.isShopScope && activeCountAsync.hasError,
             onOpenReports: () => _openReports(context),
             onOpenLowStock: stats.isShopScope && stats.lowStockCount > 0
                 ? () => Navigator.of(context).push(

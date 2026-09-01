@@ -53,7 +53,7 @@ final syncEngineProvider = Provider<SyncEngine>((ref) {
       ref.invalidate(productListControllerProvider);
       final range = ref.read(dashboardHomeRangeProvider);
       ref.invalidate(dashboardStatsProvider(range));
-      ref.invalidate(activeProductCountProvider);
+      ref.invalidate(shopActiveProductCountProvider);
       ref.invalidate(unreadNotificationCountProvider);
       ref.invalidate(historyListControllerProvider);
       ref.invalidate(pendingTransactionCountProvider);

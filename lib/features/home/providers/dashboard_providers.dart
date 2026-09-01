@@ -7,12 +7,23 @@ import '../../../models/product_sales_row.dart';
 import '../../../models/staff_sales_row.dart';
 import '../../../models/stock_movement_row.dart';
 import '../../../repositories/reports_repository.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../../products/providers/product_providers.dart';
 
 /// Stable "today" range for the home dashboard. Realtime/sync invalidation
-/// targets this instead of wiping every [dashboardStatsProvider] family key.
+/// targets this instead of wiping every dashboardStatsProvider family key.
 final dashboardHomeRangeProvider = Provider<DateRange>((ref) {
   return DateRange.today();
+});
+
+/// Active product count for Owner/Manager only — returns null for staff so
+/// the extra products query never runs on self-scoped dashboards.
+final shopActiveProductCountProvider =
+    FutureProvider.autoDispose<int?>((ref) async {
+  final profile = ref.watch(currentProfileProvider).valueOrNull;
+  if (profile == null || !profile.role.canViewReports) return null;
+  final repo = ref.watch(productRepositoryProvider);
+  return repo.countActiveProducts();
 });
 
 final reportsRepositoryProvider = Provider<ReportsRepository>((ref) {
