@@ -66,7 +66,7 @@ final productRealtimeProvider = Provider.autoDispose<void>((ref) {
         callback: (_) {
           final range = ref.read(dashboardHomeRangeProvider);
           ref.invalidate(dashboardStatsProvider(range));
-          ref.invalidate(activeProductCountProvider);
+          ref.invalidate(shopActiveProductCountProvider);
         },
       )
       .subscribe();
