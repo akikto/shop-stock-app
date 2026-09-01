@@ -1,85 +1,90 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:shop_stock_app/services/fcm_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class _RecordingClient extends Fake implements SupabaseClient {
-  _RecordingClient({this.userId = 'user-1'});
+class _MockSupabaseClient extends Mock implements SupabaseClient {}
 
-  final String? userId;
-  int rpcCalls = 0;
-  String? lastRpcToken;
+class _MockGoTrueClient extends Mock implements GoTrueClient {}
 
-  @override
-  GoTrueClient get auth => _FakeAuth(userId);
-
+/// Minimal awaitable stub for [SupabaseClient.rpc] (PostgrestFilterBuilder).
+class _AwaitableRpc extends Fake {
   @override
   dynamic noSuchMethod(Invocation invocation) {
-    if (invocation.memberName == #rpc) {
-      rpcCalls++;
-      final params = invocation.namedArguments[#params] as Map<String, dynamic>?;
-      lastRpcToken = params?['p_token'] as String?;
+    if (invocation.memberName == #then) {
       return Future<void>.value();
     }
     return super.noSuchMethod(invocation);
   }
 }
 
-class _FakeAuth extends Fake implements GoTrueClient {
-  _FakeAuth(this.userId);
-
-  final String? userId;
-
-  @override
-  User? get currentUser => userId == null
-      ? null
-      : User(
-          id: userId!,
-          appMetadata: const <String, dynamic>{},
-          userMetadata: const <String, dynamic>{},
-          aud: 'authenticated',
-          createdAt: '2026-01-01T00:00:00Z',
-        );
-}
-
 void main() {
+  late _MockSupabaseClient client;
+  late _MockGoTrueClient auth;
+
+  setUpAll(() {
+    registerFallbackValue(<String, dynamic>{});
+  });
+
+  setUp(() {
+    client = _MockSupabaseClient();
+    auth = _MockGoTrueClient();
+    when(() => client.auth).thenReturn(auth);
+    when(() => auth.currentUser).thenReturn(null);
+  });
+
   group('FcmService', () {
     test('registerTokenForTest skips duplicate RPC for same token', () async {
-      final client = _RecordingClient();
-      final service = FcmService(client: client);
+      var rpcCalls = 0;
+      when(
+        () => client.rpc<Object?>(
+          any(),
+          params: any(named: 'params'),
+        ),
+      ).thenAnswer((invocation) {
+        rpcCalls++;
+        return _AwaitableRpc();
+      });
 
+      final service = FcmService(client: client);
       await service.registerTokenForTest('token-a');
       await service.registerTokenForTest('token-a');
       await service.registerTokenForTest('token-b');
 
-      expect(client.rpcCalls, 2);
+      expect(rpcCalls, 2);
       expect(service.lastRegisteredTokenForTest, 'token-b');
     });
 
     test('registerTokenIfAvailable is no-op when Firebase is not initialized',
         () async {
-      final client = _RecordingClient();
       final service = FcmService(client: client);
 
       await service.registerTokenIfAvailable();
 
-      expect(client.rpcCalls, 0);
+      verifyNever(
+        () => client.rpc<Object?>(any(), params: any(named: 'params')),
+      );
       expect(service.hasTokenRefreshListener, isFalse);
     });
 
     test('unregisterTokenIfAvailable is no-op when Firebase is not initialized',
         () async {
-      final client = _RecordingClient();
       final service = FcmService(client: client);
 
       await service.unregisterTokenIfAvailable();
 
-      expect(client.rpcCalls, 0);
+      verifyNever(
+        () => client.rpc<Object?>(any(), params: any(named: 'params')),
+      );
     });
 
     test('attachTokenRefreshListenerForTest only attaches once', () async {
-      final client = _RecordingClient();
+      when(
+        () => client.rpc<Object?>(any(), params: any(named: 'params')),
+      ).thenAnswer((_) => _AwaitableRpc());
+
       final service = FcmService(client: client);
       final controller = StreamController<String>();
 
