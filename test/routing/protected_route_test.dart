@@ -30,7 +30,6 @@ import 'package:shop_stock_app/sync/models/transaction_write_result.dart';
 import 'package:shop_stock_app/services/image_compressor.dart';
 import 'package:shop_stock_app/services/product_photo_service.dart';
 import 'package:shop_stock_app/services/product_photo_uploader.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' hide AuthException;
 
 import '../auth/fake_auth_repository.dart';
 

@@ -106,9 +106,9 @@ class _NotificationsBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (state.isLoading && state.notifications.isEmpty) {
-      return const ListView(
-        physics: AlwaysScrollableScrollPhysics(),
-        children: [
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: const [
           SizedBox(
             height: 240,
             child: LoadingIndicator(message: AppStrings.loadingNotifications),
@@ -130,9 +130,9 @@ class _NotificationsBody extends StatelessWidget {
     }
 
     if (state.notifications.isEmpty) {
-      return const ListView(
-        physics: AlwaysScrollableScrollPhysics(),
-        children: [
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: const [
           SizedBox(
             height: 240,
             child: Center(child: Text(AppStrings.noNotifications)),
