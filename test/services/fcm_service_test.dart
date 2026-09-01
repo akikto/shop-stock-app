@@ -9,15 +9,15 @@ class _MockSupabaseClient extends Mock implements SupabaseClient {}
 
 class _MockGoTrueClient extends Mock implements GoTrueClient {}
 
-/// Minimal awaitable stub for [SupabaseClient.rpc] (PostgrestFilterBuilder).
-class _AwaitableRpc extends Fake {
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    if (invocation.memberName == #then) {
-      return Future<void>.value();
-    }
-    return super.noSuchMethod(invocation);
-  }
+class _MockPostgrestFilterBuilder extends Mock
+    implements PostgrestFilterBuilder<Object?> {}
+
+_MockPostgrestFilterBuilder _completedRpc() {
+  final builder = _MockPostgrestFilterBuilder();
+  when(
+    () => builder.then<void>(any(), onError: any(named: 'onError')),
+  ).thenAnswer((_) => Future<void>.value());
+  return builder;
 }
 
 void main() {
@@ -45,7 +45,7 @@ void main() {
         ),
       ).thenAnswer((invocation) {
         rpcCalls++;
-        return _AwaitableRpc();
+        return _completedRpc();
       });
 
       final service = FcmService(client: client);
@@ -83,7 +83,7 @@ void main() {
     test('attachTokenRefreshListenerForTest only attaches once', () async {
       when(
         () => client.rpc<Object?>(any(), params: any(named: 'params')),
-      ).thenAnswer((_) => _AwaitableRpc());
+      ).thenAnswer((_) => _completedRpc());
 
       final service = FcmService(client: client);
       final controller = StreamController<String>();

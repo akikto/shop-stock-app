@@ -45,7 +45,7 @@ class FcmMessageRouter {
     }
   }
 
-  static void handleMessageOpened(RemoteMessage message) {
+  static void handleMessageOpened(RemoteMessage _) {
     openNotifications();
   }
 
