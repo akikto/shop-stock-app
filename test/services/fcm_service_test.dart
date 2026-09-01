@@ -9,20 +9,10 @@ class _RecordingClient extends Fake implements SupabaseClient {
 
   final String? userId;
   int rpcCalls = 0;
-  int deleteCalls = 0;
   String? lastRpcToken;
-  String? lastDeletedToken;
 
   @override
   GoTrueClient get auth => _FakeAuth(userId);
-
-  @override
-  SupabaseQueryBuilder from(String table) {
-    if (table != 'fcm_tokens') {
-      throw UnimplementedError('Unexpected table: $table');
-    }
-    return _FakeDeleteBuilder(this);
-  }
 
   @override
   Future<dynamic> rpc(
@@ -46,56 +36,11 @@ class _FakeAuth extends Fake implements GoTrueClient {
       ? null
       : User(
           id: userId!,
-          appMetadata: const {},
-          userMetadata: const {},
+          appMetadata: const <String, dynamic>{},
+          userMetadata: const <String, dynamic>{},
           aud: 'authenticated',
           createdAt: '2026-01-01T00:00:00Z',
         );
-}
-
-class _FakeDeleteBuilder extends Fake implements SupabaseQueryBuilder {
-  _FakeDeleteBuilder(this.client);
-
-  final _RecordingClient client;
-  String? _token;
-
-  @override
-  PostgrestFilterBuilder delete() {
-    client.deleteCalls++;
-    return _FakeEqBuilder(client);
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
-class _FakeEqBuilder extends Fake implements PostgrestFilterBuilder {
-  _FakeEqBuilder(this.client);
-
-  final _RecordingClient client;
-  final _filters = <String, String>{};
-
-  @override
-  PostgrestFilterBuilder eq(String column, Object value) {
-    _filters[column] = value.toString();
-    return this;
-  }
-
-  @override
-  Future<List<Map<String, dynamic>>> then(
-    FutureOr<List<Map<String, dynamic>>> Function(
-      List<Map<String, dynamic>> value,
-    ) onValue, {
-    Function? onError,
-  }) {
-    if (_filters['token'] != null) {
-      client.lastDeletedToken = _filters['token'];
-    }
-    return Future.value(<Map<String, dynamic>>[]);
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 void main() {
@@ -130,8 +75,9 @@ void main() {
 
       await service.unregisterTokenIfAvailable();
 
-      expect(client.deleteCalls, 0);
+      expect(client.rpcCalls, 0);
     });
+
     test('attachTokenRefreshListenerForTest only attaches once', () async {
       final client = _RecordingClient();
       final service = FcmService(client: client);

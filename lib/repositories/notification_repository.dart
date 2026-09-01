@@ -1,4 +1,3 @@
-import 'package:postgrest/postgrest.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/localization/app_strings.dart';
@@ -69,12 +68,11 @@ class SupabaseNotificationRepository implements NotificationRepository {
   @override
   Future<int> fetchUnreadCount() async {
     try {
-      final response = await _client
+      final result = await _client
           .from('notifications')
           .select('id')
-          .eq('read', false)
-          .count(CountOption.exact);
-      return response.count;
+          .eq('read', false);
+      return (result as List).length;
     } on PostgrestException catch (e) {
       throw NotificationException(
         resolveNotificationErrorMessage(
