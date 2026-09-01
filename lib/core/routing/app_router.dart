@@ -10,6 +10,7 @@ import '../../features/auth/providers/auth_provider.dart';
 import '../../features/history/presentation/history_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/home/providers/fcm_providers.dart';
+import '../../services/fcm_message_router.dart';
 import '../../features/products/presentation/product_detail_screen.dart';
 import '../../features/products/presentation/product_form_screen.dart';
 import '../../features/products/presentation/products_screen.dart';
@@ -30,6 +31,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final authRepository = ref.watch(authRepositoryProvider);
 
   return GoRouter(
+    navigatorKey: FcmMessageRouter.navigatorKey,
     initialLocation: _homePath,
     refreshListenable: GoRouterRefreshStream(authRepository.authStateChanges),
     redirect: (context, state) {
@@ -107,6 +109,7 @@ class _ProtectedAppShell extends ConsumerWidget {
         }
 
         ref.watch(fcmRegistrationProvider);
+        FcmMessageRouter.flushPendingNavigation();
 
         return const AppShell(
           destinations: [

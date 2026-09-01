@@ -25,6 +25,28 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
+  void _openNotifications(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => const NotificationsScreen()),
+    );
+  }
+
+  Widget _notificationBell({
+    required BuildContext context,
+    required int? count,
+    required bool showBadge,
+  }) {
+    return IconButton(
+      icon: Badge(
+        isLabelVisible: showBadge,
+        label: Text('${count ?? 0}'),
+        child: const Icon(Icons.notifications_outlined),
+      ),
+      tooltip: AppStrings.notifications,
+      onPressed: () => _openNotifications(context),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(notificationRealtimeProvider);
@@ -48,26 +70,22 @@ class HomeScreen extends ConsumerWidget {
               onPressed: () => _openReports(context),
             ),
           unreadAsync.when(
-            data: (count) => IconButton(
-              icon: Badge(
-                isLabelVisible: count > 0,
-                label: Text('$count'),
-                child: const Icon(Icons.notifications_outlined),
-              ),
-              tooltip: AppStrings.notifications,
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                    builder: (_) => const NotificationsScreen()),
-              ),
+            skipLoadingOnReload: true,
+            data: (count) => _notificationBell(
+              context: context,
+              count: count,
+              showBadge: count > 0,
             ),
-            loading: () => IconButton(
+            loading: () => _notificationBell(
+              context: context,
+              count: unreadAsync.valueOrNull,
+              showBadge: (unreadAsync.valueOrNull ?? 0) > 0,
+            ),
+            error: (_, __) => IconButton(
               icon: const Icon(Icons.notifications_outlined),
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                    builder: (_) => const NotificationsScreen()),
-              ),
+              tooltip: AppStrings.notifications,
+              onPressed: () => _openNotifications(context),
             ),
-            error: (_, __) => const SizedBox.shrink(),
           ),
         ],
       ),

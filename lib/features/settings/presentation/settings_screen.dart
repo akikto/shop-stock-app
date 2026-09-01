@@ -7,6 +7,7 @@ import '../../../shared/widgets/loading_indicator.dart';
 import '../../../sync/providers/sync_providers.dart';
 import '../../../sync/sync_bootstrap.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../home/providers/fcm_providers.dart';
 import 'notification_preferences_screen.dart';
 import 'pending_transactions_screen.dart';
 import 'staff_management_screen.dart';
@@ -99,7 +100,13 @@ class SettingsScreen extends ConsumerWidget {
               const SizedBox(height: 24),
               FilledButton.icon(
                 onPressed: () async {
-                  await ref.read(authRepositoryProvider).signOut();
+                  try {
+                    await ref
+                        .read(fcmServiceProvider)
+                        .unregisterTokenIfAvailable();
+                  } finally {
+                    await ref.read(authRepositoryProvider).signOut();
+                  }
                 },
                 icon: const Icon(Icons.logout),
                 label: const Text(AppStrings.logout),
