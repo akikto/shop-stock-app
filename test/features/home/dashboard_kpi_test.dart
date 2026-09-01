@@ -71,5 +71,25 @@ void main() {
       expect(sales.value, contains('1500'));
       expect(adjustments.value, '2');
     });
+
+    test('shows placeholder while active product count is loading', () {
+      final kpis = buildDashboardKpis(
+        stats: shopStats,
+        activeProductCountPending: true,
+      );
+      final active = kpis
+          .firstWhere((k) => k.kind == DashboardKpiKind.activeProductCount);
+      expect(active.value, '...');
+    });
+
+    test('shows dash when active product count failed', () {
+      final kpis = buildDashboardKpis(
+        stats: shopStats,
+        activeProductCountError: true,
+      );
+      final active = kpis
+          .firstWhere((k) => k.kind == DashboardKpiKind.activeProductCount);
+      expect(active.value, '—');
+    });
   });
 }

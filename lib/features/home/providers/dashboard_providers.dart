@@ -9,6 +9,12 @@ import '../../../models/stock_movement_row.dart';
 import '../../../repositories/reports_repository.dart';
 import '../../products/providers/product_providers.dart';
 
+/// Stable "today" range for the home dashboard. Realtime/sync invalidation
+/// targets this instead of wiping every [dashboardStatsProvider] family key.
+final dashboardHomeRangeProvider = Provider<DateRange>((ref) {
+  return DateRange.today();
+});
+
 final reportsRepositoryProvider = Provider<ReportsRepository>((ref) {
   return SupabaseReportsRepository();
 });

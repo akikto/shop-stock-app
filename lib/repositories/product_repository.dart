@@ -274,9 +274,14 @@ class SupabaseProductRepository implements ProductRepository {
   @override
   Future<int> countActiveProducts() async {
     try {
-      final rows =
-          await _client.from('products').select('id').eq('is_active', true);
-      return (rows as List).length;
+      final count = await _client
+          .from('products')
+          .eq('is_active', true)
+          .count(CountOption.exact);
+      return count;
+    } on PostgrestException catch (e) {
+      throw ProductException(
+          e.message.isNotEmpty ? e.message : 'Could not count active products.');
     } catch (_) {
       throw ProductException('Could not count active products.');
     }

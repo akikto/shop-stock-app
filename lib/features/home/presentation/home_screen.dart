@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/localization/app_strings.dart';
 import '../../../core/navigation/shell_navigation_provider.dart';
-import '../../../core/utils/date_range.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../models/dashboard_stats.dart';
 import '../../../shared/widgets/error_view.dart';
@@ -33,8 +32,10 @@ class HomeScreen extends ConsumerWidget {
 
     final profile = ref.watch(currentProfileProvider).valueOrNull;
     final canViewReports = profile?.role.canViewReports ?? false;
-    final range = DateRange.today();
+    final range = ref.watch(dashboardHomeRangeProvider);
     final statsAsync = ref.watch(dashboardStatsProvider(range));
+    final activeCountAsync =
+        canViewReports ? ref.watch(activeProductCountProvider) : null;
     final unreadAsync = ref.watch(unreadNotificationCountProvider);
 
     return Scaffold(
@@ -86,71 +87,27 @@ class HomeScreen extends ConsumerWidget {
             message: error.toString(),
             onRetry: () => ref.invalidate(dashboardStatsProvider(range)),
           ),
-          data: (stats) {
-            if (stats.isShopScope) {
-              return _ShopScopedDashboard(
-                stats: stats,
-                canViewReports: canViewReports,
-                onOpenReports: () => _openReports(context),
-                onNavigateTab: (tab) =>
-                    ref.read(shellNavigationIndexProvider.notifier).state = tab,
-              );
-            }
-
-            return _DashboardBody(
-              stats: stats,
-              canViewReports: canViewReports,
-              onOpenReports: () => _openReports(context),
-              onNavigateTab: (tab) =>
-                  ref.read(shellNavigationIndexProvider.notifier).state = tab,
-            );
-          },
+          data: (stats) => _DashboardBody(
+            stats: stats,
+            canViewReports: canViewReports,
+            activeProductCount: stats.isShopScope
+                ? activeCountAsync?.valueOrNull
+                : null,
+            activeProductCountPending: stats.isShopScope &&
+                (activeCountAsync?.isLoading ?? false),
+            activeProductCountError: stats.isShopScope &&
+                (activeCountAsync?.hasError ?? false),
+            onOpenReports: () => _openReports(context),
+            onOpenLowStock: stats.isShopScope && stats.lowStockCount > 0
+                ? () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                          builder: (_) => const LowStockScreen()),
+                    )
+                : null,
+            onNavigateTab: (tab) =>
+                ref.read(shellNavigationIndexProvider.notifier).state = tab,
+          ),
         ),
-      ),
-    );
-  }
-}
-
-/// Loads active-product count only for shop-scoped dashboards so staff
-/// never trigger the extra products query.
-class _ShopScopedDashboard extends ConsumerWidget {
-  const _ShopScopedDashboard({
-    required this.stats,
-    required this.canViewReports,
-    required this.onOpenReports,
-    required this.onNavigateTab,
-  });
-
-  final DashboardStats stats;
-  final bool canViewReports;
-  final VoidCallback onOpenReports;
-  final void Function(int tab) onNavigateTab;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final activeCountAsync = ref.watch(activeProductCountProvider);
-
-    return activeCountAsync.when(
-      loading: () => ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: const [
-          SizedBox(height: 120),
-          LoadingIndicator(message: AppStrings.loadingDashboard),
-        ],
-      ),
-      error: (error, _) => ErrorView(
-        message: error.toString(),
-        onRetry: () => ref.invalidate(activeProductCountProvider),
-      ),
-      data: (activeCount) => _DashboardBody(
-        stats: stats,
-        activeProductCount: activeCount,
-        canViewReports: canViewReports,
-        onOpenReports: onOpenReports,
-        onOpenLowStock: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (_) => const LowStockScreen()),
-        ),
-        onNavigateTab: onNavigateTab,
       ),
     );
   }
@@ -163,11 +120,15 @@ class _DashboardBody extends StatelessWidget {
     required this.onOpenReports,
     required this.onNavigateTab,
     this.activeProductCount,
+    this.activeProductCountPending = false,
+    this.activeProductCountError = false,
     this.onOpenLowStock,
   });
 
   final DashboardStats stats;
   final int? activeProductCount;
+  final bool activeProductCountPending;
+  final bool activeProductCountError;
   final bool canViewReports;
   final VoidCallback onOpenReports;
   final VoidCallback? onOpenLowStock;
@@ -178,6 +139,8 @@ class _DashboardBody extends StatelessWidget {
     final kpis = buildDashboardKpis(
       stats: stats,
       activeProductCount: activeProductCount,
+      activeProductCountPending: activeProductCountPending,
+      activeProductCountError: activeProductCountError,
     );
 
     return ListView(
