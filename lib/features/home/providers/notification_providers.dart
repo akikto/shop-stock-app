@@ -6,7 +6,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../models/app_notification.dart';
 import '../../../repositories/notification_repository.dart';
 import '../../../services/supabase_service.dart';
-import 'dashboard_providers.dart';
 import 'dashboard_refresh.dart';
 
 final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
