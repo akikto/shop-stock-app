@@ -12,66 +12,47 @@ class NotificationsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(notificationRealtimeProvider);
-    final notificationsAsync = ref.watch(notificationsListProvider);
+    final listState = ref.watch(notificationListControllerProvider);
+    final controller = ref.read(notificationListControllerProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text(AppStrings.notifications),
         actions: [
           TextButton(
-            onPressed: () async {
-              await ref.read(notificationRepositoryProvider).markAllAsRead();
-              ref.invalidate(notificationsListProvider);
-              ref.invalidate(unreadNotificationCountProvider);
-            },
+            onPressed: listState.notifications.isEmpty
+                ? null
+                : () async {
+                    await ref
+                        .read(notificationRepositoryProvider)
+                        .markAllAsRead();
+                    controller.markAllLocalAsRead();
+                    ref.invalidate(unreadNotificationCountProvider);
+                  },
             child: const Text(AppStrings.markAllRead),
           ),
         ],
       ),
-      body: notificationsAsync.when(
-        loading: () => const LoadingIndicator(),
-        error: (e, _) => ErrorView(
-          message: e.toString(),
-          onRetry: () => ref.invalidate(notificationsListProvider),
-        ),
-        data: (notifications) {
-          if (notifications.isEmpty) {
-            return const Center(child: Text(AppStrings.noNotifications));
-          }
-          return ListView.separated(
-            itemCount: notifications.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
-            itemBuilder: (context, i) {
-              final n = notifications[i];
-              return ListTile(
-                leading:
-                    Icon(_iconForType(n.type), color: _colorForType(n.type)),
-                title: Text(n.message),
-                subtitle: Text(_formatTime(n.createdAt)),
-                tileColor: n.read
-                    ? null
-                    : Theme.of(context)
-                        .colorScheme
-                        .primaryContainer
-                        .withValues(alpha: 0.15),
-                onTap: () async {
-                  if (!n.read) {
-                    await ref
-                        .read(notificationRepositoryProvider)
-                        .markAsRead(n.id);
-                    ref.invalidate(notificationsListProvider);
-                    ref.invalidate(unreadNotificationCountProvider);
-                  }
-                },
-              );
-            },
-          );
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await controller.refresh();
+          ref.invalidate(unreadNotificationCountProvider);
         },
+        child: _NotificationsBody(
+          state: listState,
+          onRetry: () => controller.refresh(),
+          onLoadMore: controller.loadMore,
+          onMarkRead: (id) async {
+            await ref.read(notificationRepositoryProvider).markAsRead(id);
+            controller.markLocalAsRead(id);
+            ref.invalidate(unreadNotificationCountProvider);
+          },
+        ),
       ),
     );
   }
 
-  static IconData _iconForType(String type) {
+  static IconData iconForType(String type) {
     switch (type) {
       case 'sale':
         return Icons.point_of_sale;
@@ -86,7 +67,7 @@ class NotificationsScreen extends ConsumerWidget {
     }
   }
 
-  static Color _colorForType(String type) {
+  static Color colorForType(String type) {
     switch (type) {
       case 'sale':
         return Colors.green;
@@ -101,8 +82,162 @@ class NotificationsScreen extends ConsumerWidget {
     }
   }
 
-  static String _formatTime(DateTime dt) {
+  static String formatTime(DateTime dt) {
     final local = dt.toLocal();
-    return '${local.day}/${local.month}/${local.year} ${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
+    return '${local.day}/${local.month}/${local.year} '
+        '${local.hour.toString().padLeft(2, '0')}:'
+        '${local.minute.toString().padLeft(2, '0')}';
+  }
+}
+
+class _NotificationsBody extends StatelessWidget {
+  const _NotificationsBody({
+    required this.state,
+    required this.onRetry,
+    required this.onLoadMore,
+    required this.onMarkRead,
+  });
+
+  final NotificationListState state;
+  final VoidCallback onRetry;
+  final Future<void> Function() onLoadMore;
+  final Future<void> Function(String id) onMarkRead;
+
+  @override
+  Widget build(BuildContext context) {
+    if (state.isLoading && state.notifications.isEmpty) {
+      return const ListView(
+        physics: AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(
+            height: 240,
+            child: LoadingIndicator(message: AppStrings.loadingNotifications),
+          ),
+        ],
+      );
+    }
+
+    if (state.error != null && state.notifications.isEmpty) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(
+            height: 320,
+            child: ErrorView(message: state.error!, onRetry: onRetry),
+          ),
+        ],
+      );
+    }
+
+    if (state.notifications.isEmpty) {
+      return const ListView(
+        physics: AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(
+            height: 240,
+            child: Center(child: Text(AppStrings.noNotifications)),
+          ),
+        ],
+      );
+    }
+
+    return ListView.separated(
+      physics: const AlwaysScrollableScrollPhysics(),
+      itemCount: state.notifications.length + 1,
+      separatorBuilder: (_, index) {
+        if (index >= state.notifications.length - 1) {
+          return const SizedBox.shrink();
+        }
+        return const Divider(height: 1);
+      },
+      itemBuilder: (context, index) {
+        if (index == state.notifications.length) {
+          return _LoadMoreFooter(
+            isLoadingMore: state.isLoadingMore,
+            hasMore: state.hasMore,
+            error: state.error,
+            onLoadMore: onLoadMore,
+            onRetry: onRetry,
+          );
+        }
+
+        final n = state.notifications[index];
+        return ListTile(
+          leading: Icon(
+            NotificationsScreen.iconForType(n.type),
+            color: NotificationsScreen.colorForType(n.type),
+          ),
+          title: Text(n.message),
+          subtitle: Text(NotificationsScreen.formatTime(n.createdAt)),
+          tileColor: n.read
+              ? null
+              : Theme.of(context)
+                  .colorScheme
+                  .primaryContainer
+                  .withValues(alpha: 0.15),
+          onTap: () async {
+            if (!n.read) {
+              await onMarkRead(n.id);
+            }
+          },
+        );
+      },
+    );
+  }
+}
+
+class _LoadMoreFooter extends StatelessWidget {
+  const _LoadMoreFooter({
+    required this.isLoadingMore,
+    required this.hasMore,
+    required this.onLoadMore,
+    required this.onRetry,
+    this.error,
+  });
+
+  final bool isLoadingMore;
+  final bool hasMore;
+  final String? error;
+  final Future<void> Function() onLoadMore;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoadingMore) {
+      return const Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (error != null) {
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Text(error!, textAlign: TextAlign.center),
+            const SizedBox(height: 8),
+            TextButton(onPressed: onRetry, child: const Text(AppStrings.retry)),
+          ],
+        ),
+      );
+    }
+
+    if (!hasMore) {
+      return const Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(child: Text(AppStrings.noMoreNotifications)),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Center(
+        child: OutlinedButton(
+          onPressed: () => onLoadMore(),
+          child: const Text(AppStrings.loadMoreNotifications),
+        ),
+      ),
+    );
   }
 }

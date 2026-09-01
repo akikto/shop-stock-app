@@ -134,6 +134,16 @@ class AppStrings {
   static const notifications = 'বিজ্ঞপ্তি';
   static const noNotifications = 'কোনো বিজ্ঞপ্তি নেই';
   static const markAllRead = 'সব পড়া হয়েছে';
+  static const markAsRead = 'পড়া হয়েছে';
+  static const viewNotifications = 'বিজ্ঞপ্তি দেখুন';
+  static const loadingNotifications = 'বিজ্ঞপ্তি লোড হচ্ছে...';
+  static const notificationsLoadFailed = 'বিজ্ঞপ্তি লোড করা যায়নি';
+  static const unreadCountLoadFailed = 'অপঠিত বিজ্ঞপ্তি গণনা করা যায়নি';
+  static const notificationUpdateFailed = 'বিজ্ঞপ্তি আপডেট করা যায়নি';
+  static const notificationsUpdateFailed = 'বিজ্ঞপ্তি আপডেট করা যায়নি';
+  static const notificationRefreshFailed = 'বিজ্ঞপ্তি রিফ্রেশ করা যায়নি';
+  static const loadMoreNotifications = 'আরও দেখুন';
+  static const noMoreNotifications = 'আর কোনো বিজ্ঞপ্তি নেই';
   static const viewReports = 'রিপোর্ট দেখুন';
   static const quickActions = 'দ্রুত কাজ';
   static const totalActivity = 'মোট কার্যক্রম';

@@ -132,7 +132,10 @@ class _EmptyReportsRepository implements ReportsRepository {
 
 class _EmptyNotificationRepository implements NotificationRepository {
   @override
-  Future<List<AppNotification>> fetchNotifications({int limit = 50}) async =>
+  Future<List<AppNotification>> fetchNotifications({
+    int limit = 50,
+    int offset = 0,
+  }) async =>
       [];
 
   @override
@@ -143,10 +146,6 @@ class _EmptyNotificationRepository implements NotificationRepository {
 
   @override
   Future<void> markAllAsRead() async {}
-
-  @override
-  RealtimeChannel subscribeToNotifications(void Function() onChange) =>
-      throw UnimplementedError();
 }
 
 class _EmptyActivityLogRepository implements ActivityLogRepository {
