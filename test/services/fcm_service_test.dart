@@ -15,14 +15,14 @@ class _RecordingClient extends Fake implements SupabaseClient {
   GoTrueClient get auth => _FakeAuth(userId);
 
   @override
-  Future<dynamic> rpc(
-    String fn, {
-    Map<String, dynamic>? params,
-    dynamic options,
-  }) async {
-    rpcCalls++;
-    lastRpcToken = params?['p_token'] as String?;
-    return null;
+  dynamic noSuchMethod(Invocation invocation) {
+    if (invocation.memberName == #rpc) {
+      rpcCalls++;
+      final params = invocation.namedArguments[#params] as Map<String, dynamic>?;
+      lastRpcToken = params?['p_token'] as String?;
+      return Future<void>.value();
+    }
+    return super.noSuchMethod(invocation);
   }
 }
 
