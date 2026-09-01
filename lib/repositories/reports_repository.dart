@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/localization/app_strings.dart';
@@ -40,24 +38,6 @@ ReportsException _mapReportsException(
   );
 }
 
-Map<String, dynamic> _parseDashboardRpcResult(dynamic result) {
-  if (result == null) {
-    throw FormatException('get_dashboard_stats returned null');
-  }
-  if (result is Map) {
-    return Map<String, dynamic>.from(result);
-  }
-  if (result is String) {
-    final decoded = jsonDecode(result);
-    if (decoded is Map) {
-      return Map<String, dynamic>.from(decoded);
-    }
-  }
-  throw FormatException(
-    'Unexpected get_dashboard_stats result type: ${result.runtimeType}',
-  );
-}
-
 abstract class ReportsRepository {
   Future<DashboardStats> fetchDashboardStats(
       {required DateTime from, required DateTime to});
@@ -88,13 +68,9 @@ class SupabaseReportsRepository implements ReportsRepository {
         'get_dashboard_stats',
         params: _rpcParams(from, to),
       );
-      return DashboardStats.fromJson(_parseDashboardRpcResult(result));
+      return DashboardStats.fromJson(Map<String, dynamic>.from(result as Map));
     } on PostgrestException catch (e) {
       throw _mapReportsException(e, AppStrings.dashboardLoadFailed);
-    } on FormatException catch (e) {
-      throw ReportsException(
-        e.message.isNotEmpty ? e.message : AppStrings.dashboardLoadFailed,
-      );
     } catch (_) {
       throw ReportsException(AppStrings.dashboardLoadFailed);
     }

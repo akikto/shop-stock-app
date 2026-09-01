@@ -89,7 +89,7 @@ void main() {
       );
       final active = kpis
           .firstWhere((k) => k.kind == DashboardKpiKind.activeProductCount);
-      expect(active.value, '—');
+      expect(active.value, '-');
     });
   });
 }

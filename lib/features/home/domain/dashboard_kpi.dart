@@ -76,7 +76,7 @@ List<DashboardKpiDescriptor> buildDashboardKpis({
       value: activeProductCountPending
           ? '...'
           : activeProductCountError
-              ? '—'
+              ? '-'
               : '${activeProductCount ?? 0}',
     ),
   ];
