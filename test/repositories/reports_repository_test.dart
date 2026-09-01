@@ -89,6 +89,17 @@ void main() {
         AppStrings.staffReportLoadFailed,
       );
     });
+
+    test('appends migration hint for missing RPC schema cache errors', () {
+      const server =
+          'Could not find the function public.get_staff_sales_report(p_from, p_to) in the schema cache';
+      final message = resolveReportsErrorMessage(
+        serverMessage: server,
+        fallbackMessage: AppStrings.staffReportLoadFailed,
+      );
+      expect(message, contains(server));
+      expect(message, contains(AppStrings.databaseMigrationRequired));
+    });
   });
 
   group('ReportsRepository contract', () {

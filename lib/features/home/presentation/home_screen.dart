@@ -80,6 +80,7 @@ class HomeScreen extends ConsumerWidget {
           }
         },
         child: statsAsync.when(
+          skipLoadingOnReload: true,
           loading: () =>
               const LoadingIndicator(message: AppStrings.loadingDashboard),
           error: (error, _) => ErrorView(

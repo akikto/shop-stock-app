@@ -7,6 +7,7 @@ import '../../../models/app_notification.dart';
 import '../../../repositories/notification_repository.dart';
 import '../../../services/supabase_service.dart';
 import 'dashboard_providers.dart';
+import 'dashboard_refresh.dart';
 
 final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
   return SupabaseNotificationRepository();
@@ -56,6 +57,7 @@ final notificationRealtimeProvider = Provider.autoDispose<void>((ref) {
 /// Subscribes to product stock changes so the dashboard can refresh.
 final productRealtimeProvider = Provider.autoDispose<void>((ref) {
   final client = SupabaseService.client;
+  final refresh = ref.watch(debouncedDashboardRefreshProvider);
 
   final channel = client
       .channel('products-realtime')
@@ -63,11 +65,7 @@ final productRealtimeProvider = Provider.autoDispose<void>((ref) {
         event: PostgresChangeEvent.update,
         schema: 'public',
         table: 'products',
-        callback: (_) {
-          final range = ref.read(dashboardHomeRangeProvider);
-          ref.invalidate(dashboardStatsProvider(range));
-          ref.invalidate(shopActiveProductCountProvider);
-        },
+        callback: (_) => refresh.schedule(),
       )
       .subscribe();
 

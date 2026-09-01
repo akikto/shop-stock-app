@@ -151,6 +151,8 @@ class AppStrings {
   static const productReportLoadFailed = 'পণ্য রিপোর্ট লোড করা যায়নি';
   static const stockMovementReportLoadFailed =
       'স্টক চলাচল রিপোর্ট লোড করা যায়নি';
+  static const databaseMigrationRequired =
+      'Supabase-এ মাইগ্রেশন 0010–0013 প্রয়োগ করুন (README দেখুন)।';
 
   static String reportSaleCount(int count) => '$countটি বিক্রি';
 
