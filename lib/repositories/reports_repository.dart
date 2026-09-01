@@ -23,7 +23,17 @@ String resolveReportsErrorMessage({
   required String serverMessage,
   required String fallbackMessage,
 }) {
-  return serverMessage.isNotEmpty ? serverMessage : fallbackMessage;
+  if (serverMessage.isEmpty) return fallbackMessage;
+  if (_isMissingDatabaseFunctionError(serverMessage)) {
+    return '$serverMessage\n${AppStrings.databaseMigrationRequired}';
+  }
+  return serverMessage;
+}
+
+bool _isMissingDatabaseFunctionError(String message) {
+  final lower = message.toLowerCase();
+  return lower.contains('schema cache') ||
+      lower.contains('could not find the function');
 }
 
 ReportsException _mapReportsException(
