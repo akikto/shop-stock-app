@@ -61,7 +61,7 @@ void main() {
 
     test('does not log full device tokens', () {
       expect(handlerSource, contains('token_suffix'));
-      expect(handlerSource, isNot(contains('console.log(token)'));
+      expect(handlerSource, isNot(contains('console.log(token)')));
     });
   });
 }
