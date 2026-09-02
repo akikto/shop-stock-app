@@ -28,14 +28,41 @@ class AppConfig {
     defaultValue: '',
   );
 
+  /// Trimmed values for runtime use — GitHub Actions secrets occasionally
+  /// include trailing whitespace that breaks Supabase URL parsing.
+  static String get effectiveSupabaseUrl => supabaseUrl.trim();
+
+  static String get effectiveSupabaseAnonKey => supabaseAnonKey.trim();
+
   /// Fails fast at startup if the app was built without configuration,
   /// instead of silently trying to talk to an empty URL.
   static void assertConfigured() {
-    if (supabaseUrl.isEmpty || supabaseAnonKey.isEmpty) {
+    final url = effectiveSupabaseUrl;
+    final key = effectiveSupabaseAnonKey;
+
+    if (url.isEmpty || key.isEmpty) {
       throw StateError(
         'Missing Supabase configuration. Run with:\n'
         '  flutter run --dart-define-from-file=config/config.json\n'
+        'For GitHub Pages preview, set repository secrets SUPABASE_URL and '
+        'SUPABASE_ANON_KEY, then redeploy.\n'
         'See README.md for setup instructions.',
+      );
+    }
+
+    final parsed = Uri.tryParse(url);
+    if (parsed == null || !parsed.hasScheme || parsed.host.isEmpty) {
+      throw StateError(
+        'SUPABASE_URL must be a full URL, for example '
+        'https://YOUR-PROJECT-REF.supabase.co\n'
+        'Got: "$url"',
+      );
+    }
+
+    if (key.startsWith('sb_secret_')) {
+      throw StateError(
+        'SUPABASE_ANON_KEY looks like a secret (service-role) key. '
+        'Use the public anon/publishable key only.',
       );
     }
   }

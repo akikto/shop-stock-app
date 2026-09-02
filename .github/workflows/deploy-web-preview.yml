@@ -57,12 +57,15 @@ jobs:
       - name: Write build-time config from repository secrets
         run: |
           mkdir -p config
-          cat > config/config.ci.json << EOF
-          {
-            "SUPABASE_URL": "${{ secrets.SUPABASE_URL }}",
-            "SUPABASE_ANON_KEY": "${{ secrets.SUPABASE_ANON_KEY }}"
-          }
-          EOF
+          if [ -z "${{ secrets.SUPABASE_URL }}" ] || [ -z "${{ secrets.SUPABASE_ANON_KEY }}" ]; then
+            echo "Missing SUPABASE_URL or SUPABASE_ANON_KEY repository secret."
+            exit 1
+          fi
+          jq -n \
+            --arg url "${{ secrets.SUPABASE_URL }}" \
+            --arg key "${{ secrets.SUPABASE_ANON_KEY }}" \
+            '{SUPABASE_URL: ($url | gsub("^\\s+|\\s+$"; "")), SUPABASE_ANON_KEY: ($key | gsub("^\\s+|\\s+$"; ""))}' \
+            > config/config.ci.json
 
       - name: flutter pub get
         run: flutter pub get
@@ -96,12 +99,11 @@ jobs:
       - name: Write build-time config for Android APK
         run: |
           mkdir -p config
-          cat > config/config.ci.json << EOF
-          {
-            "SUPABASE_URL": "${{ secrets.SUPABASE_URL }}",
-            "SUPABASE_ANON_KEY": "${{ secrets.SUPABASE_ANON_KEY }}"
-          }
-          EOF
+          jq -n \
+            --arg url "${{ secrets.SUPABASE_URL }}" \
+            --arg key "${{ secrets.SUPABASE_ANON_KEY }}" \
+            '{SUPABASE_URL: ($url | gsub("^\\s+|\\s+$"; "")), SUPABASE_ANON_KEY: ($key | gsub("^\\s+|\\s+$"; ""))}' \
+            > config/config.ci.json
 
       - name: Generate android/ platform scaffold if missing
         run: |

@@ -123,6 +123,11 @@ void main() {
       expect(workflow, contains(r'${{ secrets.SUPABASE_ANON_KEY }}'));
     });
 
+    test('writes config JSON with jq so secret characters stay valid', () {
+      expect(workflow, contains('jq -n'));
+      expect(workflow, contains('config/config.ci.json'));
+    });
+
     test(
         'never references a service_role secret value (the word appears only in cautionary comments)',
         () {
