@@ -1,0 +1,67 @@
+name: CI verify
+
+# Runs analyze + test on pull requests before merge. Deploy workflow
+# still runs on push to main only.
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: flutter pub get
+        run: flutter pub get
+
+      - name: flutter analyze
+        run: |
+          set -o pipefail
+          flutter analyze 2>&1 | tee analyze-output.txt
+          exit_code=${PIPESTATUS[0]}
+          if [ "$exit_code" -ne 0 ]; then
+            {
+              echo "## Flutter analyze failed"
+              echo '```'
+              cat analyze-output.txt
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit "$exit_code"
+          fi
+
+      - name: Upload analyze output on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: analyze-output
+          path: analyze-output.txt
+
+      - name: Comment analyze output on PR
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.existsSync('analyze-output.txt')
+              ? fs.readFileSync('analyze-output.txt', 'utf8')
+              : 'analyze-output.txt missing';
+            const truncated = body.length > 60000 ? body.slice(0, 60000) + '\n...(truncated)' : body;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: `## Flutter analyze failed\n\n\`\`\`\n${truncated}\n\`\`\``,
+            });
+
+      - name: flutter test
+        run: flutter test
