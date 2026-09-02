@@ -37,15 +37,23 @@ Future<void> main() async {
     if (kDebugMode) {
       debugPrint('Startup failed: $error\n$stackTrace');
     }
-    runApp(StartupErrorApp(message: error.toString()));
+    runApp(StartupErrorApp(
+      message: error.toString(),
+      stackTrace: kIsWeb ? stackTrace.toString() : null,
+    ));
   }
 }
 
 /// Shown when Supabase/config init fails — avoids a blank web preview screen.
 class StartupErrorApp extends StatelessWidget {
-  const StartupErrorApp({super.key, required this.message});
+  const StartupErrorApp({
+    super.key,
+    required this.message,
+    this.stackTrace,
+  });
 
   final String message;
+  final String? stackTrace;
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +91,22 @@ class StartupErrorApp extends StatelessWidget {
                       fontSize: 13,
                     ),
                   ),
+                  if (stackTrace?.isNotEmpty ?? false) ...[
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Stack trace (web preview only):',
+                      style: TextStyle(color: Colors.white54, fontSize: 12),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      stackTrace!,
+                      style: const TextStyle(
+                        color: Colors.white38,
+                        fontFamily: 'monospace',
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
