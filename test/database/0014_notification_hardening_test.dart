@@ -68,7 +68,7 @@ void main() {
     test('Flutter repository uses RPC not direct UPDATE', () {
       expect(notificationRepoSource, contains("rpc('mark_notification_read'"));
       expect(notificationRepoSource, contains("rpc('mark_all_notifications_read'"));
-      expect(notificationRepoSource, isNot(contains(".from('notifications').update"));
+      expect(notificationRepoSource, isNot(contains(".from('notifications').update")));
     });
   });
 
