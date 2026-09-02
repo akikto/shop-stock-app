@@ -63,5 +63,14 @@ void main() {
       expect(handlerSource, contains('token_suffix'));
       expect(handlerSource, isNot(contains('console.log(token)')));
     });
+
+    test('verifies notification row before push delivery', () {
+      expect(handlerSource, contains('verifyNotificationExists'));
+    });
+
+    test('checks notification preferences before FCM send', () {
+      expect(handlerSource, contains('loadNotificationPreferences'));
+      expect(handlerSource, contains('preferences_disabled'));
+    });
   });
 }

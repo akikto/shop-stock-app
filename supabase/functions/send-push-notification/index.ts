@@ -1,4 +1,7 @@
-// Phase 5B — server-side FCM delivery for notifications INSERT webhook.
+// Phase 5B/5C — server-side FCM delivery for notifications INSERT webhook.
+//
+// Phase 5C adds: notification row verification, preference re-check before FCM,
+// HTTP 503 for retryable FCM failures. Inbox rows are never deleted here.
 //
 // Deploy:
 //   supabase functions deploy send-push-notification --no-verify-jwt

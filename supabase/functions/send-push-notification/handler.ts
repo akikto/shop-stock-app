@@ -8,6 +8,7 @@ import {
   sendFcmToToken,
 } from "./fcm.ts";
 import { redactId, tokenSuffix } from "./logging.ts";
+import { isPushEnabledForType, type NotificationPreferencesRow } from "./preferences.ts";
 import type { FcmSendResult, NotificationRecord, ProcessResult, ServiceAccountJson } from "./types.ts";
 import { parseNotificationInsert, verifyWebhookSecret } from "./webhook.ts";
 
@@ -56,6 +57,12 @@ export async function handlePushWebhookRequest(
     if (message.includes("access token")) {
       return json({ error: "Temporary Firebase auth failure." }, 503);
     }
+    if (message.includes("Temporary FCM delivery failure")) {
+      return json({ error: "Temporary FCM delivery failure." }, 503);
+    }
+    if (message.includes("Notification not found")) {
+      return json({ error: "Notification not found." }, 404);
+    }
     return json({ error: "Push delivery failed." }, 500);
   }
 }
@@ -78,6 +85,28 @@ export async function deliverNotificationPush(
 
   const createClientFn = deps.createAdminClient ?? createClient;
   const admin = createClientFn(supabaseUrl, serviceRoleKey);
+
+  const notificationExists = await verifyNotificationExists(admin, record.id);
+  if (!notificationExists) {
+    throw new Error("Notification not found.");
+  }
+
+  const preferences = await loadNotificationPreferences(admin, record.recipient_id);
+  if (!isPushEnabledForType(record.type, preferences)) {
+    console.log(
+      `push_delivery_preferences_disabled notification_id=${redactId(record.id)} recipient=${redactId(record.recipient_id)} type=${record.type}`,
+    );
+    return {
+      notificationId: record.id,
+      recipientSuffix: redactId(record.recipient_id),
+      tokenCount: 0,
+      successCount: 0,
+      failureCount: 0,
+      removedTokenCount: 0,
+      skipped: true,
+      reason: "preferences_disabled",
+    };
+  }
 
   const { data: tokens, error: tokenError } = await admin
     .from("fcm_tokens")
@@ -150,6 +179,40 @@ export async function deliverNotificationPush(
   );
 
   return baseResult;
+}
+
+async function verifyNotificationExists(
+  admin: SupabaseClient,
+  notificationId: string,
+): Promise<boolean> {
+  const { data, error } = await admin
+    .from("notifications")
+    .select("id")
+    .eq("id", notificationId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error("Failed to verify notification record.");
+  }
+
+  return data != null;
+}
+
+async function loadNotificationPreferences(
+  admin: SupabaseClient,
+  recipientId: string,
+): Promise<NotificationPreferencesRow | null> {
+  const { data, error } = await admin
+    .from("notification_preferences")
+    .select("notify_sale, notify_stock_in, notify_stock_adjustment, notify_low_stock")
+    .eq("user_id", recipientId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error("Failed to load notification preferences.");
+  }
+
+  return data as NotificationPreferencesRow | null;
 }
 
 async function removeStaleToken(

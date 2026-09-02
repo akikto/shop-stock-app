@@ -6,6 +6,7 @@ import {
 
 import { classifyFcmError, buildFcmData, parseServiceAccount } from "./fcm.ts";
 import { deliverNotificationPush, handlePushWebhookRequest } from "./handler.ts";
+import { isPushEnabledForType } from "./preferences.ts";
 import type { FcmSendResult, NotificationRecord } from "./types.ts";
 import { parseNotificationInsert, verifyWebhookSecret } from "./webhook.ts";
 
@@ -43,12 +44,56 @@ function webhookRequest(body: unknown, secret = "test-webhook-secret"): Request 
   });
 }
 
-function mockAdmin(tokens: string[]) {
+function mockAdmin(
+  tokens: string[],
+  options: {
+    notificationExists?: boolean;
+    preferences?: Record<string, boolean | null> | null;
+  } = {},
+) {
+  const notificationExists = options.notificationExists ?? true;
+  const preferences = options.preferences ?? null;
   const deleted: { user_id: string; token: string }[] = [];
   return {
     deleted,
     client: {
-      from(_table: string) {
+      from(table: string) {
+        if (table === "notifications") {
+          return {
+            select(_cols: string) {
+              return {
+                eq(_column: string, notificationId: string) {
+                  return {
+                    maybeSingle() {
+                      return Promise.resolve({
+                        data: notificationExists ? { id: notificationId } : null,
+                        error: null,
+                      });
+                    },
+                  };
+                },
+              };
+            },
+          };
+        }
+        if (table === "notification_preferences") {
+          return {
+            select(_cols: string) {
+              return {
+                eq(_column: string, _userId: string) {
+                  return {
+                    maybeSingle() {
+                      return Promise.resolve({
+                        data: preferences,
+                        error: null,
+                      });
+                    },
+                  };
+                },
+              };
+            },
+          };
+        }
         return {
           select(_cols: string) {
             return {
@@ -193,7 +238,7 @@ Deno.test("invalid token triggers cleanup for that token only", async () => {
   }]);
 });
 
-Deno.test("temporary FCM failure is retryable", async () => {
+Deno.test("temporary FCM failure returns retryable error", async () => {
   const admin = mockAdmin(["device-token"]);
   await assertRejects(
     () =>
@@ -211,6 +256,75 @@ Deno.test("temporary FCM failure is retryable", async () => {
     Error,
     "Temporary FCM delivery failure.",
   );
+});
+
+Deno.test("temporary FCM failure maps to HTTP 503", async () => {
+  const admin = mockAdmin(["device-token"]);
+  const response = await handlePushWebhookRequest(
+    webhookRequest({
+      type: "INSERT",
+      table: "notifications",
+      schema: "public",
+      record: sampleRecord,
+    }),
+    {
+      env: baseEnv(),
+      createAdminClient: () => admin.client as never,
+      getAccessToken: async () => "access-token",
+      sendFcm: async () => ({
+        tokenSuffix: "suffix",
+        ok: false,
+        permanentFailure: false,
+        retryable: true,
+      }),
+    },
+  );
+  assertEquals(response.status, 503);
+});
+
+Deno.test("push skipped when preferences disable type", async () => {
+  const admin = mockAdmin([], {
+    preferences: { notify_sale: false },
+  });
+  const result = await deliverNotificationPush(sampleRecord, {
+    env: baseEnv(),
+    createAdminClient: () => admin.client as never,
+    getAccessToken: async () => "access-token",
+  });
+  assertEquals(result.skipped, true);
+  assertEquals(result.reason, "preferences_disabled");
+  assertEquals(result.tokenCount, 0);
+});
+
+Deno.test("push proceeds when preferences allow type", async () => {
+  const admin = mockAdmin([], {
+    preferences: { notify_sale: true },
+  });
+  const result = await deliverNotificationPush(sampleRecord, {
+    env: baseEnv(),
+    createAdminClient: () => admin.client as never,
+    getAccessToken: async () => "access-token",
+  });
+  assertEquals(result.skipped, true);
+  assertEquals(result.reason, "no_tokens");
+});
+
+Deno.test("missing notification row is rejected", async () => {
+  const admin = mockAdmin([], { notificationExists: false });
+  await assertRejects(
+    () =>
+      deliverNotificationPush(sampleRecord, {
+        env: baseEnv(),
+        createAdminClient: () => admin.client as never,
+      }),
+    Error,
+    "Notification not found.",
+  );
+});
+
+Deno.test("preference helper mirrors SQL defaults", () => {
+  assertEquals(isPushEnabledForType("sale", null), true);
+  assertEquals(isPushEnabledForType("sale", { notify_sale: false }), false);
 });
 
 Deno.test("missing Firebase credentials returns configuration error", async () => {
