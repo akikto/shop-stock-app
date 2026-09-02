@@ -71,6 +71,71 @@ supabase functions deploy invite-staff
 
 Then use **Settings → Staff Management → +** to create email/password accounts for new staff.
 
+### Push notifications (Phase 5B)
+
+In-app notifications (Phase 5A) register FCM tokens and route taps to the notifications inbox. Phase 5B adds **server-side** FCM delivery when a row is inserted into `public.notifications` (created by sale/stock RPCs — never by the Flutter client directly).
+
+Flow:
+
+```
+RPC → notifications INSERT → Database Webhook → send-push-notification → FCM → device
+```
+
+The Flutter app must **not** call `send-push-notification`. The database remains the source of truth.
+
+#### 1. Deploy the Edge Function
+
+```bash
+supabase functions deploy send-push-notification --no-verify-jwt
+```
+
+`--no-verify-jwt` is required because the caller is a Database Webhook, not an authenticated app user. Webhook authentication uses a shared secret header instead (see below).
+
+#### 2. Configure Edge Function secrets
+
+In **Supabase Dashboard → Edge Functions → Secrets** (or `supabase secrets set`), add:
+
+| Secret | Description |
+|--------|-------------|
+| `FIREBASE_SERVICE_ACCOUNT` | Full Firebase service account JSON (server-side only). Used for FCM HTTP v1 OAuth. |
+| `PUSH_WEBHOOK_SECRET` | Random shared secret for webhook authentication. |
+
+`SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are injected automatically for Edge Functions.
+
+**Never commit** Firebase service account JSON, private keys, `service_role` keys, or webhook secrets to this repository or into the Flutter app.
+
+#### 3. Create the Database Webhook
+
+In **Supabase Dashboard → Database → Webhooks → Create webhook**:
+
+| Setting | Value |
+|---------|--------|
+| Name | `notifications-insert-push` (or similar) |
+| Table | `public.notifications` |
+| Events | **Insert** |
+| Type | Supabase Edge Function → `send-push-notification` |
+
+If configuring manually via HTTP instead of the Edge Function picker:
+
+- **URL:** `https://<project-ref>.supabase.co/functions/v1/send-push-notification`
+- **HTTP header:** `x-push-webhook-secret` = value of `PUSH_WEBHOOK_SECRET`
+
+#### 4. Verify on Android
+
+1. Sign in on a physical Android device with Firebase configured (`google-services.json`).
+2. Trigger a sale or stock-in that creates a notification for your user.
+3. Confirm push delivery (background/terminated) and tap routing to **Notifications**.
+
+Foreground messages show an in-app snackbar; taps use the existing Phase 5A `FcmMessageRouter`.
+
+#### Edge Function tests (local)
+
+```bash
+deno test supabase/functions/send-push-notification/handler_test.ts
+```
+
+Uses mocks only — no real Firebase credentials or push sends.
+
 ### Offline sync (Phase 5, Android)
 
 See `lib/sync/README.md`. Web builds skip offline sync (`kIsWeb`).
@@ -111,6 +176,7 @@ lib/
  ├─ services/       # Supabase, FCM, photos
  ├─ sync/           # Drift offline queue + sync engine
  └─ shared/widgets/
-supabase/migrations/  # 0001–0012
+supabase/migrations/  # 0001–0013
+supabase/functions/   # invite-staff, send-push-notification
 test/
 ```
