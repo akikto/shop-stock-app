@@ -92,11 +92,9 @@ class SupabaseNotificationRepository implements NotificationRepository {
       throw NotificationException(AppStrings.notificationUpdateFailed);
     }
     try {
-      await _client
-          .from('notifications')
-          .update({'read': true})
-          .eq('id', id)
-          .eq('recipient_id', userId);
+      await _client.rpc('mark_notification_read', params: {
+        'p_notification_id': id,
+      });
     } on PostgrestException catch (e) {
       throw NotificationException(
         resolveNotificationErrorMessage(
@@ -114,11 +112,7 @@ class SupabaseNotificationRepository implements NotificationRepository {
     final userId = _userId;
     if (userId == null) return;
     try {
-      await _client
-          .from('notifications')
-          .update({'read': true})
-          .eq('recipient_id', userId)
-          .eq('read', false);
+      await _client.rpc('mark_all_notifications_read');
     } on PostgrestException catch (e) {
       throw NotificationException(
         resolveNotificationErrorMessage(

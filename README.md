@@ -33,7 +33,7 @@ Mobile-first Flutter + Supabase app for a small shop (4–5 staff).
 1. Create a project at https://supabase.com
 2. Apply migrations **in order** via `supabase db push` or the SQL editor:
 
-   `0001` → `0002` → `0003` → `0004` → `0005` → `0006` → `0007` → `0008` → `0009` → `0010` → `0011` → `0012` → `0013`
+   `0001` → `0002` → `0003` → `0004` → `0005` → `0006` → `0007` → `0008` → `0009` → `0010` → `0011` → `0012` → `0013` → `0014`
 
 3. Enable Email/Password auth
 4. Create the first user (Owner), then promote once in SQL:
@@ -138,23 +138,20 @@ Uses mocks only — no real Firebase credentials or push sends.
 
 ### Notification hardening (Phase 5C)
 
-Production semantics after Phase 5C:
+Production semantics:
 
 | Concern | Behavior |
 |---------|----------|
 | **Inbox (source of truth)** | `notifications` rows created by server RPCs only; Realtime + PostgREST in Flutter |
+| **Mark as read** | RPC-only (`mark_notification_read`, `mark_all_notifications_read`); direct client UPDATE revoked (migration `0014`) |
+| **Immutable fields** | `message`, `type`, `recipient_id`, `created_at` cannot be changed by clients |
 | **Push (delivery channel)** | FCM sent only after INSERT webhook; inbox row is never deleted on push failure |
-| **Preferences** | Filter inbox INSERT in `_notify_managers_owners` (migration 0012); push layer re-checks before FCM |
-| **Preference default** | Missing row = all types enabled (`coalesce(..., true)`) |
-| **Push disabled** | No FCM send; existing inbox rows remain |
+| **Preferences** | Filter inbox INSERT in `_notify_managers_owners`; push layer re-checks before FCM |
+| **Low-stock alerts** | Threshold-crossing only: `previous_stock > limit AND new_stock <= limit` (migration `0014`) |
 | **Stale FCM tokens** | Removed only on permanent FCM errors, scoped to `(user_id, token)` |
-| **Temporary FCM errors** | Token kept; webhook may retry (HTTP 503) |
-| **Webhook idempotency** | Duplicate webhook deliveries may send duplicate pushes (no dedup table yet) |
+| **Webhook idempotency** | Duplicate webhook deliveries may send duplicate pushes (no dedup table) |
 
-**Known limitations requiring a future migration (not included in Phase 5C):**
-
-1. **UPDATE column restriction** — RLS allows any column update on own rows; Flutter only sets `read`. Harden with `mark_notification_read` RPC + trigger or column grants.
-2. **Low-stock deduplication** — alerts fire on every sale/adjustment while stock ≤ limit. Harden with threshold-crossing logic (`p_previous_stock > limit AND current ≤ limit`) in `_maybe_notify_low_stock`.
+Apply migration `0014` after `0013` via `supabase db push` or SQL editor.
 
 ### Offline sync (Phase 5, Android)
 
@@ -196,7 +193,7 @@ lib/
  ├─ services/       # Supabase, FCM, photos
  ├─ sync/           # Drift offline queue + sync engine
  └─ shared/widgets/
-supabase/migrations/  # 0001–0013
+supabase/migrations/  # 0001–0014
 supabase/functions/   # invite-staff, send-push-notification
 test/
 ```
