@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+/// Static checks against supabase/functions/send-push-notification/ — no live
+/// Firebase or Supabase credentials in CI. Mirrors migration SQL security tests.
 void main() {
   late String indexSource;
   late String handlerSource;
@@ -29,7 +31,7 @@ void main() {
     });
 
     test('queries fcm_tokens by recipient from webhook record', () {
-      expect(handlerSource, contains(".from(\"fcm_tokens\")"));
+      expect(handlerSource, contains('.from("fcm_tokens")'));
       expect(handlerSource, contains('.eq("user_id", record.recipient_id)'));
     });
 
