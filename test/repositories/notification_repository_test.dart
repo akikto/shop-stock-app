@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shop_stock_app/core/localization/app_strings.dart';
@@ -5,6 +7,8 @@ import 'package:shop_stock_app/repositories/notification_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class _MockSupabaseClient extends Mock implements SupabaseClient {}
+
+class _MockGoTrueClient extends Mock implements GoTrueClient {}
 
 void main() {
   group('resolveNotificationErrorMessage', () {
@@ -47,7 +51,12 @@ void main() {
         ),
       );
     });
+
+    test('uses mark_notification_read RPC not direct table UPDATE', () {
+      final source =
+          File('lib/repositories/notification_repository.dart').readAsStringSync();
+      expect(source, contains("rpc('mark_notification_read'"));
+      expect(source, isNot(contains(".from('notifications').update"));
+    });
   });
 }
-
-class _MockGoTrueClient extends Mock implements GoTrueClient {}

@@ -34,21 +34,30 @@ void main() {
   });
 
   group('Phase 5C notification UPDATE security', () {
-    test('RLS allows recipient-scoped UPDATE only', () {
-      expect(rlsSql, contains('notifications_update_own'));
+    late String migration0014Sql;
+
+    setUpAll(() {
+      migration0014Sql =
+          File('supabase/migrations/0014_notification_hardening.sql')
+              .readAsStringSync();
+    });
+
+    test('migration 0014 removes direct client UPDATE policy', () {
+      expect(migration0014Sql,
+          contains('drop policy if exists notifications_update_own'));
+      expect(migration0014Sql,
+          contains('revoke update on table public.notifications from authenticated'));
+    });
+
+    test('mark-as-read uses secure RPCs', () {
+      expect(migration0014Sql, contains('mark_notification_read'));
+      expect(migration0014Sql, contains('mark_all_notifications_read'));
+      expect(notificationRepoSource, contains("rpc('mark_notification_read'"));
+    });
+
+    test('SELECT policy remains from migration 0003', () {
+      expect(rlsSql, contains('notifications_select_own'));
       expect(rlsSql, contains('recipient_id = auth.uid()'));
-    });
-
-    test('RLS does not column-restrict UPDATE (migration required for hardening)', () {
-      expect(rlsSql, isNot(contains('mark_notification_read')));
-      expect(rlsSql, isNot(contains('only column read')));
-    });
-
-    test('Flutter markAsRead updates read field only', () {
-      expect(notificationRepoSource, contains(".update({'read': true})"));
-      expect(notificationRepoSource, isNot(contains("'message':")));
-      expect(notificationRepoSource, isNot(contains("'type':")));
-      expect(notificationRepoSource, isNot(contains("'recipient_id':")));
     });
 
     test('notifications have no client INSERT policy', () {
@@ -56,21 +65,25 @@ void main() {
     });
   });
 
-  group('Phase 5C low-stock deduplication audit', () {
-    test('_maybe_notify_low_stock exists and checks threshold', () {
+  group('Phase 5C low-stock deduplication', () {
+    late String migration0014Sql;
+
+    setUpAll(() {
+      migration0014Sql =
+          File('supabase/migrations/0014_notification_hardening.sql')
+              .readAsStringSync();
+    });
+
+    test('migration 0014 uses threshold-crossing logic', () {
+      expect(migration0014Sql,
+          contains('p_previous_stock > p_product.low_stock_limit'));
+      expect(migration0014Sql,
+          contains('_maybe_notify_low_stock(v_product, v_previous_stock)'));
+    });
+
+    test('legacy 0010 fired on every at-or-below check (superseded by 0014)', () {
       expect(migration0010Sql, contains('_maybe_notify_low_stock'));
-      expect(
-        migration0010Sql,
-        contains('p_product.current_stock <= p_product.low_stock_limit'),
-      );
-    });
-
-    test('low-stock has no threshold-crossing guard (migration required)', () {
       expect(migration0010Sql, isNot(contains('p_previous_stock')));
-    });
-
-    test('low-stock fires after sale and adjustment only', () {
-      expect(migration0010Sql, contains('_maybe_notify_low_stock(v_product)'));
     });
   });
 
@@ -95,7 +108,7 @@ void main() {
   group('Phase 5C inbox vs push separation', () {
     test('Flutter does not invoke send-push-notification', () {
       expect(notificationRepoSource, isNot(contains('send-push-notification')));
-      expect(notificationRepoSource, isNot(contains('functions.invoke'));
+      expect(notificationRepoSource, isNot(contains('functions.invoke')));
     });
 
     test('push layer verifies notification row exists', () {
@@ -103,7 +116,7 @@ void main() {
     });
 
     test('push skip does not imply inbox deletion', () {
-      expect(handlerSource, isNot(contains('.from("notifications").delete'));
+      expect(handlerSource, isNot(contains('.from("notifications").delete')));
     });
   });
 
