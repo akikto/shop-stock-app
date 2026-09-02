@@ -46,7 +46,7 @@ AppNotification _notification(String id, {bool read = false}) =>
 
 Future<void> _settleNotificationList(WidgetTester tester) async {
   await tester.pump();
-  await tester.pump(const Duration.zero);
+  await tester.pump(Duration.zero);
   await tester.pump();
 }
 
