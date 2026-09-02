@@ -136,6 +136,26 @@ deno test supabase/functions/send-push-notification/handler_test.ts
 
 Uses mocks only — no real Firebase credentials or push sends.
 
+### Notification hardening (Phase 5C)
+
+Production semantics after Phase 5C:
+
+| Concern | Behavior |
+|---------|----------|
+| **Inbox (source of truth)** | `notifications` rows created by server RPCs only; Realtime + PostgREST in Flutter |
+| **Push (delivery channel)** | FCM sent only after INSERT webhook; inbox row is never deleted on push failure |
+| **Preferences** | Filter inbox INSERT in `_notify_managers_owners` (migration 0012); push layer re-checks before FCM |
+| **Preference default** | Missing row = all types enabled (`coalesce(..., true)`) |
+| **Push disabled** | No FCM send; existing inbox rows remain |
+| **Stale FCM tokens** | Removed only on permanent FCM errors, scoped to `(user_id, token)` |
+| **Temporary FCM errors** | Token kept; webhook may retry (HTTP 503) |
+| **Webhook idempotency** | Duplicate webhook deliveries may send duplicate pushes (no dedup table yet) |
+
+**Known limitations requiring a future migration (not included in Phase 5C):**
+
+1. **UPDATE column restriction** — RLS allows any column update on own rows; Flutter only sets `read`. Harden with `mark_notification_read` RPC + trigger or column grants.
+2. **Low-stock deduplication** — alerts fire on every sale/adjustment while stock ≤ limit. Harden with threshold-crossing logic (`p_previous_stock > limit AND current ≤ limit`) in `_maybe_notify_low_stock`.
+
 ### Offline sync (Phase 5, Android)
 
 See `lib/sync/README.md`. Web builds skip offline sync (`kIsWeb`).

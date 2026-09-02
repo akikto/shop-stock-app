@@ -102,7 +102,13 @@ class _ProtectedAppShell extends ConsumerWidget {
             body: ErrorView(
               message: AppStrings.accountDeactivated,
               onRetry: () async {
-                await ref.read(authRepositoryProvider).signOut();
+                try {
+                  await ref
+                      .read(fcmServiceProvider)
+                      .unregisterTokenIfAvailable();
+                } finally {
+                  await ref.read(authRepositoryProvider).signOut();
+                }
               },
             ),
           );
