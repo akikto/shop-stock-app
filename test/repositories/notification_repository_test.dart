@@ -56,7 +56,7 @@ void main() {
       final source =
           File('lib/repositories/notification_repository.dart').readAsStringSync();
       expect(source, contains("rpc('mark_notification_read'"));
-      expect(source, isNot(contains(".from('notifications').update"));
+      expect(source, isNot(contains(".from('notifications').update")));
     });
   });
 }
