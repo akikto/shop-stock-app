@@ -44,6 +44,12 @@ AppNotification _notification(String id, {bool read = false}) =>
       createdAt: DateTime.utc(2026, 1, 1, 12),
     );
 
+Future<void> _settleNotificationList(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration.zero);
+  await tester.pump();
+}
+
 void main() {
   testWidgets('NotificationsScreen shows Bengali empty state', (tester) async {
     await tester.pumpWidget(
@@ -59,8 +65,7 @@ void main() {
       ),
     );
 
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
+    await _settleNotificationList(tester);
 
     expect(find.text(AppStrings.noNotifications), findsOneWidget);
   });
@@ -80,8 +85,7 @@ void main() {
       ),
     );
 
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
+    await _settleNotificationList(tester);
 
     expect(find.text('Sale message n1'), findsOneWidget);
     expect(find.text(AppStrings.noMoreNotifications), findsOneWidget);
