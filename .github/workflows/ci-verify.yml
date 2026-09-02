@@ -21,7 +21,16 @@ jobs:
         run: flutter pub get
 
       - name: flutter analyze
-        run: flutter analyze
+        run: |
+          set -o pipefail
+          flutter analyze 2>&1 | tee analyze-output.txt
+
+      - name: Upload analyze output on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: analyze-output
+          path: analyze-output.txt
 
       - name: flutter test
         run: flutter test
