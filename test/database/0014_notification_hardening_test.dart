@@ -107,7 +107,7 @@ void main() {
     });
 
     test('record_stock_in is not modified in 0014', () {
-      expect(migrationSql, isNot(contains('record_stock_in'));
+      expect(migrationSql, isNot(contains('record_stock_in')));
     });
   });
 
