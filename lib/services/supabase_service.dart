@@ -21,11 +21,9 @@ class SupabaseService {
     // Web preview: skip AppLinks deep-link handling at startup. The browser
     // preview uses email/password only, and app_links can throw during
     // SupabaseAuth.initialize on GitHub Pages (null-check in getInitialLink).
-    // PKCE verifier storage stays in-memory on web — fine for this login flow.
     final authOptions = kIsWeb
-        ? FlutterAuthClientOptions(
+        ? const FlutterAuthClientOptions(
             detectSessionInUri: false,
-            pkceAsyncStorage: MemoryAuthAsyncStorage(),
           )
         : const FlutterAuthClientOptions();
 
