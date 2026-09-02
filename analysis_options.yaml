@@ -18,3 +18,4 @@ analyzer:
     - windows/**
     - macos/**
     - linux/**
+    - supabase/**

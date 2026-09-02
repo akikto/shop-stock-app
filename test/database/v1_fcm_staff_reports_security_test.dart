@@ -6,10 +6,22 @@ import 'package:shop_stock_app/models/stock_movement_row.dart';
 
 void main() {
   late String migrationSql;
+  late String pushIndexSource;
+  late String pushHandlerSource;
+  late String pushFcmSource;
 
   setUpAll(() {
     migrationSql =
         File('supabase/migrations/0012_v1_fcm_staff_reports.sql').readAsStringSync();
+    pushIndexSource =
+        File('supabase/functions/send-push-notification/index.ts')
+            .readAsStringSync();
+    pushHandlerSource =
+        File('supabase/functions/send-push-notification/handler.ts')
+            .readAsStringSync();
+    pushFcmSource =
+        File('supabase/functions/send-push-notification/fcm.ts')
+            .readAsStringSync();
   });
 
   group('Migration 0012 v1.0 safety', () {
@@ -62,6 +74,56 @@ void main() {
       expect(migrationSql, contains("tablename = 'notifications'"));
       expect(migrationSql, contains("tablename = 'products'"));
       expect(migrationSql, contains("tablename = 'activity_logs'"));
+    });
+  });
+
+  group('send-push-notification Edge Function security', () {
+    test('requires webhook secret header', () {
+      expect(pushIndexSource, contains('PUSH_WEBHOOK_SECRET'));
+      expect(pushIndexSource, contains('x-push-webhook-secret'));
+      expect(pushIndexSource, contains('--no-verify-jwt'));
+    });
+
+    test('uses server-side Firebase service account secret only', () {
+      expect(pushIndexSource, contains('FIREBASE_SERVICE_ACCOUNT'));
+      expect(pushIndexSource, isNot(contains('private_key:')));
+    });
+
+    test('queries fcm_tokens by recipient from webhook record', () {
+      expect(pushHandlerSource, contains('.from("fcm_tokens")'));
+      expect(
+        pushHandlerSource,
+        contains('.eq("user_id", record.recipient_id)'),
+      );
+    });
+
+    test('does not accept client-supplied recipient override', () {
+      expect(pushHandlerSource, isNot(contains('body.recipient')));
+      expect(pushHandlerSource, contains('parseNotificationInsert'));
+    });
+
+    test('uses FCM HTTP v1 endpoint', () {
+      expect(pushFcmSource, contains('fcm.googleapis.com/v1/projects'));
+      expect(pushFcmSource, isNot(contains('fcm/send')));
+    });
+
+    test('removes permanently invalid tokens scoped to recipient', () {
+      expect(pushHandlerSource, contains('removeStaleToken'));
+      expect(pushHandlerSource, contains('.eq("user_id", recipientId)'));
+      expect(pushHandlerSource, contains('.eq("token", token)'));
+    });
+
+    test('includes data payload keys for Flutter routing compatibility', () {
+      expect(pushFcmSource, contains('notification_id'));
+      expect(pushFcmSource, contains('notification_type'));
+      expect(pushFcmSource, contains('recipient_id'));
+      expect(pushFcmSource, contains('route'));
+      expect(pushFcmSource, contains('"notifications"'));
+    });
+
+    test('does not log full device tokens', () {
+      expect(pushHandlerSource, contains('token_suffix'));
+      expect(pushHandlerSource, isNot(contains('console.log(token)')));
     });
   });
 
