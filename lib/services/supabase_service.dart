@@ -23,7 +23,7 @@ class SupabaseService {
     // SupabaseAuth.initialize on GitHub Pages (null-check in getInitialLink).
     // PKCE verifier storage stays in-memory on web — fine for this login flow.
     final authOptions = kIsWeb
-        ? const FlutterAuthClientOptions(
+        ? FlutterAuthClientOptions(
             detectSessionInUri: false,
             pkceAsyncStorage: MemoryAuthAsyncStorage(),
           )
