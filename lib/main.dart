@@ -91,10 +91,10 @@ class StartupErrorApp extends StatelessWidget {
                       fontSize: 13,
                     ),
                   ),
-                  if (stackTrace?.isNotEmpty ?? false) ...[
+                  if (stackTrace != null && stackTrace!.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     const Text(
-                      'Stack trace (web preview only):',
+                      'Details (web preview):',
                       style: TextStyle(color: Colors.white54, fontSize: 12),
                     ),
                     const SizedBox(height: 8),

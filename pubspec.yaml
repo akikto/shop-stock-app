@@ -12,6 +12,7 @@ dependencies:
 
   # Backend / Auth
   supabase_flutter: ^2.5.0
+  web: ^1.1.1
 
   # State management
   flutter_riverpod: ^2.5.0

@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/config/app_config.dart';
+import 'in_memory_gotrue_storage.dart';
+import 'web_browser_local_storage.dart';
 
 /// Thin wrapper around the Supabase client lifecycle.
 ///
@@ -18,16 +20,28 @@ class SupabaseService {
     if (_initialized) return;
     AppConfig.assertConfigured();
 
-    // Web preview: skip AppLinks deep-link handling at startup. The browser
-    // preview uses email/password only, and app_links can throw during
-    // SupabaseAuth.initialize on GitHub Pages (null-check in getInitialLink).
+    // Web preview: avoid shared_preferences during Supabase init. On many
+    // Flutter web builds supabase_flutter falls back to SharedPreferences
+    // (when dart.library.js_interop is false), which can throw a null-check
+    // at startup. Use browser localStorage + in-memory PKCE storage instead.
+    final sessionKey =
+        'sb-${Uri.parse(AppConfig.effectiveSupabaseUrl).host.split('.').first}-auth-token';
+
+    final authOptions = kIsWeb
+        ? FlutterAuthClientOptions(
+            detectSessionInUri: false,
+            localStorage: WebBrowserLocalStorage(
+              persistSessionKey: sessionKey,
+            ),
+            pkceAsyncStorage: InMemoryGotrueAsyncStorage(),
+          )
+        : const FlutterAuthClientOptions();
+
     try {
       await Supabase.initialize(
         url: AppConfig.effectiveSupabaseUrl,
         publishableKey: AppConfig.effectiveSupabaseAnonKey,
-        authOptions: const FlutterAuthClientOptions(
-          detectSessionInUri: !kIsWeb,
-        ),
+        authOptions: authOptions,
       );
     } catch (error, stackTrace) {
       Error.throwWithStackTrace(
