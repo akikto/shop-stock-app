@@ -95,7 +95,7 @@ void main() {
   group('Phase 5C inbox vs push separation', () {
     test('Flutter does not invoke send-push-notification', () {
       expect(notificationRepoSource, isNot(contains('send-push-notification')));
-      expect(notificationRepoSource, isNot(contains('functions.invoke'));
+      expect(notificationRepoSource, isNot(contains('functions.invoke')));
     });
 
     test('push layer verifies notification row exists', () {
@@ -103,7 +103,7 @@ void main() {
     });
 
     test('push skip does not imply inbox deletion', () {
-      expect(handlerSource, isNot(contains('.from("notifications").delete'));
+      expect(handlerSource, isNot(contains('.from("notifications").delete')));
     });
   });
 
