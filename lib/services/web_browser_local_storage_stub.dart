@@ -8,9 +8,7 @@ class WebBrowserLocalStorage extends LocalStorage {
 
   final String persistSessionKey;
 
-  late final LocalStorage _delegate = InMemoryLocalStorage(
-    persistSessionKey: persistSessionKey,
-  );
+  late final LocalStorage _delegate = InMemoryLocalStorage();
 
   @override
   Future<void> initialize() => _delegate.initialize();

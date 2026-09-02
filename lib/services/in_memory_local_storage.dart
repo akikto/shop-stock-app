@@ -5,9 +5,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 /// Used as the safe fallback for Flutter web preview startup when browser
 /// [window.localStorage] is unavailable (private mode, blocked storage, etc.).
 class InMemoryLocalStorage extends LocalStorage {
-  InMemoryLocalStorage({required this.persistSessionKey});
+  InMemoryLocalStorage();
 
-  final String persistSessionKey;
   String? _session;
 
   @override

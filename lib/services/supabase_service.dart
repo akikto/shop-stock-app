@@ -54,7 +54,6 @@ class SupabaseService {
       await Supabase.initialize(
         url: AppConfig.effectiveSupabaseUrl,
         publishableKey: anonKey,
-        anonKey: anonKey,
         authOptions: _authOptionsForPlatform(),
       );
     } catch (error, stackTrace) {

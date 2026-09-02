@@ -25,7 +25,7 @@ class WebBrowserLocalStorage extends LocalStorage {
       storage.setItem(probeKey, '1');
       storage.removeItem(probeKey);
     } catch (_) {
-      _fallback = InMemoryLocalStorage(persistSessionKey: persistSessionKey);
+      _fallback = InMemoryLocalStorage();
     }
     await _active.initialize();
   }
