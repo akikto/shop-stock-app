@@ -37,8 +37,15 @@ echo "==> Supabase login + link"
 supabase login --token "$SUPABASE_ACCESS_TOKEN"
 supabase link --project-ref "$SUPABASE_PROJECT_REF"
 
-echo "==> Apply migrations 0001-0014"
-supabase db push
+echo "==> Apply migrations 0001-0014 (or reconcile if remote drift)"
+if ! supabase db push; then
+  echo ""
+  echo "db push failed (remote migration history mismatch is common)."
+  echo "Run: bash scripts/reconcile_migrations.sh"
+  echo "Then apply 0014 in SQL Editor if needed, repair history, and:"
+  echo "  bash scripts/finish_deploy.sh"
+  exit 1
+fi
 
 if [[ -n "${OWNER_AUTH_USER_ID:-}" ]]; then
   echo "==> Promote owner"
