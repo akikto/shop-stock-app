@@ -1,12 +1,51 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:web/web.dart';
 
-/// Persists Supabase auth sessions in `window.localStorage` on web.
+import 'in_memory_local_storage.dart';
+
+/// Web session storage: prefers [window.localStorage], falls back to memory.
 ///
-/// Used instead of [SharedPreferencesLocalStorage], which falls back to
-/// shared_preferences on many Flutter web builds and can crash at startup.
+/// Never uses shared_preferences, which is the source of the preview null-check
+/// crash on GitHub Pages.
 class WebBrowserLocalStorage extends LocalStorage {
   WebBrowserLocalStorage({required this.persistSessionKey});
+
+  final String persistSessionKey;
+
+  LocalStorage? _fallback;
+
+  LocalStorage get _active =>
+      _fallback ?? _BrowserLocalStorage(persistSessionKey);
+
+  @override
+  Future<void> initialize() async {
+    try {
+      final storage = window.localStorage;
+      final probeKey = '$persistSessionKey.__probe__';
+      storage.setItem(probeKey, '1');
+      storage.removeItem(probeKey);
+    } catch (_) {
+      _fallback = InMemoryLocalStorage(persistSessionKey: persistSessionKey);
+    }
+    await _active.initialize();
+  }
+
+  @override
+  Future<bool> hasAccessToken() => _active.hasAccessToken();
+
+  @override
+  Future<String?> accessToken() => _active.accessToken();
+
+  @override
+  Future<void> removePersistedSession() => _active.removePersistedSession();
+
+  @override
+  Future<void> persistSession(String persistSessionString) =>
+      _active.persistSession(persistSessionString);
+}
+
+class _BrowserLocalStorage extends LocalStorage {
+  _BrowserLocalStorage(this.persistSessionKey);
 
   final String persistSessionKey;
 
