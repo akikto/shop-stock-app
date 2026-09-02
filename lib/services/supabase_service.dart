@@ -21,17 +21,13 @@ class SupabaseService {
     // Web preview: skip AppLinks deep-link handling at startup. The browser
     // preview uses email/password only, and app_links can throw during
     // SupabaseAuth.initialize on GitHub Pages (null-check in getInitialLink).
-    final authOptions = kIsWeb
-        ? const FlutterAuthClientOptions(
-            detectSessionInUri: false,
-          )
-        : const FlutterAuthClientOptions();
-
     try {
       await Supabase.initialize(
         url: AppConfig.effectiveSupabaseUrl,
         publishableKey: AppConfig.effectiveSupabaseAnonKey,
-        authOptions: authOptions,
+        authOptions: const FlutterAuthClientOptions(
+          detectSessionInUri: !kIsWeb,
+        ),
       );
     } catch (error, stackTrace) {
       Error.throwWithStackTrace(
