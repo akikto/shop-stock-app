@@ -128,6 +128,14 @@ void main() {
       expect(workflow, contains('config/config.ci.json'));
     });
 
+    test('verifies Supabase URL is embedded in web build output', () {
+      expect(workflow, contains('grep -q "supabase.co" build/web/main.dart.js'));
+    });
+
+    test('builds Android app bundle in addition to APK', () {
+      expect(workflow, contains('flutter build appbundle'));
+    });
+
     test(
         'never references a service_role secret value (the word appears only in cautionary comments)',
         () {

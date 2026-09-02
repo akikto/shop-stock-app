@@ -66,6 +66,8 @@ jobs:
             --arg key "${{ secrets.SUPABASE_ANON_KEY }}" \
             '{SUPABASE_URL: ($url | gsub("^\\s+|\\s+$"; "")), SUPABASE_ANON_KEY: ($key | gsub("^\\s+|\\s+$"; ""))}' \
             > config/config.ci.json
+          jq -e '.SUPABASE_URL != "" and .SUPABASE_ANON_KEY != ""' config/config.ci.json >/dev/null
+          echo "Supabase config file written (values not printed)."
 
       - name: flutter pub get
         run: flutter pub get
@@ -82,6 +84,14 @@ jobs:
             --release \
             --base-href "$BASE_HREF" \
             --dart-define-from-file=config/config.ci.json
+
+      - name: Verify Supabase URL baked into web build
+        run: |
+          if ! grep -q "supabase.co" build/web/main.dart.js; then
+            echo "Supabase URL was not embedded in the web build output."
+            exit 1
+          fi
+          echo "Web build contains supabase.co host reference."
 
       - name: Remove secrets file before publishing web artifact
         run: rm -f config/config.ci.json
@@ -104,6 +114,7 @@ jobs:
             --arg key "${{ secrets.SUPABASE_ANON_KEY }}" \
             '{SUPABASE_URL: ($url | gsub("^\\s+|\\s+$"; "")), SUPABASE_ANON_KEY: ($key | gsub("^\\s+|\\s+$"; ""))}' \
             > config/config.ci.json
+          jq -e '.SUPABASE_URL != "" and .SUPABASE_ANON_KEY != ""' config/config.ci.json >/dev/null
 
       - name: Generate android/ platform scaffold if missing
         run: |
@@ -125,6 +136,12 @@ jobs:
           done
           echo "APK build failed after 4 attempts."
           exit 1
+
+      - name: flutter build appbundle
+        run: |
+          flutter build appbundle \
+            --release \
+            --dart-define-from-file=config/config.ci.json
 
       - name: Remove secrets file (never publish it)
         run: rm -f config/config.ci.json

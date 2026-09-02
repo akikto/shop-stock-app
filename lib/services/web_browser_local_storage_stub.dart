@@ -1,24 +1,28 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// Non-web stub — never instantiated; [SupabaseService] only uses the web
-/// implementation when [kIsWeb] is true at runtime.
+import 'in_memory_local_storage.dart';
+
+/// VM/Android stub — [SupabaseService] only constructs this on web (`kIsWeb`).
 class WebBrowserLocalStorage extends LocalStorage {
   WebBrowserLocalStorage({required this.persistSessionKey});
 
   final String persistSessionKey;
 
-  @override
-  Future<void> initialize() async {}
+  late final LocalStorage _delegate = InMemoryLocalStorage();
 
   @override
-  Future<bool> hasAccessToken() async => false;
+  Future<void> initialize() => _delegate.initialize();
 
   @override
-  Future<String?> accessToken() async => null;
+  Future<bool> hasAccessToken() => _delegate.hasAccessToken();
 
   @override
-  Future<void> removePersistedSession() async {}
+  Future<String?> accessToken() => _delegate.accessToken();
 
   @override
-  Future<void> persistSession(String persistSessionString) async {}
+  Future<void> removePersistedSession() => _delegate.removePersistedSession();
+
+  @override
+  Future<void> persistSession(String persistSessionString) =>
+      _delegate.persistSession(persistSessionString);
 }
