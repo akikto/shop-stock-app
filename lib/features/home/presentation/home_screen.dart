@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/localization/app_strings.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/navigation/shell_navigation_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/stock/presentation/stock_screen.dart';
@@ -157,8 +158,12 @@ class _DashboardBody extends StatelessWidget {
   final VoidCallback onStockIn;
 
   static EdgeInsets _scrollPadding(BuildContext context) {
-    const navHeight = 64.0;
-    return const EdgeInsets.fromLTRB(16, 16, 16, navHeight + 12);
+    return const EdgeInsets.fromLTRB(
+      16,
+      16,
+      16,
+      AppTheme.shellNavigationBarHeight + 12,
+    );
   }
 
   @override
@@ -213,7 +218,7 @@ class _KpiGrid extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       mainAxisSpacing: 12,
       crossAxisSpacing: 12,
-      childAspectRatio: 1.5,
+      childAspectRatio: 1.2,
       children: [
         for (final kpi in kpis) _KpiCard(descriptor: kpi),
       ],
@@ -242,12 +247,12 @@ class _KpiCard extends StatelessWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Icon(icon, color: color, size: 28),
+            const Spacer(),
             Text(
               descriptor.value,
               style: Theme.of(context)
@@ -255,7 +260,17 @@ class _KpiCard extends StatelessWidget {
                   .headlineSmall
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
-            Text(descriptor.label, style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 4),
+            Text(
+              descriptor.label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textHeightBehavior: const TextHeightBehavior(
+                applyHeightToFirstAscent: false,
+                applyHeightToLastDescent: true,
+              ),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.25),
+            ),
           ],
         ),
       ),
@@ -337,7 +352,20 @@ class _QuickActionTile extends StatelessWidget {
               children: [
                 Icon(icon),
                 const SizedBox(width: 8),
-                Expanded(child: Text(label)),
+                Expanded(
+                  child: Text(
+                    label,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textHeightBehavior: const TextHeightBehavior(
+                      applyHeightToFirstAscent: false,
+                      applyHeightToLastDescent: true,
+                    ),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          height: 1.25,
+                        ),
+                  ),
+                ),
               ],
             ),
           ),

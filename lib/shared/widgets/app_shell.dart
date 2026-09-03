@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/navigation/shell_navigation_provider.dart';
+import '../../core/theme/app_theme.dart';
 import 'offline_status_banner.dart';
 
 class ShellDestination {
@@ -71,7 +72,7 @@ class ShellNavigationBar extends StatelessWidget {
     final theme = Theme.of(context);
     final navTheme = theme.navigationBarTheme;
     final colorScheme = theme.colorScheme;
-    final height = navTheme.height ?? 64.0;
+    final height = navTheme.height ?? AppTheme.shellNavigationBarHeight;
 
     return Material(
       elevation: 3,
@@ -132,9 +133,14 @@ class _ShellNavItem extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
+              textHeightBehavior: const TextHeightBehavior(
+                applyHeightToFirstAscent: false,
+                applyHeightToLastDescent: true,
+              ),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: color,
                     fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                    height: 1.2,
                   ),
             ),
           ],
