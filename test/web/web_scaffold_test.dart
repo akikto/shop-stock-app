@@ -136,6 +136,10 @@ void main() {
       expect(workflow, contains('flutter build appbundle'));
     });
 
+    test('builds web without PWA service worker (avoids stale preview cache)', () {
+      expect(workflow, contains('--pwa-strategy=none'));
+    });
+
     test('optionally writes google-services.json from GitHub secret', () {
       expect(workflow, contains('GOOGLE_SERVICES_JSON'));
       expect(workflow, contains('android/app/google-services.json'));

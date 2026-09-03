@@ -11,7 +11,7 @@ Offline Sale, Stock In, and Stock Adjustment for **Android native** builds.
 - `services/sync_coordinator.dart` — reconnect / resume triggers (debounced)
 - `repositories/offline_aware_transaction_repository.dart` — online RPC vs local queue
 - `providers/sync_providers.dart` — Riverpod wiring
-- `sync_bootstrap.dart` — opens DB after Supabase init (skipped on web)
+- `sync_bootstrap.dart` — opens DB after Supabase init (web uses `app_bootstrap_web.dart` instead)
 
 ## Server idempotency
 
@@ -34,4 +34,4 @@ without double stock mutation.
 - FIFO replay; network errors stay pending; business errors (e.g. insufficient stock) fail
 - Successful sync refreshes product cache and invalidates providers
 
-Web preview builds skip offline sync (`kIsWeb`).
+Web preview builds skip offline sync (conditional `app_bootstrap_web.dart` import — no Drift/Riverpod sync overrides).

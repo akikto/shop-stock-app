@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'database/sync_database.dart';
@@ -15,46 +14,66 @@ class SyncBootstrap {
   static SyncCoordinator? _coordinator;
   static bool isInitialized = false;
 
-  static Future<void> initialize(ProviderContainer container) async {
-    if (kIsWeb) return;
-
+  /// Builds a [ProviderContainer] with all sync overrides applied at creation.
+  ///
+  /// Riverpod does not allow adding overrides via [ProviderContainer.updateOverrides]
+  /// on an empty container — overrides must be supplied at construction time.
+  static Future<ProviderContainer> createContainer() async {
     _database = await SyncDatabase.open();
     _connectivity = ConnectivityService();
     await _connectivity!.start();
 
-    container.updateOverrides([
-      syncDatabaseProvider.overrideWithValue(_database!),
-      connectivityServiceProvider.overrideWithValue(_connectivity!),
-    ]);
+    final setupContainer = ProviderContainer(
+      overrides: [
+        syncDatabaseProvider.overrideWithValue(_database!),
+        connectivityServiceProvider.overrideWithValue(_connectivity!),
+      ],
+    );
+    final engine = setupContainer.read(syncEngineProvider);
+    setupContainer.dispose();
 
+    late SyncController syncController;
     _coordinator = SyncCoordinator(
       connectivity: _connectivity!,
-      engine: container.read(syncEngineProvider),
+      engine: engine,
       onSyncStateChanged: (isSyncing, error) {
-        final ctrl = container.read(syncControllerProvider.notifier);
         if (isSyncing) {
-          ctrl.setSyncing();
+          syncController.setSyncing();
         } else if (error != null) {
-          ctrl.reportError(error);
+          syncController.reportError(error);
         } else {
-          ctrl.reportSuccess();
+          syncController.reportSuccess();
         }
       },
     );
 
-    container.updateOverrides([
-      syncControllerProvider
-          .overrideWith((ref) => SyncController(_coordinator!)),
-      syncCoordinatorProvider.overrideWithValue(_coordinator!),
-    ]);
+    final container = ProviderContainer(
+      overrides: [
+        syncDatabaseProvider.overrideWithValue(_database!),
+        connectivityServiceProvider.overrideWithValue(_connectivity!),
+        syncCoordinatorProvider.overrideWithValue(_coordinator!),
+        syncControllerProvider.overrideWith((ref) {
+          syncController = SyncController(_coordinator!);
+          return syncController;
+        }),
+      ],
+    );
+
+    // Ensure controller exists before coordinator schedules sync work.
+    container.read(syncControllerProvider);
 
     _coordinator!.start();
     isInitialized = true;
+    return container;
   }
 
   static Future<void> dispose() async {
     await _coordinator?.dispose();
     await _connectivity?.dispose();
     await _database?.close();
+    _coordinator = null;
+    _connectivity = null;
+    _database = null;
+    isInitialized = false;
   }
 }
