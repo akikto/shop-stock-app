@@ -7,9 +7,10 @@ import 'core/responsive/mobile_frame.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'services/supabase_service.dart';
+import 'startup/app_bootstrap_web.dart'
+    if (dart.library.io) 'startup/app_bootstrap_io.dart' as app_bootstrap;
 import 'startup/fcm_bootstrap_stub.dart'
     if (dart.library.io) 'startup/fcm_bootstrap_mobile.dart' as fcm_bootstrap;
-import 'sync/sync_bootstrap.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,8 +21,7 @@ Future<void> main() async {
     await SupabaseService.initialize();
     await fcm_bootstrap.bootstrapFcm();
 
-    final container = ProviderContainer();
-    await SyncBootstrap.initialize(container);
+    final container = await app_bootstrap.createAppContainer();
 
     runApp(
       UncontrolledProviderScope(

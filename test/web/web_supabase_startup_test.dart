@@ -22,6 +22,30 @@ void main() {
     });
   });
 
+  group('app bootstrap excludes sync on web builds', () {
+    test('main.dart uses conditional app bootstrap import', () {
+      final mainSource = File('lib/main.dart').readAsStringSync();
+      expect(mainSource, contains('app_bootstrap_web.dart'));
+      expect(mainSource, contains('app_bootstrap_io.dart'));
+      expect(mainSource, contains('createAppContainer'));
+      expect(mainSource, isNot(contains('SyncBootstrap.initialize')));
+    });
+
+    test('web bootstrap does not import sync_bootstrap', () {
+      final webBootstrap =
+          File('lib/startup/app_bootstrap_web.dart').readAsStringSync();
+      expect(webBootstrap, isNot(contains('sync_bootstrap')));
+      expect(webBootstrap, isNot(contains('SyncBootstrap')));
+    });
+
+    test('sync bootstrap wires overrides at ProviderContainer construction', () {
+      final source = File('lib/sync/sync_bootstrap.dart').readAsStringSync();
+      expect(source, contains('ProviderContainer('));
+      expect(source, contains('overrides:'));
+      expect(source, contains('createContainer'));
+    });
+  });
+
   group('FCM bootstrap is excluded from web builds', () {
     test('main.dart uses conditional FCM bootstrap import', () {
       final mainSource = File('lib/main.dart').readAsStringSync();

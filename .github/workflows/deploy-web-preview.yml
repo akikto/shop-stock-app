@@ -85,6 +85,7 @@ jobs:
         run: |
           flutter build web \
             --release \
+            --pwa-strategy=none \
             --base-href "$BASE_HREF" \
             --dart-define-from-file=config/config.ci.json
 
