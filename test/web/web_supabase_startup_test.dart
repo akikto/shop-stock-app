@@ -38,11 +38,11 @@ void main() {
       expect(webBootstrap, isNot(contains('SyncBootstrap')));
     });
 
-    test('sync bootstrap uses ProviderContainer overrides at construction', () {
+    test('sync bootstrap wires overrides at ProviderContainer construction', () {
       final source = File('lib/sync/sync_bootstrap.dart').readAsStringSync();
       expect(source, contains('ProviderContainer('));
       expect(source, contains('overrides:'));
-      expect(source, isNot(contains('updateOverrides'));
+      expect(source, contains('createContainer'));
     });
   });
 

@@ -14,54 +14,39 @@ class SyncBootstrap {
   static SyncCoordinator? _coordinator;
   static bool isInitialized = false;
 
-  /// Builds a [ProviderContainer] with all sync overrides applied at creation.
-  ///
-  /// Riverpod does not allow adding overrides via [ProviderContainer.updateOverrides]
-  /// on an empty container — overrides must be supplied at construction time.
+  /// Builds a [ProviderContainer] with sync overrides supplied at construction.
   static Future<ProviderContainer> createContainer() async {
     _database = await SyncDatabase.open();
     _connectivity = ConnectivityService();
     await _connectivity!.start();
 
-    final setupContainer = ProviderContainer(
-      overrides: [
-        syncDatabaseProvider.overrideWithValue(_database!),
-        connectivityServiceProvider.overrideWithValue(_connectivity!),
-      ],
-    );
-    final engine = setupContainer.read(syncEngineProvider);
-    setupContainer.dispose();
-
-    late SyncController syncController;
-    _coordinator = SyncCoordinator(
-      connectivity: _connectivity!,
-      engine: engine,
-      onSyncStateChanged: (isSyncing, error) {
-        if (isSyncing) {
-          syncController.setSyncing();
-        } else if (error != null) {
-          syncController.reportError(error);
-        } else {
-          syncController.reportSuccess();
-        }
-      },
-    );
-
     final container = ProviderContainer(
       overrides: [
         syncDatabaseProvider.overrideWithValue(_database!),
         connectivityServiceProvider.overrideWithValue(_connectivity!),
-        syncCoordinatorProvider.overrideWithValue(_coordinator!),
-        syncControllerProvider.overrideWith((ref) {
-          syncController = SyncController(_coordinator!);
-          return syncController;
+        syncCoordinatorProvider.overrideWith((ref) {
+          return SyncCoordinator(
+            connectivity: _connectivity!,
+            engine: ref.watch(syncEngineProvider),
+            onSyncStateChanged: (isSyncing, error) {
+              final ctrl = ref.read(syncControllerProvider.notifier);
+              if (isSyncing) {
+                ctrl.setSyncing();
+              } else if (error != null) {
+                ctrl.reportError(error);
+              } else {
+                ctrl.reportSuccess();
+              }
+            },
+          );
         }),
+        syncControllerProvider.overrideWith(
+          (ref) => SyncController(ref.watch(syncCoordinatorProvider)),
+        ),
       ],
     );
 
-    // Ensure controller exists before coordinator schedules sync work.
-    container.read(syncControllerProvider);
-
+    _coordinator = container.read(syncCoordinatorProvider);
     _coordinator!.start();
     isInitialized = true;
     return container;
