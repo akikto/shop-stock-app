@@ -136,6 +136,16 @@ void main() {
       expect(workflow, contains('flutter build appbundle'));
     });
 
+    test('optionally writes google-services.json from GitHub secret', () {
+      expect(workflow, contains('GOOGLE_SERVICES_JSON'));
+      expect(workflow, contains('android/app/google-services.json'));
+    });
+
+    test('uploads APK and AAB artifacts', () {
+      expect(workflow, contains('name: android-apk'));
+      expect(workflow, contains('name: android-aab'));
+    });
+
     test(
         'never references a service_role secret value (the word appears only in cautionary comments)',
         () {

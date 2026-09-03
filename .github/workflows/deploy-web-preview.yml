@@ -11,6 +11,9 @@ name: Deploy web preview to GitHub Pages + build Android APK
 #   2. In this repo: Settings -> Secrets and variables -> Actions ->
 #      add repository secrets SUPABASE_URL and SUPABASE_ANON_KEY
 #      (the public anon key only — NEVER the service_role key).
+#      Optional for FCM-enabled APK builds:
+#      GOOGLE_SERVICES_JSON — full google-services.json file contents
+#      (Android client config only; NOT the Firebase service account).
 #   3. If this repo is not named "shop-stock-app", update BASE_HREF
 #      below to match, e.g. /<your-repo-name>/.
 #
@@ -122,6 +125,25 @@ jobs:
             flutter create --platforms android .
           fi
 
+      - name: Write google-services.json for FCM (optional)
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          if [ -z "$GOOGLE_SERVICES_JSON" ]; then
+            echo "GOOGLE_SERVICES_JSON not set — APK builds without FCM client config."
+            exit 0
+          fi
+          mkdir -p android/app
+          printf '%s' "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
+          jq -e '.client[0].client_info.android_client_info.package_name' \
+            android/app/google-services.json >/dev/null
+          pkg="$(jq -r '.client[0].client_info.android_client_info.package_name' android/app/google-services.json)"
+          if [ "$pkg" != "com.akikto.shop_stock_app" ]; then
+            echo "google-services.json package must be com.akikto.shop_stock_app (got $pkg)"
+            exit 1
+          fi
+          echo "google-services.json written for $pkg (content not logged)."
+
       - name: flutter build apk
         run: |
           set -e
@@ -152,3 +174,14 @@ jobs:
           name: android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
+
+      - name: Upload Android AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aab
+          path: build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+
+      - name: Remove generated Android secrets
+        if: always()
+        run: rm -f android/app/google-services.json

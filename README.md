@@ -169,6 +169,8 @@ Workflow: `.github/workflows/deploy-web-preview.yml`
 
 Repository secrets: `SUPABASE_URL`, `SUPABASE_ANON_KEY`
 
+Optional for FCM-enabled Android APK/AAB from CI: `GOOGLE_SERVICES_JSON` (full contents of `google-services.json` for package `com.akikto.shop_stock_app` — not the Firebase service account). See `config/google-services.example.json` for shape.
+
 ---
 
 ## Tests

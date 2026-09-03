@@ -51,11 +51,12 @@ cat > config/config.json <<EOF
 EOF
 
 echo ""
-echo "=== Manual (Dashboard) ==="
-echo "1. Authentication → Email ON"
-echo "2. Database → Webhooks → notifications INSERT → send-push-notification"
-echo "   Header: x-push-webhook-secret = \$PUSH_WEBHOOK_SECRET"
-echo "3. SQL Editor → scripts/verify_production.sql"
-echo "4. android/app/google-services.json (package com.akikto.shop_stock_app)"
+echo "=== Production checklist (after first deploy) ==="
+echo "Verify in SQL Editor: scripts/verify_production.sql"
+echo "Email auth + notifications INSERT webhook should already be configured."
+echo "If not, see scripts/setup_notifications_push_webhook.sql"
+echo ""
+echo "Android FCM client: place google-services.json in android/app/"
+echo "  or set GitHub secret GOOGLE_SERVICES_JSON for CI APK builds."
 echo ""
 echo "Deploy functions: DONE"
