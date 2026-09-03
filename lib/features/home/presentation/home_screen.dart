@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../core/navigation/shell_navigation_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../features/stock/presentation/stock_screen.dart';
 import '../../../models/dashboard_stats.dart';
 import '../../../shared/widgets/error_view.dart';
 import '../../../shared/widgets/loading_indicator.dart';
@@ -122,6 +123,9 @@ class HomeScreen extends ConsumerWidget {
                 : null,
             onNavigateTab: (tab) =>
                 ref.read(shellNavigationIndexProvider.notifier).state = tab,
+            onStockIn: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const StockScreen()),
+            ),
           ),
         ),
       ),
@@ -135,6 +139,7 @@ class _DashboardBody extends StatelessWidget {
     required this.canViewReports,
     required this.onOpenReports,
     required this.onNavigateTab,
+    required this.onStockIn,
     this.activeProductCount,
     this.activeProductCountPending = false,
     this.activeProductCountError = false,
@@ -149,6 +154,12 @@ class _DashboardBody extends StatelessWidget {
   final VoidCallback onOpenReports;
   final VoidCallback? onOpenLowStock;
   final void Function(int tab) onNavigateTab;
+  final VoidCallback onStockIn;
+
+  static EdgeInsets _scrollPadding(BuildContext context) {
+    const navHeight = 64.0;
+    return const EdgeInsets.fromLTRB(16, 16, 16, navHeight + 12);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -161,7 +172,7 @@ class _DashboardBody extends StatelessWidget {
 
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(16),
+      padding: _scrollPadding(context),
       children: [
         Text(
           stats.isShopScope ? AppStrings.todaySales : AppStrings.mySalesToday,
@@ -180,7 +191,7 @@ class _DashboardBody extends StatelessWidget {
         _QuickActions(
           canViewReports: canViewReports,
           onNewSale: () => onNavigateTab(ShellTab.sale),
-          onStockIn: () => onNavigateTab(ShellTab.stockIn),
+          onStockIn: onStockIn,
           onHistory: () => onNavigateTab(ShellTab.history),
           onReports: onOpenReports,
         ),

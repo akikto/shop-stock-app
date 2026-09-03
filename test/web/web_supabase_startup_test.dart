@@ -31,6 +31,11 @@ void main() {
       expect(mainSource, isNot(contains('SyncBootstrap.initialize')));
     });
 
+    test('shell nav exposes stable key for widget tests', () {
+      final source = File('lib/shared/widgets/app_shell.dart').readAsStringSync();
+      expect(source, contains("Key('shell_bottom_nav')"));
+    });
+
     test('web bootstrap does not import sync_bootstrap', () {
       final webBootstrap =
           File('lib/startup/app_bootstrap_web.dart').readAsStringSync();

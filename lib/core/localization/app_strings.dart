@@ -34,6 +34,7 @@ class AppStrings {
 
   // Product list / search
   static const products = 'পণ্যসমূহ';
+  static const productsNav = 'পণ্য';
   static const searchProducts = 'পণ্য খুঁজুন';
   static const noProductsFound = 'কোনো পণ্য পাওয়া যায়নি';
   static const currentStock = 'বর্তমান স্টক';

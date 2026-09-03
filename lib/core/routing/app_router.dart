@@ -16,7 +16,6 @@ import '../../features/products/presentation/product_form_screen.dart';
 import '../../features/products/presentation/products_screen.dart';
 import '../../features/sale/presentation/sale_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
-import '../../features/stock/presentation/stock_screen.dart';
 import '../../shared/widgets/app_shell.dart';
 import '../../shared/widgets/error_view.dart';
 import '../../shared/widgets/loading_indicator.dart';
@@ -126,7 +125,7 @@ class _ProtectedAppShell extends ConsumerWidget {
               screen: HomeScreen(),
             ),
             ShellDestination(
-              label: AppStrings.products,
+              label: AppStrings.productsNav,
               icon: Icons.inventory_2_outlined,
               selectedIcon: Icons.inventory_2,
               screen: ProductsScreen(),
@@ -136,12 +135,6 @@ class _ProtectedAppShell extends ConsumerWidget {
               icon: Icons.point_of_sale_outlined,
               selectedIcon: Icons.point_of_sale,
               screen: SaleScreen(),
-            ),
-            ShellDestination(
-              label: AppStrings.stockIn,
-              icon: Icons.add_box_outlined,
-              selectedIcon: Icons.add_box,
-              screen: StockScreen(),
             ),
             ShellDestination(
               label: AppStrings.history,
