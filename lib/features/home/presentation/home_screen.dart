@@ -157,9 +157,8 @@ class _DashboardBody extends StatelessWidget {
   final VoidCallback onStockIn;
 
   static EdgeInsets _scrollPadding(BuildContext context) {
-    final navHeight =
-        Theme.of(context).navigationBarTheme.height ?? kBottomNavigationBarHeight;
-    return EdgeInsets.fromLTRB(16, 16, 16, navHeight + 12);
+    const navHeight = 64.0;
+    return const EdgeInsets.fromLTRB(16, 16, 16, navHeight + 12);
   }
 
   @override

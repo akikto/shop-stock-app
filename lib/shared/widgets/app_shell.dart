@@ -44,6 +44,7 @@ class AppShell extends ConsumerWidget {
         ),
       ),
       bottomNavigationBar: ShellNavigationBar(
+        key: const Key('shell_bottom_nav'),
         destinations: destinations,
         selectedIndex: index.clamp(0, destinations.length - 1),
         onDestinationSelected: (i) =>

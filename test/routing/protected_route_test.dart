@@ -28,7 +28,6 @@ import 'package:shop_stock_app/repositories/reports_repository.dart';
 import 'package:shop_stock_app/repositories/transaction_repository.dart';
 import 'package:shop_stock_app/sync/models/transaction_write_result.dart';
 import 'package:shop_stock_app/services/image_compressor.dart';
-import 'package:shop_stock_app/shared/widgets/app_shell.dart';
 import 'package:shop_stock_app/services/product_photo_service.dart';
 import 'package:shop_stock_app/services/product_photo_uploader.dart';
 
@@ -259,7 +258,7 @@ void main() {
 
       expect(find.text(AppStrings.login), findsOneWidget);
       // Bottom navigation (protected shell) must not be present.
-      expect(find.byType(ShellNavigationBar), findsNothing);
+      expect(find.byKey(const Key('shell_bottom_nav')), findsNothing);
     });
 
     testWidgets(
@@ -280,7 +279,7 @@ void main() {
 
       await _settleProtectedShell(tester, fake);
 
-      expect(find.byType(ShellNavigationBar), findsOneWidget);
+      expect(find.byKey(const Key('shell_bottom_nav')), findsOneWidget);
       expect(find.text(AppStrings.login), findsNothing);
     });
 
@@ -303,7 +302,7 @@ void main() {
       await tester.pumpWidget(_appWithRouter(fake));
       await tester.pumpAndSettle();
 
-      expect(find.byType(ShellNavigationBar), findsNothing);
+      expect(find.byKey(const Key('shell_bottom_nav')), findsNothing);
       expect(
           find.textContaining(AppStrings.accountDeactivated), findsOneWidget);
     });
