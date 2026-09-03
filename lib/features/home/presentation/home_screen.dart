@@ -192,7 +192,7 @@ class _DashboardBody extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Expanded(
-            flex: showLowStock ? 58 : 62,
+            flex: showLowStock ? 64 : 68,
             child: _KpiGrid(kpis: kpis),
           ),
           if (showLowStock) ...[
@@ -208,7 +208,7 @@ class _DashboardBody extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Expanded(
-            flex: 28,
+            flex: 24,
             child: _QuickActions(
               canViewReports: canViewReports,
               onNewSale: () => onNavigateTab(ShellTab.sale),
@@ -242,7 +242,7 @@ class _KpiGrid extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           mainAxisSpacing: spacing,
           crossAxisSpacing: spacing,
-          mainAxisExtent: cellHeight.clamp(72, double.infinity),
+          mainAxisExtent: cellHeight,
           children: [
             for (final kpi in kpis) _KpiCard(descriptor: kpi),
           ],
@@ -270,45 +270,49 @@ class _KpiCard extends StatelessWidget {
       DashboardKpiKind.activeProductCount => Icons.inventory_2_outlined,
     };
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: accent.withValues(alpha: 0.25)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundColor: accent.withValues(alpha: 0.15),
-              child: Icon(icon, color: accent, size: 18),
-            ),
-            const Spacer(),
-            Text(
-              descriptor.value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: onAccent,
-                    height: 1.1,
-                  ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              descriptor.label,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: onAccent.withValues(alpha: 0.85),
-                    height: 1.15,
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-          ],
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: background,
+          border: Border.all(color: accent.withValues(alpha: 0.25)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                radius: 13,
+                backgroundColor: accent.withValues(alpha: 0.15),
+                child: Icon(icon, color: accent, size: 16),
+              ),
+              const Spacer(),
+              Text(
+                descriptor.value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: onAccent,
+                      height: 1.0,
+                    ),
+              ),
+              const SizedBox(height: 2),
+              Flexible(
+                child: Text(
+                  descriptor.label,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: onAccent.withValues(alpha: 0.9),
+                        height: 1.1,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -369,7 +373,7 @@ class _QuickActions extends StatelessWidget {
             crossAxisCount: 2,
             mainAxisSpacing: spacing,
             crossAxisSpacing: spacing,
-            mainAxisExtent: cellHeight.clamp(48, double.infinity),
+            mainAxisExtent: cellHeight,
           ),
           itemCount: actions.length,
           itemBuilder: (context, index) {
