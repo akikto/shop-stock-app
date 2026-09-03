@@ -56,6 +56,7 @@ class AppShell extends ConsumerWidget {
 
 class ShellNavigationBar extends StatelessWidget {
   const ShellNavigationBar({
+    super.key,
     required this.destinations,
     required this.selectedIndex,
     required this.onDestinationSelected,
