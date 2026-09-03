@@ -81,10 +81,8 @@ deno test supabase/functions/send-push-notification/handler_test.ts
 deno test supabase/functions/send-push-notification/preferences_test.ts
 
 echo ""
-echo "DONE. Manual steps remaining in Supabase Dashboard:"
-echo "  1. Authentication → enable Email provider"
-echo "  2. Database → Webhooks → notifications INSERT → send-push-notification"
-echo "     Header: x-push-webhook-secret = \$PUSH_WEBHOOK_SECRET"
-echo "  3. Run scripts/verify_production.sql in SQL Editor"
-echo "  4. Place google-services.json in android/app/ (package: com.akikto.shop_stock_app)"
-echo "  5. Test push on a physical Android device"
+echo "DONE. Post-deploy verification:"
+echo "  1. SQL Editor → scripts/verify_production.sql"
+echo "  2. Email auth + notifications webhook (see scripts/setup_notifications_push_webhook.sql if missing)"
+echo "  3. GitHub secret GOOGLE_SERVICES_JSON for FCM-enabled CI APK (optional)"
+echo "  4. Test push on a physical Android device"

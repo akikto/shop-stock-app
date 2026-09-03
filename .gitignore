@@ -2,6 +2,9 @@
 config/config.json
 config/config.ci.json
 
+# Firebase Android client config (use GOOGLE_SERVICES_JSON secret in CI)
+android/app/google-services.json
+
 # Flutter / Dart
 .dart_tool/
 .flutter-plugins

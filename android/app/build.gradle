@@ -3,6 +3,11 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+def googleServicesFile = file("google-services.json")
+if (googleServicesFile.exists()) {
+    apply plugin: "com.google.gms.google-services"
+}
+
 android {
     namespace = "com.akikto.shop_stock_app"
     compileSdk = flutter.compileSdkVersion
