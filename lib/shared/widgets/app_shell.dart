@@ -43,18 +43,100 @@ class AppShell extends ConsumerWidget {
           ],
         ),
       ),
-      bottomNavigationBar: NavigationBar(
+      bottomNavigationBar: _ShellNavigationBar(
+        destinations: destinations,
         selectedIndex: index.clamp(0, destinations.length - 1),
         onDestinationSelected: (i) =>
             ref.read(shellNavigationIndexProvider.notifier).state = i,
-        destinations: [
-          for (final d in destinations)
-            NavigationDestination(
-              icon: Icon(d.icon),
-              selectedIcon: Icon(d.selectedIcon),
-              label: d.label,
+      ),
+    );
+  }
+}
+
+class _ShellNavigationBar extends StatelessWidget {
+  const _ShellNavigationBar({
+    required this.destinations,
+    required this.selectedIndex,
+    required this.onDestinationSelected,
+  });
+
+  final List<ShellDestination> destinations;
+  final int selectedIndex;
+  final ValueChanged<int> onDestinationSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final navTheme = theme.navigationBarTheme;
+    final colorScheme = theme.colorScheme;
+    final height = navTheme.height ?? 64.0;
+
+    return Material(
+      elevation: navTheme.elevation ?? 3,
+      color: navTheme.backgroundColor ?? colorScheme.surfaceContainer,
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: height,
+          child: Row(
+            children: [
+              for (var i = 0; i < destinations.length; i++)
+                Expanded(
+                  child: _ShellNavItem(
+                    destination: destinations[i],
+                    selected: i == selectedIndex,
+                    onTap: () => onDestinationSelected(i),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ShellNavItem extends StatelessWidget {
+  const _ShellNavItem({
+    required this.destination,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final ShellDestination destination;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final color = selected ? colorScheme.primary : colorScheme.onSurfaceVariant;
+
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              selected ? destination.selectedIcon : destination.icon,
+              color: color,
+              size: 24,
             ),
-        ],
+            const SizedBox(height: 4),
+            Text(
+              destination.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: color,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                  ),
+            ),
+          ],
+        ),
       ),
     );
   }

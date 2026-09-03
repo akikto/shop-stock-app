@@ -13,6 +13,7 @@ import '../providers/notification_providers.dart';
 import 'low_stock_screen.dart';
 import 'notifications_screen.dart';
 import 'reports_screen.dart';
+import '../../../features/stock/presentation/stock_screen.dart';
 
 /// Role-aware home dashboard with today's KPIs, low-stock summary,
 /// and quick navigation to reports and notifications.
@@ -122,6 +123,9 @@ class HomeScreen extends ConsumerWidget {
                 : null,
             onNavigateTab: (tab) =>
                 ref.read(shellNavigationIndexProvider.notifier).state = tab,
+            onStockIn: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const StockScreen()),
+            ),
           ),
         ),
       ),
@@ -135,6 +139,7 @@ class _DashboardBody extends StatelessWidget {
     required this.canViewReports,
     required this.onOpenReports,
     required this.onNavigateTab,
+    required this.onStockIn,
     this.activeProductCount,
     this.activeProductCountPending = false,
     this.activeProductCountError = false,
@@ -149,6 +154,13 @@ class _DashboardBody extends StatelessWidget {
   final VoidCallback onOpenReports;
   final VoidCallback? onOpenLowStock;
   final void Function(int tab) onNavigateTab;
+  final VoidCallback onStockIn;
+
+  static EdgeInsets _scrollPadding(BuildContext context) {
+    final navHeight =
+        Theme.of(context).navigationBarTheme.height ?? kBottomNavigationBarHeight;
+    return EdgeInsets.fromLTRB(16, 16, 16, navHeight + 12);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -161,7 +173,7 @@ class _DashboardBody extends StatelessWidget {
 
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(16),
+      padding: _scrollPadding(context),
       children: [
         Text(
           stats.isShopScope ? AppStrings.todaySales : AppStrings.mySalesToday,
@@ -180,7 +192,7 @@ class _DashboardBody extends StatelessWidget {
         _QuickActions(
           canViewReports: canViewReports,
           onNewSale: () => onNavigateTab(ShellTab.sale),
-          onStockIn: () => onNavigateTab(ShellTab.stockIn),
+          onStockIn: onStockIn,
           onHistory: () => onNavigateTab(ShellTab.history),
           onReports: onOpenReports,
         ),

@@ -8,9 +8,8 @@ class ShellTab {
   static const int home = 0;
   static const int products = 1;
   static const int sale = 2;
-  static const int stockIn = 3;
-  static const int history = 4;
-  static const int settings = 5;
+  static const int history = 3;
+  static const int settings = 4;
 }
 
 /// Selected tab for the protected [AppShell]. Quick actions on the
