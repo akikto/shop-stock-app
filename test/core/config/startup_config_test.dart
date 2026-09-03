@@ -47,8 +47,10 @@ void main() {
     test('expands null-check errors with actionable text', () {
       final text = formatStartupFailure(
         'Null check operator used on a null value',
+        StackTrace.fromString('#1      Supabase.initialize (package:supabase_flutter/...)\n'),
       );
-      expect(text, contains('shared_preferences'));
+      expect(text, contains('null-check crash'));
+      expect(text, contains('Supabase.initialize'));
     });
   });
 }

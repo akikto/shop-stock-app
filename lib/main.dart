@@ -1,4 +1,3 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,9 +6,9 @@ import 'core/config/startup_config.dart';
 import 'core/responsive/mobile_frame.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
-import 'services/fcm_background_handler.dart';
-import 'services/fcm_service.dart';
 import 'services/supabase_service.dart';
+import 'startup/fcm_bootstrap_stub.dart'
+    if (dart.library.io) 'startup/fcm_bootstrap_mobile.dart' as fcm_bootstrap;
 import 'sync/sync_bootstrap.dart';
 
 Future<void> main() async {
@@ -19,11 +18,7 @@ Future<void> main() async {
     // Fails fast with a clear error if config wasn't supplied — see
     // core/config/app_config.dart and README.md.
     await SupabaseService.initialize();
-    await FcmService.initialize();
-
-    if (FcmService.isInitialized) {
-      FirebaseMessaging.onBackgroundMessage(fcmBackgroundMessageHandler);
-    }
+    await fcm_bootstrap.bootstrapFcm();
 
     final container = ProviderContainer();
     await SyncBootstrap.initialize(container);
