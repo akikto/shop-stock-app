@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/navigation/shell_navigation_provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/shell_page_colors.dart';
 import 'offline_status_banner.dart';
 
 class ShellDestination {
@@ -38,7 +39,13 @@ class AppShell extends ConsumerWidget {
             Expanded(
               child: IndexedStack(
                 index: index,
-                children: [for (final d in destinations) d.screen],
+                children: [
+                  for (var i = 0; i < destinations.length; i++)
+                    Theme(
+                      data: ShellPageColors.themeFor(context, i),
+                      child: destinations[i].screen,
+                    ),
+                ],
               ),
             ),
           ],
@@ -88,6 +95,7 @@ class ShellNavigationBar extends StatelessWidget {
                   child: _ShellNavItem(
                     destination: destinations[i],
                     selected: i == selectedIndex,
+                    accentColor: ShellPageColors.accentForTab(i),
                     onTap: () => onDestinationSelected(i),
                   ),
                 ),
@@ -103,17 +111,19 @@ class _ShellNavItem extends StatelessWidget {
   const _ShellNavItem({
     required this.destination,
     required this.selected,
+    required this.accentColor,
     required this.onTap,
   });
 
   final ShellDestination destination;
   final bool selected;
+  final Color accentColor;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final color = selected ? colorScheme.primary : colorScheme.onSurfaceVariant;
+    final color = selected ? accentColor : colorScheme.onSurfaceVariant;
 
     return InkWell(
       onTap: onTap,
@@ -122,10 +132,20 @@ class _ShellNavItem extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              selected ? destination.selectedIcon : destination.icon,
-              color: color,
-              size: 24,
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: selected
+                    ? accentColor.withValues(alpha: 0.14)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                selected ? destination.selectedIcon : destination.icon,
+                color: color,
+                size: 22,
+              ),
             ),
             const SizedBox(height: 4),
             Text(

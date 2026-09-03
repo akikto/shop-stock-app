@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/localization/app_strings.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/navigation/shell_navigation_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/stock/presentation/stock_screen.dart';
@@ -13,11 +12,12 @@ import '../domain/dashboard_kpi.dart';
 import '../providers/dashboard_providers.dart';
 import '../providers/notification_providers.dart';
 import 'low_stock_screen.dart';
+import 'home_kpi_colors.dart';
 import 'notifications_screen.dart';
 import 'reports_screen.dart';
 
 /// Role-aware home dashboard with today's KPIs, low-stock summary,
-/// and quick navigation to reports and notifications.
+/// and quick navigation — fits on one screen without scrolling.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -31,6 +31,18 @@ class HomeScreen extends ConsumerWidget {
     Navigator.of(context).push(
       MaterialPageRoute<void>(builder: (_) => const NotificationsScreen()),
     );
+  }
+
+  Future<void> _refresh(
+    WidgetRef ref, {
+    required bool canViewReports,
+  }) async {
+    final range = ref.read(dashboardHomeRangeProvider);
+    ref.invalidate(dashboardStatsProvider(range));
+    ref.invalidate(unreadNotificationCountProvider);
+    if (canViewReports) {
+      ref.invalidate(shopActiveProductCountProvider);
+    }
   }
 
   Widget _notificationBell({
@@ -65,6 +77,11 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text(AppStrings.home),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: AppStrings.retry,
+            onPressed: () => _refresh(ref, canViewReports: canViewReports),
+          ),
           if (canViewReports)
             IconButton(
               icon: const Icon(Icons.bar_chart_outlined),
@@ -91,42 +108,35 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(dashboardStatsProvider(range));
-          ref.invalidate(unreadNotificationCountProvider);
-          if (canViewReports) {
-            ref.invalidate(shopActiveProductCountProvider);
-          }
-        },
-        child: statsAsync.when(
-          skipLoadingOnReload: true,
-          loading: () =>
-              const LoadingIndicator(message: AppStrings.loadingDashboard),
-          error: (error, _) => ErrorView(
-            message: error.toString(),
-            onRetry: () => ref.invalidate(dashboardStatsProvider(range)),
-          ),
-          data: (stats) => _DashboardBody(
-            stats: stats,
-            canViewReports: canViewReports,
-            activeProductCount: stats.isShopScope ? activeCountAsync.valueOrNull : null,
-            activeProductCountPending:
-                stats.isShopScope && activeCountAsync.isLoading,
-            activeProductCountError:
-                stats.isShopScope && activeCountAsync.hasError,
-            onOpenReports: () => _openReports(context),
-            onOpenLowStock: stats.isShopScope && stats.lowStockCount > 0
-                ? () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                          builder: (_) => const LowStockScreen()),
-                    )
-                : null,
-            onNavigateTab: (tab) =>
-                ref.read(shellNavigationIndexProvider.notifier).state = tab,
-            onStockIn: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const StockScreen()),
-            ),
+      body: statsAsync.when(
+        skipLoadingOnReload: true,
+        loading: () =>
+            const LoadingIndicator(message: AppStrings.loadingDashboard),
+        error: (error, _) => ErrorView(
+          message: error.toString(),
+          onRetry: () => ref.invalidate(dashboardStatsProvider(range)),
+        ),
+        data: (stats) => _DashboardBody(
+          stats: stats,
+          canViewReports: canViewReports,
+          activeProductCount:
+              stats.isShopScope ? activeCountAsync.valueOrNull : null,
+          activeProductCountPending:
+              stats.isShopScope && activeCountAsync.isLoading,
+          activeProductCountError:
+              stats.isShopScope && activeCountAsync.hasError,
+          onOpenReports: () => _openReports(context),
+          onOpenLowStock: stats.isShopScope && stats.lowStockCount > 0
+              ? () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const LowStockScreen(),
+                    ),
+                  )
+              : null,
+          onNavigateTab: (tab) =>
+              ref.read(shellNavigationIndexProvider.notifier).state = tab,
+          onStockIn: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const StockScreen()),
           ),
         ),
       ),
@@ -157,15 +167,6 @@ class _DashboardBody extends StatelessWidget {
   final void Function(int tab) onNavigateTab;
   final VoidCallback onStockIn;
 
-  static EdgeInsets _scrollPadding(BuildContext context) {
-    return const EdgeInsets.fromLTRB(
-      16,
-      16,
-      16,
-      AppTheme.shellNavigationBarHeight + 12,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final kpis = buildDashboardKpis(
@@ -174,33 +175,50 @@ class _DashboardBody extends StatelessWidget {
       activeProductCountPending: activeProductCountPending,
       activeProductCountError: activeProductCountError,
     );
+    final showLowStock = stats.isShopScope &&
+        stats.lowStockCount > 0 &&
+        onOpenLowStock != null;
 
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: _scrollPadding(context),
-      children: [
-        Text(
-          stats.isShopScope ? AppStrings.todaySales : AppStrings.mySalesToday,
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        const SizedBox(height: 12),
-        _KpiGrid(kpis: kpis),
-        if (stats.isShopScope && stats.lowStockCount > 0 && onOpenLowStock != null) ...[
-          const SizedBox(height: 20),
-          _LowStockBanner(count: stats.lowStockCount, onTap: onOpenLowStock),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            stats.isShopScope ? AppStrings.todaySales : AppStrings.mySalesToday,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            flex: showLowStock ? 58 : 62,
+            child: _KpiGrid(kpis: kpis),
+          ),
+          if (showLowStock) ...[
+            const SizedBox(height: 8),
+            _LowStockBanner(count: stats.lowStockCount, onTap: onOpenLowStock),
+          ],
+          const SizedBox(height: 10),
+          Text(
+            AppStrings.quickActions,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+          const SizedBox(height: 6),
+          Expanded(
+            flex: 28,
+            child: _QuickActions(
+              canViewReports: canViewReports,
+              onNewSale: () => onNavigateTab(ShellTab.sale),
+              onStockIn: onStockIn,
+              onHistory: () => onNavigateTab(ShellTab.history),
+              onReports: onOpenReports,
+            ),
+          ),
         ],
-        const SizedBox(height: 24),
-        Text(AppStrings.quickActions,
-            style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        _QuickActions(
-          canViewReports: canViewReports,
-          onNewSale: () => onNavigateTab(ShellTab.sale),
-          onStockIn: onStockIn,
-          onHistory: () => onNavigateTab(ShellTab.history),
-          onReports: onOpenReports,
-        ),
-      ],
+      ),
     );
   }
 }
@@ -212,16 +230,24 @@ class _KpiGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 12,
-      crossAxisSpacing: 12,
-      mainAxisExtent: 140,
-      children: [
-        for (final kpi in kpis) _KpiCard(descriptor: kpi),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final rows = (kpis.length + 1) ~/ 2;
+        const spacing = 8.0;
+        final cellHeight =
+            (constraints.maxHeight - spacing * (rows - 1)) / rows;
+
+        return GridView.count(
+          crossAxisCount: 2,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: spacing,
+          crossAxisSpacing: spacing,
+          mainAxisExtent: cellHeight.clamp(72, double.infinity),
+          children: [
+            for (final kpi in kpis) _KpiCard(descriptor: kpi),
+          ],
+        );
+      },
     );
   }
 }
@@ -233,43 +259,54 @@ class _KpiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (icon, color) = switch (descriptor.kind) {
-      DashboardKpiKind.totalSales => (Icons.payments_outlined, Colors.green),
-      DashboardKpiKind.saleCount => (Icons.point_of_sale_outlined, Colors.blue),
-      DashboardKpiKind.stockInCount => (Icons.add_box_outlined, Colors.orange),
-      DashboardKpiKind.adjustmentCount =>
-        (Icons.tune_outlined, Colors.deepPurple),
-      DashboardKpiKind.lowStockCount =>
-        (Icons.warning_amber_outlined, Colors.red),
-      DashboardKpiKind.activeProductCount =>
-        (Icons.inventory_2_outlined, Colors.teal),
+    final (background, accent, onAccent) =
+        HomeKpiColors.style(descriptor.kind);
+    final icon = switch (descriptor.kind) {
+      DashboardKpiKind.totalSales => Icons.payments_outlined,
+      DashboardKpiKind.saleCount => Icons.point_of_sale_outlined,
+      DashboardKpiKind.stockInCount => Icons.add_box_outlined,
+      DashboardKpiKind.adjustmentCount => Icons.tune_outlined,
+      DashboardKpiKind.lowStockCount => Icons.warning_amber_outlined,
+      DashboardKpiKind.activeProductCount => Icons.inventory_2_outlined,
     };
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      margin: EdgeInsets.zero,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: accent.withValues(alpha: 0.25)),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: color, size: 24),
+            CircleAvatar(
+              radius: 16,
+              backgroundColor: accent.withValues(alpha: 0.15),
+              child: Icon(icon, color: accent, size: 18),
+            ),
             const Spacer(),
             Text(
               descriptor.value,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleLarge
-                  ?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: onAccent,
+                    height: 1.1,
+                  ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             Text(
               descriptor.label,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.2),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: onAccent.withValues(alpha: 0.85),
+                    height: 1.15,
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
           ],
         ),
@@ -295,34 +332,60 @@ class _QuickActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final actions = <Widget>[
-      _QuickActionTile(
+    final actions = <({IconData icon, String label, VoidCallback onTap})>[
+      (
         icon: Icons.point_of_sale_outlined,
         label: AppStrings.quickActionNewSale,
         onTap: onNewSale,
       ),
-      _QuickActionTile(
+      (
         icon: Icons.add_box_outlined,
         label: AppStrings.quickActionStockIn,
         onTap: onStockIn,
       ),
-      _QuickActionTile(
+      (
         icon: Icons.history_outlined,
         label: AppStrings.quickActionHistory,
         onTap: onHistory,
       ),
       if (canViewReports)
-        _QuickActionTile(
+        (
           icon: Icons.bar_chart_outlined,
           label: AppStrings.reports,
           onTap: onReports,
         ),
     ];
 
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: actions,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final rows = (actions.length + 1) ~/ 2;
+        const spacing = 8.0;
+        final cellHeight =
+            (constraints.maxHeight - spacing * (rows - 1)) / rows;
+
+        return GridView.builder(
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: spacing,
+            crossAxisSpacing: spacing,
+            mainAxisExtent: cellHeight.clamp(48, double.infinity),
+          ),
+          itemCount: actions.length,
+          itemBuilder: (context, index) {
+            final action = actions[index];
+            final (background, accent) =
+                HomeKpiColors.quickActionStyle(index);
+            return _QuickActionTile(
+              icon: action.icon,
+              label: action.label,
+              onTap: action.onTap,
+              background: background,
+              accent: accent,
+            );
+          },
+        );
+      },
     );
   }
 }
@@ -332,42 +395,43 @@ class _QuickActionTile extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
+    required this.background,
+    required this.accent,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final Color background;
+  final Color accent;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: (MediaQuery.sizeOf(context).width - 48) / 2,
-      child: Card(
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-            child: Row(
-              children: [
-                Icon(icon),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    label,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    textHeightBehavior: const TextHeightBehavior(
-                      applyHeightToFirstAscent: false,
-                      applyHeightToLastDescent: true,
-                    ),
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          height: 1.25,
-                        ),
-                  ),
+    return Material(
+      color: background,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          child: Row(
+            children: [
+              Icon(icon, color: accent, size: 22),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: accent.withValues(alpha: 0.95),
+                        fontWeight: FontWeight.w600,
+                        height: 1.15,
+                      ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -383,14 +447,33 @@ class _LowStockBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Colors.red.shade50,
-      child: ListTile(
-        leading: Icon(Icons.warning_amber, color: Colors.red.shade700),
-        title: Text('$count ${AppStrings.lowStockProducts}'),
-        subtitle: const Text(AppStrings.viewLowStockList),
-        trailing: const Icon(Icons.chevron_right),
+    return Material(
+      color: const Color(0xFFFFEBEE),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
         onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Row(
+            children: [
+              const Icon(Icons.warning_amber, color: Color(0xFFC62828), size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '$count ${AppStrings.lowStockProducts}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: const Color(0xFFB71C1C),
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: Color(0xFFC62828), size: 20),
+            ],
+          ),
+        ),
       ),
     );
   }
