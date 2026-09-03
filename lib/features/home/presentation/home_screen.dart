@@ -218,7 +218,7 @@ class _KpiGrid extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       mainAxisSpacing: 12,
       crossAxisSpacing: 12,
-      childAspectRatio: 1.2,
+      mainAxisExtent: 140,
       children: [
         for (final kpi in kpis) _KpiCard(descriptor: kpi),
       ],
@@ -246,18 +246,22 @@ class _KpiCard extends StatelessWidget {
     };
 
     return Card(
+      clipBehavior: Clip.antiAlias,
+      margin: EdgeInsets.zero,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 14),
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: color, size: 28),
+            Icon(icon, color: color, size: 24),
             const Spacer(),
             Text(
               descriptor.value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: Theme.of(context)
                   .textTheme
-                  .headlineSmall
+                  .titleLarge
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
@@ -265,11 +269,7 @@ class _KpiCard extends StatelessWidget {
               descriptor.label,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              textHeightBehavior: const TextHeightBehavior(
-                applyHeightToFirstAscent: false,
-                applyHeightToLastDescent: true,
-              ),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.25),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.2),
             ),
           ],
         ),
