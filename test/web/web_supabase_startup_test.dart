@@ -45,6 +45,8 @@ void main() {
       expect(source, isNot(contains('updateOverrides'));
     });
   });
+
+  group('FCM bootstrap is excluded from web builds', () {
     test('main.dart uses conditional FCM bootstrap import', () {
       final mainSource = File('lib/main.dart').readAsStringSync();
       expect(mainSource, contains('fcm_bootstrap_stub.dart'));
