@@ -35,7 +35,7 @@ List<DashboardKpiDescriptor> buildDashboardKpis({
   bool activeProductCountPending = false,
   bool activeProductCountError = false,
 }) {
-  const base = <DashboardKpiDescriptor>[
+  final base = <DashboardKpiDescriptor>[
     DashboardKpiDescriptor(
       kind: DashboardKpiKind.totalSales,
       label: AppStrings.totalSales,
