@@ -43,7 +43,7 @@ class AppShell extends ConsumerWidget {
           ],
         ),
       ),
-      bottomNavigationBar: _ShellNavigationBar(
+      bottomNavigationBar: ShellNavigationBar(
         destinations: destinations,
         selectedIndex: index.clamp(0, destinations.length - 1),
         onDestinationSelected: (i) =>
@@ -53,8 +53,8 @@ class AppShell extends ConsumerWidget {
   }
 }
 
-class _ShellNavigationBar extends StatelessWidget {
-  const _ShellNavigationBar({
+class ShellNavigationBar extends StatelessWidget {
+  const ShellNavigationBar({
     required this.destinations,
     required this.selectedIndex,
     required this.onDestinationSelected,

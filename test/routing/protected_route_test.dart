@@ -28,6 +28,7 @@ import 'package:shop_stock_app/repositories/reports_repository.dart';
 import 'package:shop_stock_app/repositories/transaction_repository.dart';
 import 'package:shop_stock_app/sync/models/transaction_write_result.dart';
 import 'package:shop_stock_app/services/image_compressor.dart';
+import 'package:shop_stock_app/shared/widgets/app_shell.dart';
 import 'package:shop_stock_app/services/product_photo_service.dart';
 import 'package:shop_stock_app/services/product_photo_uploader.dart';
 
