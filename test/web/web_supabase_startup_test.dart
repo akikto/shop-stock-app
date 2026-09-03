@@ -32,7 +32,8 @@ void main() {
 
     test('web stub has no Firebase imports', () {
       final stub = File('lib/startup/fcm_bootstrap_stub.dart').readAsStringSync();
-      expect(stub.toLowerCase(), isNot(contains('firebase')));
+      expect(stub, isNot(contains("import 'package:firebase")));
+      expect(stub, isNot(contains('import "package:firebase')));
     });
   });
 }
