@@ -35,12 +35,11 @@ List<DashboardKpiDescriptor> buildDashboardKpis({
   bool activeProductCountPending = false,
   bool activeProductCountError = false,
 }) {
-  const currency = AppStrings.currencySymbol;
-  final base = <DashboardKpiDescriptor>[
+  const base = <DashboardKpiDescriptor>[
     DashboardKpiDescriptor(
       kind: DashboardKpiKind.totalSales,
       label: AppStrings.totalSales,
-      value: '$currency${stats.totalSalesAmount}',
+      value: '${stats.totalSalesAmount}',
     ),
     DashboardKpiDescriptor(
       kind: DashboardKpiKind.saleCount,

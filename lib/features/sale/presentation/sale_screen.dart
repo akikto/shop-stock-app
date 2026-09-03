@@ -129,7 +129,7 @@ class _SaleSheetState extends ConsumerState<_SaleSheet> {
           ),
           const SizedBox(height: 16),
           Text(
-            '${AppStrings.total}: ৳$total',
+            '${AppStrings.total}: $total',
             textAlign: TextAlign.center,
             style: Theme.of(context)
                 .textTheme

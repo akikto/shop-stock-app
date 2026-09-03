@@ -80,7 +80,7 @@ class ProductCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '৳${product.salePrice}',
+                      '${product.salePrice}',
                       style: theme.textTheme.titleSmall
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),

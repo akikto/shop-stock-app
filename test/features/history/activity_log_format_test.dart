@@ -69,7 +69,7 @@ void main() {
       );
       expect(
         ActivityLogFormat.saleAmountLine(sale),
-        '${AppStrings.total}: ${AppStrings.currencySymbol}150',
+        '${AppStrings.total}: 150',
       );
     });
 
