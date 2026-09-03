@@ -4,7 +4,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/config/app_config.dart';
 import '../core/config/startup_config.dart';
 import 'in_memory_gotrue_storage.dart';
-import 'web_browser_local_storage.dart';
 
 /// Thin wrapper around the Supabase client lifecycle.
 ///
@@ -17,22 +16,19 @@ class SupabaseService {
 
   static bool _initialized = false;
 
-  static String _sessionStorageKey(String url) =>
-      'sb-${Uri.parse(url).host.split('.').first}-auth-token';
-
   static FlutterAuthClientOptions _authOptionsForPlatform() {
     if (!kIsWeb) {
       return const FlutterAuthClientOptions();
     }
 
-    final sessionKey = _sessionStorageKey(AppConfig.effectiveSupabaseUrl);
-
-    // Web preview: never allow supabase_flutter to pick SharedPreferences-based
-    // defaults (session + PKCE). detectSessionInUri stays off — email/password
-    // only, no OAuth deep links on GitHub Pages.
+    // Web preview (GitHub Pages): bypass every SharedPreferences / plugin path.
+    // Email/password only — implicit flow, no OAuth deep links, session kept in
+    // memory for the tab lifetime (EmptyLocalStorage).
     return FlutterAuthClientOptions(
       detectSessionInUri: false,
-      localStorage: WebBrowserLocalStorage(persistSessionKey: sessionKey),
+      authFlowType: AuthFlowType.implicit,
+      persistSession: false,
+      localStorage: const EmptyLocalStorage(),
       pkceAsyncStorage: InMemoryGotrueAsyncStorage(),
     );
   }

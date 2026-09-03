@@ -66,6 +66,18 @@ class StartupConfigValidation {
   }
 }
 
+String? _firstStackFrame(StackTrace? stackTrace) {
+  if (stackTrace == null) return null;
+  for (final line in stackTrace.toString().split('\n')) {
+    final trimmed = line.trim();
+    if (trimmed.isEmpty || trimmed.startsWith('#0') && trimmed.contains('main.')) {
+      continue;
+    }
+    if (trimmed.startsWith('#')) return trimmed;
+  }
+  return null;
+}
+
 /// Formats startup failures for the preview error screen.
 String formatStartupFailure(Object error, [StackTrace? stackTrace]) {
   if (error is StateError) {
@@ -73,12 +85,13 @@ String formatStartupFailure(Object error, [StackTrace? stackTrace]) {
   }
   final message = error.toString();
   if (message.contains('Null check operator used on a null value')) {
-    return 'Supabase or browser storage failed during startup '
-        '(null-check crash).\n'
-        'This usually means Flutter web hit shared_preferences during '
-        'Supabase.initialize.\n'
-        'Redeploy after the latest fix is merged, hard-refresh the preview, '
-        'and confirm GitHub secrets SUPABASE_URL + SUPABASE_ANON_KEY are set.';
+    final stackHint = _firstStackFrame(stackTrace);
+    return 'Startup failed with a null-check crash on web.\n'
+        'Common causes: stale cached preview bundle, missing GitHub secrets, '
+        'or a plugin initializing before Supabase.\n'
+        'Try a hard refresh (or incognito). Confirm repository secrets '
+        'SUPABASE_URL + SUPABASE_ANON_KEY are set, then redeploy.\n'
+        '${stackHint != null ? 'First stack frame: $stackHint' : ''}';
   }
   final buffer = StringBuffer(message);
   if (stackTrace != null && stackTrace.toString().trim().isNotEmpty) {
