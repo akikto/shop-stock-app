@@ -34,7 +34,7 @@ class ActivityLogFormat {
   static String? saleAmountLine(ActivityLog log) {
     final amount = log.saleAmount;
     if (amount == null) return null;
-    return '${AppStrings.total}: ${AppStrings.currencySymbol}$amount';
+    return '${AppStrings.total}: $amount';
   }
 
   static String? reasonLine(ActivityLog log) {

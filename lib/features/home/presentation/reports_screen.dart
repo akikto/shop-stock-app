@@ -199,7 +199,7 @@ class _StaffReportList extends StatelessWidget {
                   title: Text(row.userName),
                   subtitle: Text(AppStrings.reportSaleCount(row.saleCount)),
                   trailing: Text(
-                    '${AppStrings.currencySymbol}${row.totalAmount}',
+                    '${row.totalAmount}',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 );
@@ -240,7 +240,7 @@ class _ProductReportList extends StatelessWidget {
                     row.totalQuantity,
                   )),
                   trailing: Text(
-                    '${AppStrings.currencySymbol}${row.totalAmount}',
+                    '${row.totalAmount}',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 );

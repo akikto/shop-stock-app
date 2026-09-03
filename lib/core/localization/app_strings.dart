@@ -147,7 +147,6 @@ class AppStrings {
   static const viewReports = 'রিপোর্ট দেখুন';
   static const quickActions = 'দ্রুত কাজ';
   static const totalActivity = 'মোট কার্যক্রম';
-  static const currencySymbol = '৳';
   static const activeProductCount = 'সক্রিয় পণ্য';
   static const quickActionNewSale = 'নতুন বিক্রি';
   static const quickActionStockIn = 'স্টক যোগ';

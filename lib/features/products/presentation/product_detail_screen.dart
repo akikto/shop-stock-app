@@ -89,7 +89,7 @@ class _DetailBody extends ConsumerWidget {
         _row(context, AppStrings.mrp, product.mrp?.toString()),
         _row(context, AppStrings.purchasePrice,
             product.purchasePrice?.toString()),
-        _row(context, AppStrings.salePrice, '৳${product.salePrice}'),
+        _row(context, AppStrings.salePrice, '${product.salePrice}'),
         _row(context, AppStrings.currentStock, '${product.currentStock}'),
         _row(context, AppStrings.lowStockLimit, '${product.lowStockLimit}'),
         if (product.expiryDate != null)
