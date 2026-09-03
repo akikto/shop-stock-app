@@ -72,8 +72,8 @@ class ShellNavigationBar extends StatelessWidget {
     final height = navTheme.height ?? 64.0;
 
     return Material(
-      elevation: navTheme.elevation ?? 3,
-      color: navTheme.backgroundColor ?? colorScheme.surfaceContainer,
+      elevation: 3,
+      color: navTheme.backgroundColor ?? colorScheme.surface,
       child: SafeArea(
         top: false,
         child: SizedBox(
