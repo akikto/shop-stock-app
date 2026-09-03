@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../core/navigation/shell_navigation_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../features/stock/presentation/stock_screen.dart';
 import '../../../models/dashboard_stats.dart';
 import '../../../shared/widgets/error_view.dart';
 import '../../../shared/widgets/loading_indicator.dart';
@@ -13,7 +14,6 @@ import '../providers/notification_providers.dart';
 import 'low_stock_screen.dart';
 import 'notifications_screen.dart';
 import 'reports_screen.dart';
-import '../../../features/stock/presentation/stock_screen.dart';
 
 /// Role-aware home dashboard with today's KPIs, low-stock summary,
 /// and quick navigation to reports and notifications.

@@ -259,7 +259,7 @@ void main() {
 
       expect(find.text(AppStrings.login), findsOneWidget);
       // Bottom navigation (protected shell) must not be present.
-      expect(find.byType(NavigationBar), findsNothing);
+      expect(find.byType(ShellNavigationBar), findsNothing);
     });
 
     testWidgets(
@@ -280,7 +280,7 @@ void main() {
 
       await _settleProtectedShell(tester, fake);
 
-      expect(find.byType(NavigationBar), findsOneWidget);
+      expect(find.byType(ShellNavigationBar), findsOneWidget);
       expect(find.text(AppStrings.login), findsNothing);
     });
 
@@ -303,7 +303,7 @@ void main() {
       await tester.pumpWidget(_appWithRouter(fake));
       await tester.pumpAndSettle();
 
-      expect(find.byType(NavigationBar), findsNothing);
+      expect(find.byType(ShellNavigationBar), findsNothing);
       expect(
           find.textContaining(AppStrings.accountDeactivated), findsOneWidget);
     });
